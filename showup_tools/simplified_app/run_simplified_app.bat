@@ -3,7 +3,7 @@ setlocal
 
 REM --- Navigate to the Project Root Directory ---
 ECHO Navigating to the project root from %~dp0...
-cd /d "%~dp0\..\..\.."
+cd /d "%~dp0\..\.."
 
 REM --- Activate Virtual Environment ---
 ECHO Activating virtual environment...
