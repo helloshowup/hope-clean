@@ -114,7 +114,7 @@ def get_content_generation_template() -> str:
         Content generation template string
     """
     # Always use the specified high school lesson template file
-    excel_template_path = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\showup-tools\\simplified_app\\templates\\high-school-lesson-template.md"
+    excel_template_path = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\showup_tools\\simplified_app\\templates\\high-school-lesson-template.md"
     logger.info(f"Loading content generation template from: {excel_template_path}")
     
     try:
