@@ -15,7 +15,7 @@ pip install -e .
 
 REM --- Run the application ---
 ECHO Starting the Simplified Content Generator...
-python -m showup_tools.simplified_app.simplified_main
+python -m showup_tools.simplified_app.simplified_app
 
 REM --- Deactivate ---
 ECHO Deactivating virtual environment...
