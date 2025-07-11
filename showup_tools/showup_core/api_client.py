@@ -253,7 +253,8 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
                            model: Optional[str] = None, use_cache: bool = True,
                            task_type: str = "content_generation", system_prompt: str = "",
                            module_number: int = None, lesson_number: int = None,
-                          step_number: int = None) -> str:
+                           step_number: int = None, frequency_penalty: float = 0.0,
+                           presence_penalty: float = 0.0) -> str:
     """
     Generate content using Anthropic's Claude API.
     

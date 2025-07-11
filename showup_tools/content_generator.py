@@ -9,6 +9,7 @@ import os
 import time
 import concurrent.futures
 import asyncio
+import json
 from typing import Dict, List, Any, Optional
 
 # Import from core modules
@@ -160,110 +161,48 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
         else:
             raise RuntimeError(f"Error during asynchronous operation: {error_msg}")
 
-async def generate_three_versions(variables: Dict[str, str], template: str) -> List[str]:
-    """
-    Generate three versions of content using the same prompt but with different temperature settings.
-    
-    Args:
-        variables: Dictionary with variables for template substitution
-        template: Template string with placeholders for variables
-        
-    Returns:
-        List of three content versions with varying levels of creativity:
-        - Version 1: temperature 0.3 (more conservative/focused)
-        - Version 2: temperature 0.5 (balanced)
-        - Version 3: temperature 1.0 (more creative/varied)
-    """
-    logger.info(f"Generating three content versions with different temperatures for {variables.get('step_title', 'unknown step')}")
+async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_settings: Optional[Dict[str, Any]] = None) -> List[str]:
+    """Generate three script versions from a finalized plan."""
 
-    # Extract ui_settings from variables if present
-    ui_settings = variables.get("ui_settings", {})
-    if not isinstance(ui_settings, dict):
+    if ui_settings is None:
         ui_settings = {}
-        
-    # IMPORTANT: Create a modified function that ensures our temperature setting is respected
-    async def generate_with_forced_temperature(variables, template, settings, forced_temp):
-        """Generate content with a guaranteed temperature setting"""
-        # Make a copy to avoid modifying the original
-        settings_copy = settings.copy()
-        
-        # Ensure generation_settings exists
-        if "generation_settings" not in settings_copy:
-            settings_copy["generation_settings"] = {}
-            
-        # Force our temperature
-        settings_copy["generation_settings"]["temperature"] = forced_temp
-        
-        # Also override any template-specific settings to ensure our temperature is used
-        if "template_settings" in settings_copy:
-            for template_type, template_settings in settings_copy["template_settings"].items():
-                if isinstance(template_settings, dict):
-                    template_settings["temperature"] = forced_temp
-        
-        logger.info(f"Generating content with forced temperature: {forced_temp}")
-        return await generate_content(variables, template, settings_copy)
-        
-    # Get the initial generation model from UI settings
-    model = ui_settings.get(
-        "initial_generation_model",
-        ui_settings.get("selected_model", "claude-3-haiku-20240307"),
-    )
-    logger.info(f"Using initial generation model: {model} for three versions generation")
-    
-    # Process sequentially to avoid parallel API calls
-    # Version 1: Lower temperature (0.3) for more conservative/focused output
-    logger.info(f"Generating version 1 with temperature 0.3 using model {model}")
-    try:
-        version1 = await generate_with_forced_temperature(variables, template, ui_settings, 0.3)
-        logger.info(f"Successfully generated version 1 ({len(version1)} characters)")
-    except Exception as e:
-        error_msg = f"Error generating version 1: {str(e)}"
-        logger.error(error_msg)
-        version1 = f"Error generating content with Claude API: {str(e)}"
-    
-    # Version 2: Medium temperature (0.5) for balanced output
-    logger.info(f"Generating version 2 with temperature 0.5 using model {model}")
-    try:
-        version2 = await generate_with_forced_temperature(variables, template, ui_settings, 0.5)
-        logger.info(f"Successfully generated version 2 ({len(version2)} characters)")
-    except Exception as e:
-        error_msg = f"Error generating version 2: {str(e)}"
-        logger.error(error_msg)
-        version2 = f"Error generating content with Claude API: {str(e)}"
-    
-    # Version 3: Higher temperature (1.0) for more creative/varied output
-    logger.info(f"Generating version 3 with temperature 1.0 using model {model}")
-    try:
-        version3 = await generate_with_forced_temperature(variables, template, ui_settings, 1.0)
-        logger.info(f"Successfully generated version 3 ({len(version3)} characters)")
-    except Exception as e:
-        error_msg = f"Error generating version 3: {str(e)}"
-        logger.error(error_msg)
-        version3 = f"Error generating content with Claude API: {str(e)}"
 
-    logger.info(f"Completed generation of all three versions with temperatures: 0.3, 0.5, and 1.0")
-    return [version1, version2, version3]
+    prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "generation_prompt.txt")
+    try:
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            prompt_template = f.read()
+    except FileNotFoundError:
+        logger.error(f"Generation prompt not found: {prompt_path}")
+        raise
 
-async def generate_with_forced_temperature(variables, template, settings, forced_temp):
-    """Generate content with a guaranteed temperature setting"""
-    # Make a copy to avoid modifying the original
-    settings_copy = settings.copy()
-    
-    # Ensure generation_settings exists
-    if "generation_settings" not in settings_copy:
-        settings_copy["generation_settings"] = {}
-        
-    # Force our temperature
-    settings_copy["generation_settings"]["temperature"] = forced_temp
-    
-    # Also override any template-specific settings to ensure our temperature is used
-    if "template_settings" in settings_copy:
-        for template_type, template_settings in settings_copy["template_settings"].items():
-            if isinstance(template_settings, dict):
-                template_settings["temperature"] = forced_temp
-    
-    logger.info(f"Generating content with forced temperature: {forced_temp}")
-    return await generate_content(variables, template, settings_copy)
+    prompt = prompt_template.replace("{{final_plan}}", json.dumps(final_plan, ensure_ascii=False))
+
+    max_tokens = ui_settings.get("generation_settings", {}).get("max_tokens", 4000)
+    freq_pen = ui_settings.get("generation_settings", {}).get("frequency_penalty", 0.0)
+    pres_pen = ui_settings.get("generation_settings", {}).get("presence_penalty", 0.0)
+    model = ui_settings.get("initial_generation_model", ui_settings.get("selected_model", "claude-3-haiku-20240307"))
+
+    temperatures = [0.3, 0.5, 1.0]
+    versions = []
+
+    for idx, temp in enumerate(temperatures):
+        logger.info(f"Generating version {idx+1} with temperature {temp} using model {model}")
+        content = await generate_with_claude(
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=temp,
+            model=model,
+            frequency_penalty=freq_pen,
+            presence_penalty=pres_pen,
+            task_type="content_generation",
+        )
+        versions.append(content)
+        # Encourage diversity for the next version
+        prompt += "\n\nNOTE: Provide a distinctly different take for the next version."
+
+    logger.info("Completed generation of all three versions from plan")
+    return versions
+
 
 def extract_educational_content(content: str) -> str:
     """

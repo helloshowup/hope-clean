@@ -1,0 +1,2 @@
+Write an educational video script based on the following finalized plan:
+{{final_plan}}
