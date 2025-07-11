@@ -12,10 +12,38 @@ from .path_utils import get_project_root
 
 # Import Claude API functionality
 sys.path.append(os.path.join(str(get_project_root()), "showup-editor-ui"))
-from claude_api import generate_with_claude_haiku, edit_markdown_with_claude
+from claude_api import Client
+from showup_core.claude_api_consts import LINE_EDIT_HEADER
+
+# These constants were removed from the updated claude-api package. Provide
+# simple replacements so existing prompts continue to work.
+CONTEXT_SYSTEM_PROMPT = (
+    "You are a helpful assistant that prepares editing context for documents."
+)
 
 # Get logger
 logger = logging.getLogger("output_library_editor")
+
+
+def send_claude_edit_request(cookie: str, markdown_text: str, instructions: str,
+                             context: str = "") -> str:
+    """Send an edit request to Claude using the modern Client API."""
+    client = Client(cookie)
+    conversation_id = client.create_new_chat()["uuid"]
+    prompt_parts = [LINE_EDIT_HEADER, f"Instructions:\n{instructions.strip()}" ]
+    if context:
+        prompt_parts.append(f"Context:\n{context.strip()}")
+    prompt_parts.append(f"Markdown:\n{markdown_text}")
+    prompt = "\n\n".join(prompt_parts)
+    return client.send_message(prompt, conversation_id)
+
+
+def generate_claude_context(cookie: str, prompt: str, system_prompt: str) -> str:
+    """Generate context using Claude via the modern API."""
+    client = Client(cookie)
+    conversation_id = client.create_new_chat()["uuid"]
+    combined = f"{system_prompt}\n\n{prompt}"
+    return client.send_message(combined, conversation_id)
 
 class ContentEnhancer:
     """Handles content enhancement for the ClaudeAIPanel."""
@@ -261,7 +289,12 @@ class ContentEnhancer:
             """
             
             # Generate context with improved prompt structure
-            context = generate_with_claude_haiku(prompt=full_prompt, system_prompt=system_prompt)
+            cookie = os.getenv("CLAUDE_SESSION_COOKIE", "")
+            context = generate_claude_context(
+                cookie=cookie,
+                prompt=full_prompt,
+                system_prompt=system_prompt,
+            )
             
             # Save context response to log file
             context_response_data = {
@@ -365,12 +398,14 @@ class ContentEnhancer:
             # Log the content length for debugging
             logger.info(f"Processing content with {len(file_content)} characters")
             
-            # Call the text editor tool with the proper structure
-            enhanced_content = edit_markdown_with_claude(
+            # Call the text editor tool with the proper structure using the
+            # updated Claude client
+            cookie = os.getenv("CLAUDE_SESSION_COOKIE", "")
+            enhanced_content = send_claude_edit_request(
+                cookie=cookie,
                 markdown_text=file_content,
                 instructions=instructions,
                 context=context,
-                model=self.parent.edit_model
             )
             
             # Save API response to log file

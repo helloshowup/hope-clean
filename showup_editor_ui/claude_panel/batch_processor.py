@@ -19,17 +19,42 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import Claude API functions directly from the module
-from claude_api import (  # noqa: E402
-    edit_markdown_with_claude,
-    generate_with_claude_haiku,
-    CONTEXT_SYSTEM_PROMPT,
-    CONTEXT_USER_PROMPT_TEMPLATE,
+from claude_api import Client  # noqa: E402
+
+# Constants from the legacy claude-api package no longer exist, so we define
+# simplified versions here for backwards compatibility.
+CONTEXT_SYSTEM_PROMPT = (
+    "You are a helpful assistant that prepares editing context for documents."
+)
+CONTEXT_USER_PROMPT_TEMPLATE = (
+    "{prompt}\n\n## Learner Profile\n{learner_profile}\n\n## Content\n{file_content}"
 )
 
 # Cache utilities
 
 # Get logger
 logger = logging.getLogger("output_library_editor")
+
+
+def send_claude_edit_request(cookie: str, markdown_text: str, instructions: str,
+                             context: str = "") -> str:
+    """Send an edit request to Claude using the modern Client API."""
+    client = Client(cookie)
+    conversation_id = client.create_new_chat()["uuid"]
+    prompt_parts = [LINE_EDIT_HEADER, f"Instructions:\n{instructions.strip()}" ]
+    if context:
+        prompt_parts.append(f"Context:\n{context.strip()}")
+    prompt_parts.append(f"Markdown:\n{markdown_text}")
+    prompt = "\n\n".join(prompt_parts)
+    return client.send_message(prompt, conversation_id)
+
+
+def generate_claude_context(cookie: str, prompt: str, system_prompt: str) -> str:
+    """Generate context using Claude via the modern API."""
+    client = Client(cookie)
+    conversation_id = client.create_new_chat()["uuid"]
+    combined = f"{system_prompt}\n\n{prompt}"
+    return client.send_message(combined, conversation_id)
 
 
 class BatchProcessor:
@@ -344,11 +369,12 @@ class BatchProcessor:
                             f"Calling Claude Haiku for context generation: {os.path.basename(file_path)}"
                         )
 
-                        # Generate context using specific model for context generation
-                        context = generate_with_claude_haiku(
+                        # Generate context using the modern Claude client
+                        cookie = os.getenv("CLAUDE_SESSION_COOKIE", "")
+                        context = generate_claude_context(
+                            cookie=cookie,
                             prompt=full_prompt,
                             system_prompt=CONTEXT_SYSTEM_PROMPT,
-                            max_tokens=2000,
                         )
 
                         # Log success
@@ -373,9 +399,11 @@ class BatchProcessor:
                 # Now enhance the content with the context
                 logger.info(f"Enhancing content for {os.path.basename(file_path)}...")
 
-                # Generate enhanced content using edit function
+                # Generate enhanced content using Claude client
                 try:
-                    enhanced_content = edit_markdown_with_claude(
+                    cookie = os.getenv("CLAUDE_SESSION_COOKIE", "")
+                    enhanced_content = send_claude_edit_request(
+                        cookie=cookie,
                         markdown_text=file_content,
                         instructions=prompt,
                         context=context,
