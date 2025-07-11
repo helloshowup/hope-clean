@@ -7,7 +7,13 @@ cd /d "%~dp0\..\.."
 
 REM --- Activate Virtual Environment ---
 ECHO Activating virtual environment...
-CALL "%~dp0venv\Scripts\activate.bat"
+IF EXIST "%~dp0venv\Scripts\activate.bat" (
+    CALL "%~dp0venv\Scripts\activate.bat"
+) ELSE (
+    ECHO [ERROR] Virtual environment not found at "%~dp0venv".
+    pause
+    EXIT /B 1
+)
 
 REM --- Install the project in editable mode ---
 ECHO Installing project in editable mode...
