@@ -247,7 +247,7 @@ except ImportError as e:
 if not core_logger.handlers:
     # Create file handler
     import os
-    logs_dir = os.path.join(str(get_project_root()), 'showup-core', 'data', 'logs', 'workflow2')
+    logs_dir = os.path.join(str(get_project_root()), 'showup_core', 'data', 'logs', 'workflow2')
     os.makedirs(logs_dir, exist_ok=True)
     
     file_handler = logging.FileHandler(os.path.join(logs_dir, "core.log"))

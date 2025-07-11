@@ -12,11 +12,6 @@ import json
 import threading
 from .path_utils import get_project_root
 
-# Add the parent directory to the system path for absolute imports
-parent_dir = os.path.join(str(get_project_root()), "showup-editor-ui")
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
-
 # Import Claude API functions directly from the module
 from claude_api import (
     regenerate_markdown_with_claude,

@@ -11,7 +11,7 @@ from showup_editor_ui.claude_panel.path_utils import get_project_root
 
 # Calculate BASE_DIR relative to this module's location
 # Since this file is in ShowupSquaredV3/core, we need to go up one level to reach the project root
-BASE_DIR = os.path.join(str(get_project_root()), "showup-core")
+BASE_DIR = os.path.join(str(get_project_root()), "showup_core")
 
 # Templates directories used throughout the configuration
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")

@@ -21,16 +21,8 @@ spec.loader.exec_module(cache_utils)
 # Get the required function
 get_cache_instance = cache_utils.get_cache_instance
 
-# Import Claude API functionality from the showup-core directory
-claude_api_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'showup-core', 'claude_api.py'))
-
-# Import claude_api.py dynamically
-spec = spec_from_file_location('claude_api', claude_api_path)
-claude_api = module_from_spec(spec)
-spec.loader.exec_module(claude_api)
-
-# Get the required functions
-regenerate_markdown_with_claude = claude_api.regenerate_markdown_with_claude
+# Use the installed claude_api package
+from claude_api import regenerate_markdown_with_claude
 
 # Get logger
 logger = logging.getLogger("output_library_editor")

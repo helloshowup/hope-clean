@@ -31,3 +31,7 @@ dev = [
     "flake8",
     "isort",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests", "dev_docs"]
