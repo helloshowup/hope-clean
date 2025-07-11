@@ -11,12 +11,7 @@ from datetime import datetime
 import json
 import threading
 from .path_utils import get_project_root
-from showup_core.claude_api_consts import LINE_EDIT_HEADER
-
-# Add the parent directory to the system path for absolute imports
-parent_dir = os.path.join(str(get_project_root()), "showup-editor-ui")
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+from showup_tools.showup_core.claude_api_consts import LINE_EDIT_HEADER
 
 # Import Claude API functions directly from the module
 from claude_api import Client  # noqa: E402

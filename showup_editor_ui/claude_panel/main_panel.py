@@ -1263,7 +1263,6 @@ class ClaudeAIPanel(ttk.Frame):
         """
         Toggle the use of local cache based on user preference
         """
-        sys.path.append("..")
         from cache_utils import set_local_cache_enabled
         
         # Get the current setting

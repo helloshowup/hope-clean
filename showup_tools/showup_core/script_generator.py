@@ -17,9 +17,6 @@ from showup_editor_ui.claude_panel.path_utils import get_project_root
 
 # Ensure we can find the root directory to load the .env file
 root_dir = str(get_project_root())
-# Add the root directory to sys.path if it's not already there
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
 
 # Load .env file from the root directory
 env_path = os.path.join(root_dir, '.env')

@@ -18,18 +18,6 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 REPO_ROOT = os.path.dirname(PARENT_DIR)
 
-_PATHS = [
-    CURRENT_DIR,
-    PARENT_DIR,
-    REPO_ROOT,
-    os.path.join(REPO_ROOT, "showup-core"),
-    os.path.join(REPO_ROOT, "showup-editor-ui"),
-]
-
-for _p in _PATHS:
-    if _p not in sys.path:
-        sys.path.insert(0, _p)
-
 
 from showup_core.core.log_utils import get_log_path
 if os.name == 'nt':
@@ -75,10 +63,6 @@ for directory in required_directories:
 # This is required after code reorganization
 try:
     # Add path to simplified_workflow module explicitly
-    simplified_workflow_path = os.path.join(REPO_ROOT, 'simplified_workflow')
-    if simplified_workflow_path not in sys.path:
-        sys.path.insert(0, simplified_workflow_path)
-
     from simplified_workflow import run_workflow
     from simplified_workflow.csv_processor import read_csv
     logging.info('Successfully imported simplified_workflow')

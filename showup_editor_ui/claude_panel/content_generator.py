@@ -21,19 +21,8 @@ spec.loader.exec_module(cache_utils)
 # Get the required function
 get_cache_instance = cache_utils.get_cache_instance
 
-# Import Claude API functionality from the showup-core directory
-claude_api_path = os.path.join(str(get_project_root()), 'showup-core', 'claude_api.py')
-
-# Import claude_api.py dynamically
-spec = spec_from_file_location('claude_api', claude_api_path)
-claude_api = module_from_spec(spec)
-spec.loader.exec_module(claude_api)
-
-# Get the required functions
-generate_content_with_claude = claude_api.generate_with_claude_sonnet
-
-# Import CLAUDE_MODELS configuration
-sys.path.insert(0, os.path.join(str(get_project_root()), "showup-core"))
+# Use the installed claude_api package
+from claude_api import generate_with_claude_sonnet as generate_content_with_claude
 from claude_api import CLAUDE_MODELS
 
 # Get logger

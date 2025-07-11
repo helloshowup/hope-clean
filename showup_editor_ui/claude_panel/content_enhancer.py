@@ -11,9 +11,8 @@ import datetime
 from .path_utils import get_project_root
 
 # Import Claude API functionality
-sys.path.append(os.path.join(str(get_project_root()), "showup-editor-ui"))
 from claude_api import Client
-from showup_core.claude_api_consts import LINE_EDIT_HEADER
+from showup_tools.showup_core.claude_api_consts import LINE_EDIT_HEADER
 
 # These constants were removed from the updated claude-api package. Provide
 # simple replacements so existing prompts continue to work.

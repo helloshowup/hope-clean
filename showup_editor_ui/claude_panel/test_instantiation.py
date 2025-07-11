@@ -13,15 +13,7 @@ logger = logging.getLogger(__name__)
 # --- Setup Python Path ---
 def setup_paths():
     showup_v4_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    paths_to_add = [
-        showup_v4_root,
-        os.path.join(showup_v4_root, 'showup-core'),
-        os.path.join(showup_v4_root, 'showup_tools')
-    ]
-    for path in paths_to_add:
-        if path not in sys.path:
-            sys.path.insert(0, path)
-    logger.info(f"PYTHONPATH set to include: {paths_to_add}")
+    logger.info(f"Project root: {showup_v4_root}")
 
 setup_paths()
 

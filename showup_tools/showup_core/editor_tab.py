@@ -15,9 +15,6 @@ import json
 from typing import List
 from showup_editor_ui.claude_panel.path_utils import get_project_root
 
-# Import for the modular editor panel
-sys_path_addition = os.path.join(str(get_project_root()), "showup-editor-ui")
-
 logger = logging.getLogger('podcast_generator')
 
 
@@ -93,7 +90,7 @@ class EditorTab:
         # Load the custom prompt configuration (if it exists)
         prompt_config_path = os.path.join(
             str(get_project_root()),
-            "showup-core",
+            "showup_core",
             "data",
             "content_generation_config.json",
         )

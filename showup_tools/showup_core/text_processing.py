@@ -24,7 +24,7 @@ def load_learner_profiles() -> Dict[str, str]:
     
     profiles_dir = os.path.join(
         str(get_project_root()),
-        "showup-core",
+        "showup_core",
         "data",
         "input",
         "learner_profiles",

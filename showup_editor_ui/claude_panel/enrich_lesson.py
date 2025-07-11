@@ -67,9 +67,6 @@ def _perform_handbook_indexing_subprocess(
     # Ensure the subprocess has the correct PYTHONPATH before importing
     if pythonpath:
         os.environ["PYTHONPATH"] = pythonpath
-        for path in pythonpath.split(os.pathsep):
-            if path and path not in sys.path:
-                sys.path.insert(0, path)
 
     # Ensure RAG components are available in the subprocess context
     # We need to re-import TextbookVectorDB here because the subprocess
