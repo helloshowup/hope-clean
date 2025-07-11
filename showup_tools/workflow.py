@@ -17,7 +17,7 @@ import concurrent.futures
 # Import from other modules
 from .csv_processor import read_csv, extract_variables, get_output_path
 from .context_builder import build_context_from_adjacent_steps, build_context_for_comparison
-from .content_generator import generate_three_versions, extract_educational_content, load_content_generation_template
+from .content_generator import generate_three_versions_from_plan, extract_educational_content, load_content_generation_template
 from .content_comparator import compare_and_combine
 from .content_reviewer import review_content
 from .ai_detector import detect_ai_patterns, edit_content
@@ -389,24 +389,21 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             initial_model = ui_settings.get("initial_generation_model", "claude-3-haiku-20240307")
             
             try:
-                # Create a copy of ui_settings with the initial generation model
+                # Prepare generation settings using the initial model
                 generation_settings = ui_settings.copy()
                 generation_settings["selected_model"] = initial_model
                 generation_settings["using_initial_generation_model"] = True
-                
-                # Log the model being used
+
                 logger.info(f"Using initial generation model: {initial_model} for generating three versions")
-                
-                # Update variables with the modified settings
-                variables_with_initial_model = variables.copy()
-                variables_with_initial_model["ui_settings"] = generation_settings
-                
-                # Directly await the generation with the initial generation model
-                generations = await generate_three_versions(variables_with_initial_model, template)
+
+                final_plan = row_data_item.get("final_plan", {})
+
+                generations = await generate_three_versions_from_plan(final_plan, generation_settings)
                 add_log_entry("Generate Content", "completed", f"Generated {len(generations)} content versions")
-                row_data_item["generations"] = generations
-                
-                # Extract educational content from each generation
+                row_data_item["generated_versions"] = generations
+                row_data_item["status"] = "GENERATION_COMPLETE"
+
+                # Extract educational content for later phases
                 add_log_entry("Extract Content", "started", "Extracting educational content from generations")
                 extracted_generations = [extract_educational_content(gen) for gen in generations]
                 add_log_entry("Extract Content", "completed", "Educational content extracted successfully")
