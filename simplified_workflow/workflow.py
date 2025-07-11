@@ -1,0 +1,1223 @@
+"""
+Main Workflow Module for the Simplified Workflow.
+
+This module orchestrates the entire workflow, from reading the CSV file to saving the final output.
+"""
+
+import logging
+import os
+import datetime
+import asyncio
+from typing import Dict, List, Any, Optional
+import queue
+import uuid
+import json
+import concurrent.futures
+
+# Import from other modules
+from .csv_processor import read_csv, extract_variables, get_output_path
+from .context_builder import build_context_from_adjacent_steps, build_context_for_comparison
+from .content_generator import generate_three_versions, extract_educational_content, load_content_generation_template
+from .content_comparator import compare_and_combine
+from .content_reviewer import review_content
+from .ai_detector import detect_ai_patterns, edit_content
+from .constants import EXCEL_CLARIFICATION
+from showup_core.api_client import generate_with_claude
+# Import RAG system components
+from showup_tools.simplified_app.rag_system.token_counter import count_tokens
+from showup_tools.simplified_app.rag_system.cache_manager import cache
+from showup_tools.simplified_app.rag_system.textbook_vector_db import get_vector_db
+import hashlib
+# Batch processing functionality removed as per requirement
+from .output_manager import save_as_markdown, create_output_directory, save_generation_summary, save_workflow_log
+
+# Set up logger
+logger = logging.getLogger("simplified_workflow")
+
+def setup_logging(log_level=logging.INFO):
+    """
+    Set up logging configuration.
+    
+    Args:
+        log_level: Logging level (default: INFO)
+    """
+    # Force UTF-8 encoding on Windows to handle all Unicode characters
+    import sys
+    import os
+    import io
+    
+    # Safer UTF-8 encoding that works with both regular streams and redirected ones
+    if os.name == "nt":
+        # Check if we can use reconfigure (available in Python 3.7+ on regular streams)
+        if hasattr(sys.stdout, 'reconfigure') and not hasattr(sys.stdout, 'original_stream'):
+            # Regular stdout, use reconfigure
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        else:
+            # We're dealing with a redirected stream (like StdoutRedirector)
+            # Don't modify it - the TkInter UI has already set up UTF-8 handling
+            logger.info("Detected redirected stdout, skipping reconfigure")
+    
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # Clear any existing handlers first to prevent duplicates and encoding issues
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()  # Remove all existing handlers
+    root_logger.setLevel(log_level)
+    
+    # Create console handler with explicit UTF-8 encoding
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+    
+    # Create file handler with explicit UTF-8 encoding
+    os.makedirs("logs", exist_ok=True)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join("logs", f"simplified_workflow_{timestamp}.log")
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
+    
+    # Add the clean handlers to the root logger
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+    
+    # Configure simplified_workflow logger
+    workflow_logger = logging.getLogger("simplified_workflow")
+    workflow_logger.setLevel(log_level)
+    
+    logger.info(f"Logging configured. Log file: {log_file}")
+    return log_file
+
+def estimate_token_count(text: str) -> int:
+    """
+    Estimate the token count of a text string.
+    This is a rough approximation assuming 4 characters per token on average.
+    
+    Args:
+        text: The text to estimate token count for
+        
+    Returns:
+        Estimated token count
+    """
+    if not text:
+        return 0
+    return len(text) // 4 + 1  # Rough approximation
+
+def chunk_content(content: str, max_chunk_size: int = 8000) -> List[str]:
+    """
+    Split content into manageable chunks to avoid exceeding token limits.
+    
+    Args:
+        content: The text content to split
+        max_chunk_size: Maximum chunk size in estimated tokens
+        
+    Returns:
+        List of content chunks
+    """
+    if not content:
+        return []
+        
+    # If content is already small enough, return as is
+    if estimate_token_count(content) <= max_chunk_size:
+        return [content]
+    
+    # Split into paragraphs first
+    paragraphs = content.split('\n\n')
+    
+    chunks = []
+    current_chunk = []
+    current_size = 0
+    
+    for paragraph in paragraphs:
+        paragraph_size = estimate_token_count(paragraph)
+        
+        # Handle case where a single paragraph is too large
+        if paragraph_size > max_chunk_size:
+            # If we already have content in the current chunk, add it to chunks
+            if current_chunk:
+                chunks.append('\n\n'.join(current_chunk))
+                current_chunk = []
+                current_size = 0
+            
+            # Split the large paragraph by sentences
+            sentences = paragraph.replace('. ', '.\n').split('\n')
+            temp_chunk = []
+            temp_size = 0
+            
+            for sentence in sentences:
+                sentence_size = estimate_token_count(sentence)
+                if temp_size + sentence_size <= max_chunk_size:
+                    temp_chunk.append(sentence)
+                    temp_size += sentence_size
+                else:
+                    if temp_chunk:
+                        chunks.append('. '.join(temp_chunk) + '.')
+                    temp_chunk = [sentence]
+                    temp_size = sentence_size
+            
+            if temp_chunk:
+                chunks.append('. '.join(temp_chunk) + '.')
+        
+        # Normal case: paragraph fits in a chunk
+        elif current_size + paragraph_size <= max_chunk_size:
+            current_chunk.append(paragraph)
+            current_size += paragraph_size
+        else:
+            # Current chunk is full, start a new one
+            chunks.append('\n\n'.join(current_chunk))
+            current_chunk = [paragraph]
+            current_size = paragraph_size
+    
+    # Add the last chunk if there's anything left
+    if current_chunk:
+        chunks.append('\n\n'.join(current_chunk))
+    
+    return chunks
+
+async def extract_student_handbook_information(content_outline: str, handbook_path: str, ui_settings: Dict[str, Any]) -> str:
+    """
+    Extract relevant information from the student handbook based on content outline.
+    
+    Args:
+        content_outline: The content outline to use for finding relevant information
+        handbook_path: Path to the student handbook file
+        ui_settings: Dictionary with UI settings
+        
+    Returns:
+        String containing the relevant information extracted from the handbook
+    """
+    logger.info(f"Extracting relevant information from student handbook: {handbook_path}")
+    
+    try:
+        # Get the model to use for extraction - use the initial generation model from UI settings
+        model = ui_settings.get(
+            "initial_generation_model",
+            ui_settings.get("selected_model", "claude-3-haiku-20240307"),
+        )
+        
+        # Get token limit from UI settings
+        token_limit = int(ui_settings.get("token_limit", 4000))
+        
+        # Use the RAG system to extract relevant content from the handbook
+        logger.info(f"Using RAG system to extract relevant content for: {content_outline}")
+        
+        # Create a specific query from the content outline
+        if not content_outline or len(content_outline.strip()) < 10:
+            # If content outline is too short or empty, use a fallback query
+            query_text = "general school policies and procedures"
+            logger.warning(f"Content outline is too short, using fallback query: {query_text}")
+        else:
+            query_text = content_outline.strip()
+            logger.info(f"Using query: {query_text}")
+        
+        # Extract relevant content using the RAG system
+        try:
+            # Create a cache key for this extraction
+            cache_key = cache.get_cache_key('handbook_extraction', {
+                'content_outline': content_outline,
+                'handbook_path': handbook_path,
+                'model': model
+            })
+            
+            # Try to get from cache first
+            cached_result = cache.get(cache_key)
+            if cached_result:
+                logger.info("Retrieved handbook extraction from cache")
+                return cached_result
+                
+            # Use the vector database to find relevant chunks
+            # Create a textbook ID based on the path
+            textbook_id = hashlib.md5(handbook_path.encode()).hexdigest()
+
+            # Get vector DB instance lazily
+            db = get_vector_db()
+
+            # Get relevant chunks from the vector database
+            relevant_chunks = db.query_textbook(
+                query=query_text,
+                textbook_id=textbook_id,
+                top_k=5  # Get top 5 most relevant chunks
+            )
+            
+            # Guard against silent RAG failure
+            if not relevant_chunks:
+                raise RuntimeError("RAG retrieval failed - refusing to fall back to full handbook")
+            
+            if relevant_chunks:
+                # Format the relevant chunks for the response
+                result = "\n\n===RELEVANT HANDBOOK SECTIONS===\n\n" + "\n\n".join(relevant_chunks)
+                logger.info(f"Found {len(relevant_chunks)} relevant chunks using RAG")
+                
+                # Calculate token savings
+                with open(handbook_path, 'r', encoding='utf-8') as f:
+                    full_content = f.read()
+                    
+                full_token_count = count_tokens(full_content)
+                result_token_count = count_tokens(result)
+                
+                token_savings = full_token_count - result_token_count
+                savings_percent = (token_savings / full_token_count) * 100
+                logger.info(f"RAG token savings: {token_savings:,} tokens ({savings_percent:.1f}%)")
+            else:
+                # No relevant chunks found
+                result = "No directly relevant information found in the handbook."
+                logger.warning("No relevant chunks found in the handbook")
+            
+            # Cache the result
+            cache.set(cache_key, result)
+            
+            # Apply token count guard rail
+            result_token_count = count_tokens(result)
+            if result_token_count > 5000:
+                logger.error(f"Result exceeds token limit: {result_token_count} > 5000")
+                result = "ERROR: The extracted content exceeds the token limit. Please try with a more specific query."
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in RAG extraction: {str(e)}")
+            return f"Error extracting relevant information: {str(e)}"
+        
+    except Exception as e:
+        logger.error(f"Error extracting handbook information: {str(e)}")
+        return f"Error: {str(e)}"
+
+async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_rows: List[Dict[str, str]],
+                              output_dir: str, learner_profile: str, instance_id: str, ui_settings: Dict[str, Any],
+                              progress_queue: Optional[queue.Queue] = None):
+    """
+    Process a single row for a specific workflow phase.
+    
+    Args:
+        row_data_item: Dictionary containing row data and metadata
+        phase: The phase to process ("generate", "compare", "review", "finalize")
+        csv_rows: List of all rows from the CSV file
+        output_dir: Directory to save output files
+        learner_profile: Description of the target learner
+        instance_id: Instance identifier for managing event loops
+        ui_settings: Dictionary with UI settings
+        progress_queue: Queue to send progress updates to the UI
+        
+    Returns:
+        Updated row_data_item with phase-specific results
+    """
+    try:
+        # Extract common data
+        row_index = row_data_item["row_index"]
+        row = row_data_item["row"]
+        result = row_data_item["result"]
+        add_log_entry = row_data_item["add_log_entry"]
+        step_info = f"Module {row.get('Module', '')}, Lesson {row.get('Lesson', '')}, Step {row.get('Step number', '')}"
+        
+        # Phase-specific directories
+        generation_dir = os.path.join(output_dir, "generation_results")
+        comparison_dir = os.path.join(output_dir, "comparison_results")
+        review_dir = os.path.join(output_dir, "review_results")
+        final_dir = os.path.join(output_dir, "final_content")
+        
+        logger.info(f"Processing {step_info} for phase: {phase}")
+        
+        if phase == "generate":
+            # Content Generation Phase
+            # Generate three versions - use initial generation model
+            add_log_entry("Generate Content", "started", "Generating three content versions")
+            variables = row_data_item["variables"]
+            template = row_data_item["template"]
+            
+            # Check if student handbook extraction is enabled
+            use_student_handbook = ui_settings.get("use_student_handbook", False)
+            student_handbook_path = ui_settings.get("student_handbook_path", "")
+            
+            # Extract information from student handbook if enabled
+            if use_student_handbook and student_handbook_path and os.path.exists(student_handbook_path):
+                add_log_entry("Student Handbook", "started", "Extracting relevant information from student handbook")
+                try:
+                    # Get content outline for extraction
+                    content_outline = row.get("Content Outline", row.get("Content outline", ""))
+                    if content_outline:
+                        # Extract relevant information from student handbook
+                        handbook_info = await extract_student_handbook_information(content_outline, student_handbook_path, ui_settings)
+                        
+                        # Add extracted information to variables
+                        variables["student_handbook_info"] = handbook_info
+                        
+                        # Update template to include handbook information if needed
+                        if "{{student_handbook_info}}" not in template:
+                            # Add a section for student handbook information in the template
+                            handbook_section = "{{content_outline}}\n\nRELEVANT INFORMATION FROM STUDENT HANDBOOK:\n{{student_handbook_info}}\n"
+                            template = template.replace("{{content_outline}}", handbook_section)
+                        
+                        add_log_entry("Student Handbook", "completed", "Successfully extracted information from student handbook")
+                    else:
+                        add_log_entry("Student Handbook", "warning", "No content outline found, skipping handbook extraction")
+                except Exception as e:
+                    add_log_entry("Student Handbook", "error", f"Failed to extract information from handbook: {str(e)}")
+                    logger.exception("Exception during student handbook extraction:")
+            
+            # ===================================================================
+            # METADATA MANAGEMENT FOR LEARNER PROFILE
+            # ===================================================================
+            # When learner profiles are very long (over 500 characters), we need to
+            # handle them specially for metadata purposes while preserving the full
+            # profile for actual content generation.
+            #
+            # This process:
+            # 1. Stores the complete profile in 'target_learner_full' variable
+            # 2. Replaces the 'target_learner' variable with a shorter placeholder
+            # 3. Logs a message about this transformation
+            #
+            # IMPORTANT: This is only for metadata management in output files.
+            # The full learner profile is still used for all content generation.
+            # No content or context is lost in this process.
+            # ===================================================================
+            if "target_learner" in variables and isinstance(variables["target_learner"], str) and len(variables["target_learner"]) > 500:
+                # When profile exceeds 500 chars, create separate full and metadata versions
+                logger.info("Learner profile is too long, using a shortened version for metadata")
+                
+                # Store the complete profile in a separate variable that will be used
+                # for actual content generation throughout the workflow
+                variables["target_learner_full"] = variables["target_learner"]
+                
+                # Replace the original variable with a placeholder for metadata purposes
+                # This prevents overly long metadata fields in output files
+                variables["target_learner"] = "See target_learner_full for complete profile"
+            
+            # Get the initial generation model from settings
+            ui_settings = variables.get("ui_settings", {})
+            initial_model = ui_settings.get("initial_generation_model", "claude-3-haiku-20240307")
+            
+            try:
+                # Create a copy of ui_settings with the initial generation model
+                generation_settings = ui_settings.copy()
+                generation_settings["selected_model"] = initial_model
+                generation_settings["using_initial_generation_model"] = True
+                
+                # Log the model being used
+                logger.info(f"Using initial generation model: {initial_model} for generating three versions")
+                
+                # Update variables with the modified settings
+                variables_with_initial_model = variables.copy()
+                variables_with_initial_model["ui_settings"] = generation_settings
+                
+                # Directly await the generation with the initial generation model
+                generations = await generate_three_versions(variables_with_initial_model, template)
+                add_log_entry("Generate Content", "completed", f"Generated {len(generations)} content versions")
+                row_data_item["generations"] = generations
+                
+                # Extract educational content from each generation
+                add_log_entry("Extract Content", "started", "Extracting educational content from generations")
+                extracted_generations = [extract_educational_content(gen) for gen in generations]
+                add_log_entry("Extract Content", "completed", "Educational content extracted successfully")
+                row_data_item["extracted_generations"] = extracted_generations
+                
+                # Save generation results to file
+                try:
+                    os.makedirs(generation_dir, exist_ok=True)
+                    output_file = os.path.join(generation_dir, f"{step_info.replace(',', '').replace(' ', '_')}.json")
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump({
+                            "module": row.get("Module", ""),
+                            "lesson": row.get("Lesson", ""),
+                            "step_number": row.get("Step number", ""),
+                            "step_title": row.get("Step title", ""),
+                            "generations": generations,
+                            "extracted_generations": extracted_generations
+                        }, f, indent=2)
+                    logger.info(f"Saved generation results to {output_file}")
+                except Exception as save_e:
+                    logger.error(f"Error saving generation results: {str(save_e)}")
+                
+            except Exception as gen_e:
+                logger.error(f"Error in content generation for {step_info}: {str(gen_e)}")
+                logger.exception("Exception details:")
+                add_log_entry("Generate Content", "error", str(gen_e))
+                row_data_item["error"] = str(gen_e)
+                # Update result status
+                result["status"] = "error"
+                result["error"] = str(gen_e)
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+            
+        elif phase == "compare":
+            # Content Comparison Phase
+            # Verify we have generations from previous phase
+            if "extracted_generations" not in row_data_item:
+                error_msg = f"Missing extracted_generations for {step_info}. Cannot proceed with comparison."
+                logger.error(error_msg)
+                add_log_entry("Compare and Combine", "error", error_msg)
+                row_data_item["error"] = error_msg
+                # Update result status
+                result["status"] = "error"
+                result["error"] = error_msg
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                return row_data_item
+            
+            # Compare and combine content
+            add_log_entry("Compare and Combine", "started", "Comparing and combining content versions")
+            extracted_generations = row_data_item["extracted_generations"]
+            comparison_context = build_context_for_comparison(csv_rows, row_index)
+            comparison_context["TARGET_LEARNER"] = learner_profile
+            
+            try:
+                # Directly await the comparison
+                # Get result from compare_and_combine
+                comparison_result = await compare_and_combine(
+                    extracted_generations,
+                    learner_profile,
+                    comparison_context,
+                    instance_id=instance_id,
+                    ui_settings=ui_settings
+                )
+                
+                # Unpack the result tuple
+                best_version, explanation = comparison_result
+                
+                add_log_entry("Compare and Combine", "completed", "Content versions compared and combined successfully")
+                result["comparison_explanation"] = explanation
+                row_data_item["best_version"] = best_version
+                
+                # Save comparison results to file
+                try:
+                    os.makedirs(comparison_dir, exist_ok=True)
+                    output_file = os.path.join(comparison_dir, f"{step_info.replace(',', '').replace(' ', '_')}.json")
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump({
+                            "module": row.get("Module", ""),
+                            "lesson": row.get("Lesson", ""),
+                            "step_number": row.get("Step number", ""),
+                            "step_title": row.get("Step title", ""),
+                            "best_version": best_version,
+                            "explanation": explanation
+                        }, f, indent=2)
+                    logger.info(f"Saved comparison results to {output_file}")
+                except Exception as save_e:
+                    logger.error(f"Error saving comparison results: {str(save_e)}")
+                
+            except Exception as comp_e:
+                logger.error(f"Error in content comparison for {step_info}: {str(comp_e)}")
+                logger.exception("Exception details:")
+                add_log_entry("Compare and Combine", "error", str(comp_e))
+                row_data_item["error"] = str(comp_e)
+                # Update result status
+                result["status"] = "error"
+                result["error"] = str(comp_e)
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                
+                # Use first generation as fallback if comparison fails
+                if "generations" in row_data_item and row_data_item["generations"]:
+                    row_data_item["best_version"] = extract_educational_content(row_data_item["generations"][0])
+                    result["comparison_explanation"] = f"Error in comparison. Using first version as fallback. Error: {str(comp_e)}"
+            
+        elif phase == "review":
+            # Content Review Phase
+            # Verify we have a best version from previous phase
+            if "best_version" not in row_data_item:
+                error_msg = f"Missing best_version for {step_info}. Cannot proceed with review."
+                logger.error(error_msg)
+                add_log_entry("Review Content", "error", error_msg)
+                row_data_item["error"] = error_msg
+                # Update result status
+                result["status"] = "error"
+                result["error"] = error_msg
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                
+                # Try to recover using first generation if available
+                if "generations" in row_data_item and row_data_item["generations"]:
+                    row_data_item["best_version"] = extract_educational_content(row_data_item["generations"][0])
+                    logger.info(f"Using first generation as fallback for {step_info}")
+                else:
+                    return row_data_item
+            
+            # Review content
+            add_log_entry("Review Content", "started", "Reviewing content for target learner")
+            best_version = row_data_item["best_version"]
+            
+            try:
+                # Directly await the review
+                # Get result from review_content
+                review_result = await review_content(
+                    best_version,
+                    learner_profile,
+                    instance_id=instance_id,
+                    ui_settings=ui_settings
+                )
+                
+                # Unpack the result tuple
+                reviewed_content, edit_summary = review_result
+                
+                add_log_entry("Review Content", "completed", "Content reviewed successfully")
+                result["review_summary"] = edit_summary
+                row_data_item["reviewed_content"] = reviewed_content
+                
+                # Save review results to file
+                try:
+                    os.makedirs(review_dir, exist_ok=True)
+                    output_file = os.path.join(review_dir, f"{step_info.replace(',', '').replace(' ', '_')}.json")
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump({
+                            "module": row.get("Module", ""),
+                            "lesson": row.get("Lesson", ""),
+                            "step_number": row.get("Step number", ""),
+                            "step_title": row.get("Step title", ""),
+                            "reviewed_content": reviewed_content,
+                            "edit_summary": edit_summary
+                        }, f, indent=2)
+                    logger.info(f"Saved review results to {output_file}")
+                except Exception as save_e:
+                    logger.error(f"Error saving review results: {str(save_e)}")
+                
+            except Exception as review_e:
+                logger.error(f"Error in content review for {step_info}: {str(review_e)}")
+                logger.exception("Exception details:")
+                add_log_entry("Review Content", "error", str(review_e))
+                row_data_item["error"] = str(review_e)
+                # Update result status
+                result["status"] = "error"
+                result["error"] = str(review_e)
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                
+                # Use best version as fallback if review fails
+                row_data_item["reviewed_content"] = best_version
+                result["review_summary"] = f"Error in review. Using best version as fallback. Error: {str(review_e)}"
+            
+        elif phase == "finalize":
+            # Content Finalization Phase (AI Detection, Editing, and Saving)
+            # Verify we have reviewed content from previous phase
+            if "reviewed_content" not in row_data_item:
+                error_msg = f"Missing reviewed_content for {step_info}. Cannot proceed with finalization."
+                logger.error(error_msg)
+                add_log_entry("Finalize Content", "error", error_msg)
+                row_data_item["error"] = error_msg
+                # Update result status
+                result["status"] = "error"
+                result["error"] = error_msg
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                
+                # Try to recover using best version if available
+                if "best_version" in row_data_item:
+                    row_data_item["reviewed_content"] = row_data_item["best_version"]
+                    logger.info(f"Using best version as fallback for {step_info}")
+                else:
+                    return row_data_item
+            
+            reviewed_content = row_data_item["reviewed_content"]
+            
+            # Detect AI patterns and edit content asynchronously using threadpool
+            add_log_entry("Detect AI Patterns", "started", "Detecting AI patterns in content")
+            try:
+                # Use threadpool for potentially CPU-intensive operations
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    def _detect_wrapper(text: str) -> Dict[str, Any]:
+                        pass
+                        return detect_ai_patterns(text)
+
+                    # Run AI detection in thread
+                    detected_patterns_future = asyncio.get_event_loop().run_in_executor(
+                        pool, _detect_wrapper, reviewed_content
+                    )
+                    
+                    # Await the detection result
+                    detected_patterns = await detected_patterns_future
+                    
+                    add_log_entry("Detect AI Patterns", "completed", 
+                                f"Detected {detected_patterns.get('count', 0)} AI patterns")
+                    result["ai_patterns_detected"] = detected_patterns.get("count", 0)
+                    
+                    # Run editing in thread
+                    add_log_entry("Edit Content", "started", "Editing content to make it more human-like")
+                    # Since edit_content is an async function, call it directly
+                    # Pass UI settings to ensure token limit is respected
+                    edit_result = await edit_content(
+                        reviewed_content,
+                        detected_patterns,
+                        learner_profile,
+                        ui_settings,
+                    )
+                    pass
+                    
+                    # Unpack the result tuple
+                    final_content, editing_explanation = edit_result
+                    
+                    add_log_entry("Edit Content", "completed", "Content edited successfully")
+                    result["editing_explanation"] = editing_explanation
+                    row_data_item["final_content"] = final_content
+                
+                # Save as markdown
+                add_log_entry("Save Output", "started", "Saving content as markdown")
+                output_path = get_output_path(row, output_dir)
+                metadata = {
+                    "module": row.get("Module", ""),
+                    "lesson": row.get("Lesson", ""),
+                    "step_number": row.get("Step number", ""),
+                    "step_title": row.get("Step title", ""),
+                    "template_type": row.get("Template Type", ""),
+                    "target_learner": learner_profile
+                }
+                saved_path = save_as_markdown(final_content, metadata, output_path)
+                add_log_entry("Save Output", "completed", f"Content saved to {saved_path}")
+                result["output_path"] = saved_path
+                
+                # Save final results to JSON
+                try:
+                    os.makedirs(final_dir, exist_ok=True)
+                    output_file = os.path.join(final_dir, f"{step_info.replace(',', '').replace(' ', '_')}.json")
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump({
+                            "module": row.get("Module", ""),
+                            "lesson": row.get("Lesson", ""),
+                            "step_number": row.get("Step number", ""),
+                            "step_title": row.get("Step title", ""),
+                            "final_content": final_content,
+                            "editing_explanation": editing_explanation,
+                            "ai_patterns_detected": detected_patterns.get("count", 0),
+                            "output_path": saved_path
+                        }, f, indent=2)
+                    logger.info(f"Saved final results to {output_file}")
+                except Exception as save_e:
+                    logger.error(f"Error saving final results: {str(save_e)}")
+                
+                # Update result status
+                result["status"] = "completed"
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                
+            except Exception as finalize_e:
+                logger.error(f"Error in content finalization for {step_info}: {str(finalize_e)}")
+                logger.exception("Exception details:")
+                add_log_entry("Finalize Content", "error", str(finalize_e))
+                row_data_item["error"] = str(finalize_e)
+                
+                # Update result status
+                result["status"] = "error"
+                result["error"] = str(finalize_e)
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+        
+        logger.info(f"Completed phase {phase} for {step_info}")
+        return row_data_item
+        
+    except Exception as e:
+        # Handle any unexpected errors in phase processing
+        logger.error(f"Unexpected error processing phase {phase} for row {row_data_item['row_index']}: {str(e)}")
+        logger.exception("Exception details:")
+        
+        # Update result with error
+        if "result" in row_data_item:
+            row_data_item["result"]["status"] = "error"
+            row_data_item["result"]["error"] = str(e)
+            row_data_item["result"]["completion_timestamp"] = datetime.datetime.now().isoformat()
+            
+            # Add error log entry if add_log_entry function is available
+            if "add_log_entry" in row_data_item:
+                row_data_item["add_log_entry"]("Error", "error", str(e))
+        
+        # Store the error in row_data_item for reference
+        row_data_item["error"] = str(e)
+        
+        return row_data_item
+
+async def main(csv_path: str,
+              course_name: str,
+              learner_profile: str,
+              ui_settings: Optional[Dict[str, Any]] = None,
+              selected_modules: Optional[List[str]] = None,
+              instance_id: str = "default",
+              workflow_phase: Optional[str] = None,
+              output_dir: str = "output",
+              progress_queue: Optional[queue.Queue] = None) -> Dict[str, Any]:
+    """
+    Main workflow function.
+    
+    Args:
+        csv_path: Path to the CSV file
+        course_name: Name of the course
+        learner_profile: Description of the target learner
+        ui_settings: Dictionary with UI settings
+        selected_modules: Optional list of module names to process (if None, process all)
+        instance_id: Instance identifier for managing event loops
+        workflow_phase: Optional phase to execute (options: "generate", "compare", "review", "finalize", or None for all phases)
+        progress_queue: Queue to send progress updates to the UI
+        
+    Returns:
+        Dictionary with summary of processed items
+    """
+    # Set up logging
+    log_file = setup_logging()
+    
+    logger.info(f"Starting simplified workflow for course: {course_name}")
+    logger.info(f"CSV file: {csv_path}")
+    
+    if selected_modules:
+        logger.info(f"Processing selected modules: {', '.join(selected_modules)}")
+    else:
+        logger.info("Processing all modules")
+    
+    # Initialize UI settings if not provided
+    if ui_settings is None:
+        ui_settings = {}
+    
+    # Define the workflow phases
+    all_phases = ["generate", "compare", "review", "finalize"]
+    
+    # Determine which phases to run - more concise implementation
+    if workflow_phase is None:
+        phases_to_run = all_phases
+    else:
+        phase_index = all_phases.index(workflow_phase) if workflow_phase in all_phases else -1
+        if phase_index >= 0:
+            phases_to_run = all_phases[:phase_index + 1]
+        else:
+            phases_to_run = all_phases
+            logger.warning(f"Invalid workflow phase: {workflow_phase}. Running all phases.")
+    
+    logger.info(f"Running workflow phases: {', '.join(phases_to_run)}")
+    
+    # Initialize summary
+    summary = {
+        "course_name": course_name,
+        "csv_path": csv_path,
+        "start_time": datetime.datetime.now().isoformat(),
+        "status": "started",
+        "processed_rows": [],
+        "log_file": log_file,
+        "phases_run": phases_to_run
+    }
+    
+    try:
+        # 1. Read CSV file
+        logger.info("Reading CSV file")
+        csv_rows = read_csv(csv_path)
+        logger.info(f"Read {len(csv_rows)} rows from CSV file")
+        
+        # Create directories for output and intermediate results
+        # Use the output directory passed as a parameter
+        os.makedirs(output_dir, exist_ok=True)
+        logger.info(f"Using specified output directory: {output_dir}")
+        summary["output_dir"] = output_dir
+        
+        # Create phase-specific directories for intermediate results
+        generation_dir = os.path.join(output_dir, "generation_results")
+        comparison_dir = os.path.join(output_dir, "comparison_results")
+        review_dir = os.path.join(output_dir, "review_results")
+        final_dir = os.path.join(output_dir, "final_content")
+        
+        # Create all phase directories
+        for phase_dir in [generation_dir, comparison_dir, review_dir, final_dir]:
+            os.makedirs(phase_dir, exist_ok=True)
+            logger.info(f"Created phase directory: {phase_dir}")
+        
+        # Update summary with phase directories - CRITICAL FOR UI
+        summary["generation_dir"] = generation_dir
+        summary["comparison_dir"] = comparison_dir
+        summary["review_dir"] = review_dir
+        summary["final_dir"] = final_dir
+        
+        # 2. Filter rows by selected modules if specified
+        if selected_modules:
+            filtered_rows = [row for row in csv_rows if row.get("Module", "") in selected_modules]
+            logger.info(f"Filtered to {len(filtered_rows)} rows for selected modules")
+            csv_rows = filtered_rows
+            
+            if not csv_rows:
+                error_msg = f"No rows found for selected modules: {', '.join(selected_modules)}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+        
+        # 3. Prepare row data for all rows
+        logger.info("Preparing data for all rows")
+        row_data = []
+        
+        for i, row in enumerate(csv_rows):
+            step_info = f"Module {row.get('Module', '')}, Lesson {row.get('Lesson', '')}, Step {row.get('Step number', '')}"
+            logger.info(f"Preparing data for row {i+1}/{len(csv_rows)}: {step_info}")
+            
+            # Initialize result dictionary
+            result = {
+                "module": row.get("Module", ""),
+                "lesson": row.get("Lesson", ""),
+                "step_number": row.get("Step number", ""),
+                "step_title": row.get("Step title", ""),
+                "template_type": row.get("Template Type", ""),
+                "status": "started",
+                "timestamp": datetime.datetime.now().isoformat(),
+                "log_entries": []
+            }
+            
+            # Add log entry function
+            def add_log_entry(step, status, message, result=result):
+                entry = {
+                    "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "step": step,
+                    "status": status,
+                    "message": message
+                }
+                result["log_entries"].append(entry)
+                if status == "error":
+                    logger.error(f"{step} ({step_info}): {message}")
+                else:
+                    logger.info(f"{step} ({step_info}): {message}")
+            
+            try:
+                # 1. Extract variables
+                add_log_entry("Extract Variables", "started", f"Extracting variables for {step_info}")
+                variables = extract_variables(row, course_name, learner_profile)
+                # Add UI settings to variables
+                variables['ui_settings'] = ui_settings
+                add_log_entry("Extract Variables", "completed", "Variables extracted successfully")
+                
+                # 2. Build context
+                add_log_entry("Build Context", "started", "Building context from adjacent steps")
+                context = build_context_from_adjacent_steps(csv_rows, i)
+                variables["context"] = context
+                add_log_entry("Build Context", "completed", f"Context built successfully ({len(context)} characters)")
+                
+                # 3. Load template
+                add_log_entry("Load Template", "started", "Loading content generation template")
+                template = load_content_generation_template()
+                add_log_entry("Load Template", "completed", "Template loaded successfully")
+                
+                # Store data for this row
+                row_data.append({
+                    "row_index": i,
+                    "row": row,
+                    "variables": variables,
+                    "template": template,
+                    "context": context,
+                    "result": result,
+                    "add_log_entry": add_log_entry,
+                    "phases_completed": []  # Track completed phases
+                })
+                
+            except Exception as e:
+                error_msg = f"Error preparing data for {step_info}: {str(e)}"
+                logger.error(error_msg)
+                logger.exception("Exception details:")
+                add_log_entry("Error", "error", str(e))
+                result["status"] = "error"
+                result["error"] = str(e)
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                
+                # Add result to summary even if preparation failed
+                summary["processed_rows"].append(result)
+        
+        # Dictionary to track results by row for efficient summary updates
+        results_by_row = {}
+        
+        # 4. Process all rows through each phase
+        logger.info(f"DIAGNOSTIC: Starting workflow with phases: {phases_to_run}")
+        
+        # Process each row through the required phases sequentially
+        logger.info(
+            f"Processing {len(row_data)} rows through phases: {', '.join(phases_to_run)}"
+        )
+
+        # Dictionary to track results by row
+        results_by_row = {}
+
+        total_tasks = len(row_data) * len(phases_to_run)
+        completed_tasks = 0
+        
+        for i, row_data_item in enumerate(row_data):
+            row_index = row_data_item["row_index"]
+            row = row_data_item["row"]
+            step_info = f"Module {row.get('Module', '')}, Lesson {row.get('Lesson', '')}, Step {row.get('Step number', '')}"
+            logger.info(f"=== Processing row {i+1}/{len(row_data)}: {step_info} ===")
+            
+            # Process this row through each required phase sequentially
+            for phase in phases_to_run:
+                phase_start_time = datetime.datetime.now()
+                logger.info(f"Starting phase {phase} for {step_info}")
+                
+                try:
+                    # Process the row for this phase
+                    row_data_item = await process_row_for_phase(
+                        row_data_item,
+                        phase,
+                        csv_rows,
+                        output_dir,
+                        learner_profile,
+                        instance_id,
+                        ui_settings,
+                        progress_queue,
+                    )
+                    
+                    # Track completed phases
+                    if "phases_completed" not in row_data_item:
+                        row_data_item["phases_completed"] = []
+                    
+                    if "error" not in row_data_item and phase not in row_data_item["phases_completed"]:
+                        row_data_item["phases_completed"].append(phase)
+                    
+                    # Update the row_data array with the updated row_data_item
+                    row_data[i] = row_data_item
+                    
+                    # Check if this phase was successful
+                    if "error" in row_data_item and phase not in row_data_item.get("phases_completed", []):
+                        logger.error(f"Error in phase {phase} for {step_info}: {row_data_item['error']}")
+                        
+                        # If this phase failed, don't proceed to the next phase for this row
+                        logger.warning(f"Stopping processing for {step_info} after failed phase {phase}")
+                        break
+                    
+                    # If we've reached the requested workflow_phase, stop processing this row
+                    if phase == workflow_phase:
+                        logger.info(f"Stopping after requested phase {workflow_phase} for {step_info}")
+                        break
+                    
+                    # Log phase completion for this row
+                    phase_duration = (
+                        datetime.datetime.now() - phase_start_time
+                    ).total_seconds()
+                    logger.info(
+                        f"Completed phase {phase} for {step_info} in {phase_duration:.2f} seconds"
+                    )
+
+                    completed_tasks += 1
+                    if progress_queue is not None:
+                        progress = int(completed_tasks / total_tasks * 100)
+                        progress_queue.put(progress)
+                    
+                except Exception as e:
+                    logger.error(f"Error processing phase {phase} for {step_info}: {str(e)}")
+                    logger.exception("Exception details:")
+                    
+                    # Update result with error
+                    if "result" in row_data_item:
+                        row_data_item["result"]["status"] = "error"
+                        row_data_item["result"]["error"] = str(e)
+                        row_data_item["result"]["completion_timestamp"] = datetime.datetime.now().isoformat()
+                        
+                        # Add error log entry if add_log_entry function is available
+                        if "add_log_entry" in row_data_item:
+                            row_data_item["add_log_entry"]("Error", "error", str(e))
+                    
+                    # Store the error in row_data_item for reference
+                    row_data_item["error"] = str(e)
+
+                    completed_tasks += 1
+                    if progress_queue is not None:
+                        progress = int(completed_tasks / total_tasks * 100)
+                        progress_queue.put(progress)
+
+                    break  # Don't proceed to next phase if there was an error
+            
+            # Update summary with results for this row
+            if "result" in row_data_item:
+                row_key = (row_data_item["result"].get("module", ""),
+                          row_data_item["result"].get("lesson", ""),
+                          row_data_item["result"].get("step_number", ""))
+                
+                # Update our tracking dictionary
+                results_by_row[row_key] = row_data_item["result"]
+            
+            # Add all results to the summary
+            summary["processed_rows"] = list(results_by_row.values())
+            
+            # Save interim summary after each row is processed
+            try:
+                summary_path = save_generation_summary(output_dir, summary)
+                logger.info(f"Saved interim summary to {summary_path} after processing row {i+1}/{len(row_data)}")
+            except Exception as save_e:
+                logger.error(f"Error saving interim summary: {str(save_e)}")
+        
+        # Generate phase summaries for each completed phase
+        all_phases_completed = set()
+        for row in row_data:
+            if "phases_completed" in row:
+                all_phases_completed.update(row["phases_completed"])
+        
+        for phase in all_phases_completed:
+            # Save summary with just the phase results to phase-specific directory
+            phase_summary = {**summary}
+            phase_summary["phase"] = phase
+            phase_summary["phase_completion_time"] = datetime.datetime.now().isoformat()
+            phase_summary_path = os.path.join(output_dir, f"summary_{phase}.json")
+            
+            try:
+                with open(phase_summary_path, 'w', encoding='utf-8') as f:
+                    json.dump(phase_summary, f, indent=2)
+                logger.info(f"Saved phase summary to {phase_summary_path}")
+            except Exception as save_e:
+                logger.error(f"Error saving phase summary: {str(save_e)}")
+        
+        # 5. Save workflow log
+        log_entries = []
+        for row_result in summary["processed_rows"]:
+            log_entries.extend(row_result.get("log_entries", []))
+        
+        log_path = save_workflow_log(output_dir, log_entries)
+        summary["workflow_log"] = log_path
+        
+        # 6. Update summary status
+        summary["status"] = "completed"
+        summary["end_time"] = datetime.datetime.now().isoformat()
+        summary["success_count"] = sum(1 for r in summary["processed_rows"] if r.get("status") == "completed")
+        summary["error_count"] = sum(1 for r in summary["processed_rows"] if r.get("status") == "error")
+        
+        
+        # Collect phases completed across all rows
+        all_phases_completed = set()
+        for row in row_data:
+            if "phases_completed" in row:
+                all_phases_completed.update(row["phases_completed"])
+        summary["phases_completed"] = list(all_phases_completed)
+        
+        # 7. Save final summary
+        summary_path = save_generation_summary(output_dir, summary)
+        summary["summary_path"] = summary_path
+        
+        logger.info(f"Workflow completed. Processed {len(csv_rows)} rows. "
+                   f"Success: {summary['success_count']}, Errors: {summary['error_count']}")
+        logger.info(f"Output directory: {output_dir}")
+        logger.info(f"WORKFLOW COMPLETED WITH PHASES: {', '.join(list(all_phases_completed))}")
+        # Note: Removed emoji flag to prevent Unicode encoding errors
+        
+        # Ensure the directory paths are in the summary for the UI
+        if "generation_dir" not in summary:
+            summary["generation_dir"] = generation_dir
+        if "comparison_dir" not in summary:
+            summary["comparison_dir"] = comparison_dir
+        if "review_dir" not in summary:
+            summary["review_dir"] = review_dir
+        if "final_dir" not in summary:
+            summary["final_dir"] = final_dir
+        
+        # Log the type of summary being returned
+        logger.info(f"Returning summary of type {type(summary).__name__}: {str(summary)[:100]}...")
+        return summary
+        
+    except Exception as e:
+        error_msg = f"Error in workflow: {str(e)}"
+        logger.error(error_msg)
+        logger.exception("Exception details:")
+        
+        # Update summary status
+        summary["status"] = "error"
+        summary["error"] = str(e)
+        summary["end_time"] = datetime.datetime.now().isoformat()
+        
+        # Try to save summary even if there was an error
+        try:
+            if "output_dir" in summary:
+                summary_path = save_generation_summary(summary["output_dir"], summary)
+                summary["summary_path"] = summary_path
+        except Exception as save_error:
+            logger.error(f"Error saving summary: {str(save_error)}")
+        
+        # Ensure directory paths are in the summary even in case of error
+        if "output_dir" in summary:
+            output_dir = summary["output_dir"]
+            if "generation_dir" not in summary:
+                summary["generation_dir"] = os.path.join(output_dir, "generation_results")
+            if "comparison_dir" not in summary:
+                summary["comparison_dir"] = os.path.join(output_dir, "comparison_results")
+            if "review_dir" not in summary:
+                summary["review_dir"] = os.path.join(output_dir, "review_results")
+            if "final_dir" not in summary:
+                summary["final_dir"] = os.path.join(output_dir, "final_content")
+        else:
+            # If output_dir is not available, still provide the directory paths
+            # This ensures the UI always has these values, even in case of early errors
+            if "generation_dir" not in summary:
+                summary["generation_dir"] = "generation_results"
+            if "comparison_dir" not in summary:
+                summary["comparison_dir"] = "comparison_results"
+            if "review_dir" not in summary:
+                summary["review_dir"] = "review_results"
+            if "final_dir" not in summary:
+                summary["final_dir"] = "final_content"
+        
+        # Log the type of summary being returned
+        logger.info(f"Returning error summary of type {type(summary).__name__}: {str(summary)[:100]}...")
+        return summary
+
+def run_workflow(csv_path: str, course_name: str, learner_profile: str,
+                ui_settings: Optional[Dict[str, Any]] = None,
+                selected_modules: Optional[List[str]] = None,
+                instance_id: str = "default",
+                workflow_phase: Optional[str] = None,
+                output_dir: str = "output",
+                progress_queue: Optional[queue.Queue] = None) -> Dict[str, Any]:
+    """
+    Alias for main function with instance_id parameter.
+    """
+    try:
+        # Use asyncio.run to properly await the result of the main coroutine
+        result = asyncio.run(
+            main(
+                csv_path,
+                course_name,
+                learner_profile,
+                ui_settings,
+                selected_modules,
+                instance_id,
+                workflow_phase,
+                output_dir,
+                progress_queue,
+            )
+        )
+        
+        # Ensure result is a dictionary to prevent 'coroutine' object has no attribute 'get' error
+        if not isinstance(result, dict):
+            logger.error(f"main() returned non-dictionary result of type {type(result).__name__}. Converting to error dictionary.")
+            # Create a fallback error dictionary
+            result = {
+                "status": "error",
+                "error": f"Workflow returned unexpected result type: {type(result).__name__}",
+                "output_dir": "unknown",
+                "processed_rows": [],
+                "generation_dir": "unknown",
+                "comparison_dir": "unknown",
+                "review_dir": "unknown",
+                "final_dir": "unknown"
+            }
+        
+        # Ensure result contains all required directory paths for UI
+        required_keys = ["generation_dir", "comparison_dir", "review_dir", "final_dir"]
+        for key in required_keys:
+            if key not in result and "output_dir" in result:
+                # Add missing keys with default paths if output_dir is available
+                phase_name = key.replace("_dir", "")
+                result[key] = os.path.join(result["output_dir"], f"{phase_name}_results")
+                logger.warning(f"Added missing {key} to workflow result for UI compatibility")
+        
+        return result
+    except Exception as e:
+        # Catch any exceptions that might occur during the execution of main
+        logger.error(f"Exception in run_workflow: {str(e)}")
+        logger.exception("Exception details:")
+        
+        # Return an error dictionary that the UI can handle
+        return {
+            "status": "error",
+            "error": f"Workflow execution failed: {str(e)}",
+            "output_dir": "unknown",
+            "processed_rows": [],
+            "generation_dir": "unknown",
+            "comparison_dir": "unknown",
+            "review_dir": "unknown",
+            "final_dir": "unknown"
+        }
+
+if __name__ == "__main__":
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="Run simplified workflow for content generation")
+    parser.add_argument("csv_path", help="Path to the CSV file")
+    parser.add_argument("course_name", help="Name of the course")
+    parser.add_argument("learner_profile", help="Description of the target learner")
+    parser.add_argument("--modules", nargs="+", help="List of modules to process (optional)")
+    parser.add_argument("--phase", choices=["generate", "compare", "review", "finalize"],
+                        help="Optional workflow phase to execute (default: all phases)")
+    
+    args = parser.parse_args()
+    
+    # Run the workflow
+    asyncio.run(main(
+        args.csv_path,
+        args.course_name,
+        args.learner_profile,
+        selected_modules=args.modules,
+        workflow_phase=args.phase,
+        progress_queue=None,
+    ))
