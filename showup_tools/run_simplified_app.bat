@@ -42,7 +42,13 @@ if not exist "venv" (
 
 REM Activate the virtual environment
 echo [INFO] Activating virtual environment...
-call "%~dp0venv\Scripts\activate.bat"
+if exist "%BASE_DIR%venv\Scripts\activate.bat" (
+    call "%BASE_DIR%venv\Scripts\activate.bat"
+) else (
+    echo [ERROR] Virtual environment not found at "%BASE_DIR%venv".
+    pause
+    exit /b 1
+)
 
 REM Install all dependencies from the central requirements.txt file
 echo [INFO] Installing/updating dependencies from !REQUIREMENTS_FILE!...

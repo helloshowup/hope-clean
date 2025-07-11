@@ -66,26 +66,13 @@ async def generate_with_claude_rag(prompt: str,
     if handbook_path and os.path.exists(handbook_path):
         # Create a textbook ID based on the path
         textbook_id = hashlib.md5(handbook_path.encode()).hexdigest()
-        
-        # SAFEGUARD 2: Create a robust query that always has content
-        # Get the query from settings if provided, otherwise build from variables
-        if settings.get('specific_query'):
-            query = settings.get('specific_query')
-        else:
-            # Build a robust query from multiple fields
-            query_components = [
-                variables.get('step_title', ''),
-                variables.get('content_outline', ''),
-                variables.get('learning_outcome', ''),
-                variables.get('topic', '')
-            ]
-            # Filter out empty components and join
-            query = ' '.join(filter(None, query_components)).strip()
-            
-        # Ensure we always have a query, even if all fields are empty
+
+        # SAFEGUARD 2: Ensure we always have some kind of query
         if not query:
-            query = 'general overview'
-            logger.warning(f"No query fields provided for {textbook_id}, using fallback query")
+            query = "general overview"
+            logger.warning(
+                f"No query provided for {textbook_id}, using fallback query"
+            )
         
         # Generate cache key for retrieval results
         cache_key = cache.get_cache_key('retrieval', {
