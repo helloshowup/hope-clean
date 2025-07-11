@@ -1,0 +1,12 @@
+You are an expert instructional designer. Using the learner profile and critique, improve the initial plan.
+
+Learner Profile:
+{{learner_profile}}
+
+Initial Plan:
+{{initial_plan}}
+
+Critique:
+{{critique}}
+
+Respond with a JSON object representing the revised plan.
