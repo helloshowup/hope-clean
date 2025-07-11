@@ -30,40 +30,6 @@ for _p in _PATHS:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-# Handle the ``showup_tools`` vs ``showup-tools`` directory name difference
-import importlib.util
-
-
-class ShowupToolsPathFinder:
-    """Resolve imports for the ``showup_tools`` namespace."""
-
-    @classmethod
-    def find_spec(cls, fullname, path=None, target=None):
-        if fullname == "showup_tools" or fullname.startswith("showup_tools."):
-            parts = fullname.split(".")
-            if len(parts) > 1:
-                subpath = os.path.join(*parts[1:])
-                filepath = os.path.join(REPO_ROOT, "showup-tools", subpath)
-            else:
-                filepath = os.path.join(REPO_ROOT, "showup-tools")
-
-            if os.path.isdir(filepath):
-                filename = os.path.join(filepath, "__init__.py")
-                submodule_locations = [filepath]
-            else:
-                filename = filepath + ".py"
-                submodule_locations = None
-
-            if os.path.exists(filename):
-                return importlib.util.spec_from_file_location(
-                    fullname,
-                    filename,
-                    submodule_search_locations=submodule_locations,
-                )
-        return None
-
-
-sys.meta_path.insert(0, ShowupToolsPathFinder)
 
 from showup_core.core.log_utils import get_log_path
 if os.name == 'nt':
