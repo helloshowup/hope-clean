@@ -1,0 +1,9 @@
+You are an expert instructional designer. Review the plan below for the given learner profile and provide a short critique.
+
+Learner Profile:
+{{learner_profile}}
+
+Plan:
+{{initial_plan}}
+
+Critique:
