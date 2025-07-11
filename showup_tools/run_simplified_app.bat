@@ -42,7 +42,7 @@ if not exist "venv" (
 
 REM Activate the virtual environment
 echo [INFO] Activating virtual environment...
-call "venv\Scripts\activate.bat"
+call "%~dp0venv\Scripts\activate.bat"
 
 REM Install all dependencies from the central requirements.txt file
 echo [INFO] Installing/updating dependencies from !REQUIREMENTS_FILE!...
