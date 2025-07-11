@@ -6,7 +6,6 @@ Main entry point for the modular Output Library Editor application.
 This module initializes the main application window and starts the GUI.
 """
 
-import importlib.util
 import logging
 import os
 import sys
@@ -15,22 +14,6 @@ from tkinter import ttk
 
 from .path_utils import get_project_root
 
-# Add parent directory to path to allow importing from sibling modules
-sys.path.append(os.path.join(str(get_project_root()), "showup-editor-ui"))
-
-
-# Append showup_tools to sys.path if the package is not installed
-if importlib.util.find_spec("showup_tools") is None:
-    project_root = str(get_project_root())
-    tools_path = os.path.join(project_root, "showup_tools")
-    if tools_path not in sys.path:
-        sys.path.insert(0, tools_path)
-
-# Append showup-core to sys.path if the package is not installed
-if importlib.util.find_spec("showup_core") is None:
-    core_path = os.path.join(str(get_project_root()), "showup-core")
-    if core_path not in sys.path:
-        sys.path.insert(0, core_path)
 
 # Import the main panel class
 from claude_panel.main_panel import ClaudeAIPanel

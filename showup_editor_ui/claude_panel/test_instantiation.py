@@ -2,6 +2,9 @@ import tkinter as tk
 import sys
 import os
 import logging
+import pytest
+
+pytest.skip("Manual GUI test", allow_module_level=True)
 
 # Configure logging to see output
 logging.basicConfig(level=logging.INFO)
@@ -24,8 +27,8 @@ setup_paths()
 
 # --- Import the necessary components ---
 try:
-    from claude_panel.enrich_lesson import EnrichLessonPanel
-    from claude_panel.markdown_editor import MarkdownEditor
+    from showup_editor_ui.claude_panel.enrich_lesson import EnrichLessonPanel
+    from showup_editor_ui.claude_panel.markdown_editor import MarkdownEditor
     logger.info("Successfully imported panel components.")
 except ImportError as e:
     logger.error(f"Failed to import panel components: {e}")

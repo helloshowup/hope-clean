@@ -309,7 +309,7 @@ def load_content_generation_template() -> str:
     #    if templates are missing
     
     # Path to templates directory specified by user
-    template_dir = r"C:\Users\User\Desktop\ShowupSquaredV4 (2)\ShowupSquaredV4\ShowupSquaredV4\showup-tools\simplified_app\templates"
+    template_dir = r"C:\Users\User\Desktop\ShowupSquaredV4 (2)\ShowupSquaredV4\ShowupSquaredV4\showup_tools\simplified_app\templates"
     template_path = os.path.join(template_dir, "high-school-lesson-template.md")
     
     logger.info(f"Loading content generation template from {template_path}")
