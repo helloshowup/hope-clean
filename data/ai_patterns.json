@@ -1,0 +1,15 @@
+{
+  "phrases": [
+    "As an AI language model",
+    "I don't have personal opinions"
+  ],
+  "patterns": [
+    {
+      "category": "Generic AI Statements",
+      "patterns": [
+        "\\bAs an AI\\b",
+        "\\bI cannot\\b"
+      ]
+    }
+  ]
+}
