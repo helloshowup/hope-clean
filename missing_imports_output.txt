@@ -1,0 +1,122 @@
+/workspace/hope-clean/showup_tools/simplified_app.py
+  missing: showup_core.core.log_utils
+  missing: showup_core.model_config
+  missing: simplified_workflow
+  missing: simplified_workflow.csv_processor
+
+/workspace/hope-clean/showup_tools/showup_core/editor_tab.py
+  missing: showup_editor_ui.claude_panel.path_utils
+
+/workspace/hope-clean/showup_tools/showup_core/html_converter.py
+  missing: markdown
+
+/workspace/hope-clean/showup_tools/showup_core/editor.py
+  missing: showup_tools.api_client
+  missing: showup_tools.file_utils
+
+/workspace/hope-clean/showup_tools/showup_core/api_utils.py
+  missing: anthropic
+  missing: openai
+  missing: showup_tools.model_config
+
+/workspace/hope-clean/showup_tools/showup_core/fitness_script_generator.py
+  missing: dotenv
+  missing: showup_editor_ui.claude_panel.path_utils
+
+/workspace/hope-clean/showup_tools/showup_core/markdown_to_docx_enhanced.py
+  missing: docx.enum.text
+  missing: docx.oxml
+  missing: docx.oxml.ns
+  missing: docx.shared
+  missing: showup_tools.PIL
+  missing: showup_tools.docx.enum.text
+  missing: showup_tools.docx.oxml
+  missing: showup_tools.docx.oxml.ns
+  missing: showup_tools.docx.shared
+  missing: showup_tools.image_analyzer
+
+/workspace/hope-clean/showup_tools/showup_core/api_client.py
+  missing: Step_generator.simplified_app.rag_system.cache_manager
+  missing: aiohttp
+  missing: config.api_keys
+  missing: dotenv
+  missing: showup_editor_ui.claude_panel.path_utils
+  missing: showup_tools.ai_logger
+  missing: showup_tools.api_utils
+  missing: showup_tools.model_config
+  missing: showup_tools.prompt_templates
+
+/workspace/hope-clean/showup_tools/showup_core/content_enhancer.py
+  missing: showup_tools.config
+
+/workspace/hope-clean/showup_tools/showup_core/csv_parser.py
+  missing: showup_tools.file_utils
+
+/workspace/hope-clean/showup_tools/showup_core/text_processing.py
+  missing: showup_editor_ui.claude_panel.path_utils
+
+/workspace/hope-clean/showup_tools/showup_core/fitness_audio_processor.py
+  missing: azure.cognitiveservices.speech
+  missing: showup_editor_ui.claude_panel.path_utils
+  missing: showup_tools.audio_processor
+
+/workspace/hope-clean/showup_tools/showup_core/model_selector.py
+  missing: showup_tools.config
+
+/workspace/hope-clean/showup_tools/showup_core/html_utils.py
+  missing: showup_tools.file_utils
+
+/workspace/hope-clean/showup_tools/showup_core/utils.py
+  missing: cache_utils
+  missing: claude_api
+
+/workspace/hope-clean/showup_tools/showup_core/batch_processor.py
+  missing: config.api_keys
+  missing: dotenv
+  missing: showup_tools.batch_persistence
+
+/workspace/hope-clean/showup_tools/showup_core/audio_processor.py
+  missing: azure.cognitiveservices.speech
+  missing: showup_editor_ui.claude_panel.path_utils
+
+/workspace/hope-clean/showup_tools/showup_core/prompt_templates.py
+  missing: showup_tools.config
+
+/workspace/hope-clean/showup_tools/showup_core/__init__.py
+  missing: showup_core.html_converter
+  missing: showup_editor_ui.claude_panel.path_utils
+  missing: showup_tools.api_client
+  missing: showup_tools.api_utils
+  missing: showup_tools.config
+  missing: showup_tools.content_enhancer
+  missing: showup_tools.csv_parser
+  missing: showup_tools.file_utils
+  missing: showup_tools.state_manager
+  missing: showup_tools.utils
+
+/workspace/hope-clean/showup_tools/showup_core/script_generator.py
+  missing: dotenv
+  missing: showup_editor_ui.claude_panel.path_utils
+
+/workspace/hope-clean/showup_tools/showup_core/file_utils.py
+  missing: showup_editor_ui.claude_panel.path_utils
+  missing: showup_tools.config
+  missing: showup_tools.prompt_manager
+
+/workspace/hope-clean/showup_tools/showup_core/content_utils.py
+  missing: showup_tools.api_utils
+  missing: showup_tools.config
+  missing: showup_tools.file_utils
+
+/workspace/hope-clean/showup_tools/showup_core/config.py
+  missing: showup_editor_ui.claude_panel.path_utils
+
+/workspace/hope-clean/showup_tools/showup_core/state_manager.py
+  missing: showup_tools.config
+
+/workspace/hope-clean/showup_tools/simplified_app/simplified_app.py
+  missing: showup_core.core.log_utils
+  missing: showup_core.model_config
+  missing: simplified_workflow
+  missing: simplified_workflow.csv_processor
+
