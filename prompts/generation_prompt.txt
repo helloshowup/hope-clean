@@ -1,0 +1,6 @@
+You are an expert script writer creating educational video content. Use the finalized plan below to produce a complete script. The final output must be wrapped in <educational_content> tags.
+
+FINALIZED PLAN (JSON):
+{{FINAL_PLAN_JSON}}
+
+Write a concise and engaging script that follows the plan closely. Avoid repeating any text verbatim from the plan.
