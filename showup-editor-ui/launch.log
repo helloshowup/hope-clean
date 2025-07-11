@@ -1,0 +1,312 @@
+ 
+==== LAUNCH 2025/07/07  4:27:19,54 ==== 
+FAISS or HuggingFace embeddings not installed. Vector search will be unavailable.
+2025-07-07 04:27:23,505 - output_library_editor - INFO - Starting Output Library Editor GUI with enhanced context generation...
+2025-07-07 04:27:23,509 - output_library_editor - INFO - ClaudeAIPanel initialized
+2025-07-07 04:27:23,526 - output_library_editor - INFO - Loaded profile: Default
+2025-07-07 04:27:23,526 - output_library_editor - INFO - Set default profile to Default
+2025-07-07 04:27:23,541 - output_library_editor - INFO - ClaudeAIPanel tabs created with following indexes:
+2025-07-07 04:27:23,541 - output_library_editor - INFO - Prompt Config tab index: 0
+2025-07-07 04:27:23,541 - output_library_editor - INFO - Markdown Editor tab index: 1
+2025-07-07 04:27:23,541 - output_library_editor - INFO - Batch Processing tab index: 2
+2025-07-07 04:27:23,541 - output_library_editor - INFO - Full Doc Regeneration tab index: 3
+2025-07-07 04:27:23,541 - output_library_editor - INFO - AI Detection tab index: 4
+2025-07-07 04:27:23,541 - output_library_editor - INFO - Generate Content tab index: 5
+2025-07-07 04:27:23,542 - output_library_editor - INFO - MD Splitter tab index: 6
+2025-07-07 04:27:23,542 - output_library_editor - INFO - MD to HTML tab index: 7
+2025-07-07 04:27:23,542 - output_library_editor - INFO - Batch Splitter tab index: 8
+2025-07-07 04:27:23,542 - output_library_editor - INFO - File Renamer tab index: 9
+2025-07-07 04:27:23,542 - output_library_editor - INFO - HTML Viewer tab index: 10
+2025-07-07 04:27:23,542 - output_library_editor - INFO - Markdown Tools tab index: 11
+2025-07-07 04:27:23,542 - output_library_editor - INFO - Podcast Generator tab index: 12
+2025-07-07 04:27:23,542 - output_library_editor - INFO - Document Creator tab index: 13
+2025-07-07 04:27:23,542 - output_library_editor - INFO - Audio Script Splitter tab index: 14
+2025-07-07 04:27:23,542 - output_library_editor - INFO - Lesson Preview tab index: 15
+2025-07-07 04:27:23,798 - AIDetector - INFO - Loaded AI detection patterns from C:\Users\User\Documents\hope\hope\showup-editor-ui\data\input\ai_patterns.json
+2025-07-07 04:27:23,808 - output_library_editor - INFO - Loaded 8 snippets from C:\Users\User\Documents\hope\hope\showup-editor-ui\data\input\snippets.txt
+2025-07-07 04:27:23,846 - showup_tools.simplified_app.rag_system.textbook_vector_db - INFO - Using langchain RecursiveCharacterTextSplitter
+2025-07-07 04:27:23,856 - output_library_editor - INFO - Loaded tab visibility settings from C:\Users\User\Documents\hope\hope\showup-editor-ui\data\tab_visibility.json
+2025-07-07 04:27:23,899 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 04:27:23,979 - output_library_editor - INFO - Loaded 10 learner profiles
+2025-07-07 04:27:23,994 - output_library_editor - INFO - Batch processor tab setup
+2025-07-07 04:27:24,012 - output_library_editor - INFO - Full document regenerator tab setup
+2025-07-07 04:27:24,734 - output_library_editor - INFO - Markdown editor tab setup complete
+2025-07-07 04:27:24,798 - output_library_editor - ERROR - Could not determine library directory path
+2025-07-07 04:27:26,490 - output_library_editor - INFO - HTML Viewer tab setup complete
+2025-07-07 04:27:26,524 - output_library_editor - INFO - Markdown tools tab setup complete
+2025-07-07 04:27:26,543 - output_library_editor - INFO - Document creator tab setup
+2025-07-07 04:27:26,563 - output_library_editor - INFO - Audio script splitter tab setup
+2025-07-07 04:27:26,592 - output_library_editor - WARNING - Non-critical error registering Enrich Lesson tab: .!claudeaipanel.!panedwindow.!frame2.!notebook.!frame17 is not managed by .!claudeaipanel.!panedwindow.!frame2.!notebook
+2025-07-07 04:27:26,592 - output_library_editor - INFO - All tabs initialized
+2025-07-07 04:27:34,305 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12 csv.md
+2025-07-07 04:27:35,498 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12 csv.md
+2025-07-07 04:27:35,663 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12 csv.md
+2025-07-07 04:27:35,704 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12 csv.md
+2025-07-07 04:27:35,704 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12 csv.md
+2025-07-07 04:27:36,747 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12.md
+2025-07-07 04:27:36,998 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12.md
+2025-07-07 04:27:37,019 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12.md
+2025-07-07 04:27:37,019 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\12.md
+2025-07-07 04:27:48,760 - output_library_editor - INFO - Showing tab: Enrich Lesson
+2025-07-07 04:27:48,761 - output_library_editor - INFO - Tab visibility settings saved to C:\Users\User\Documents\hope\hope\showup-editor-ui\data\tab_visibility.json
+FAISS or HuggingFace embeddings not installed. Vector search will be unavailable.
+2025-07-07 04:29:15,570 - showup_tools.simplified_app.rag_system.textbook_vector_db - INFO - Using langchain RecursiveCharacterTextSplitter
+2025-07-07 04:29:15,570 - showup_tools.simplified_app.rag_system.textbook_vector_db - WARNING - Vector search unavailable - storing chunks only
+2025-07-07 04:29:15,570 - showup_tools.simplified_app.rag_system.textbook_vector_db - INFO - Saved 89 chunks for Marketing Measurables for Design Students_
+2025-07-07 04:29:15,570 - root - INFO - [Subprocess] index_textbook for Marketing Measurables for Design Students_ returned: True
+2025-07-07 04:29:15,590 - showup_tools.simplified_app.rag_system.textbook_vector_db - INFO - Vector search unavailable, using keyword search for query: ' Downloadable Resource for "Rebrand Impact Analysis" Lesson  Rebrand Metrics Template for Graphic Designers Format: Excel spreadsheet Purpose: Provides a practical tool for measuring rebrand success from a graphic design perspective  Instructions This template helps you track and measure the success of a rebranding initiative from a graphic design perspective. The template is designed to be straightforward and accessible for graphic design students who may not have extensive experience with spreadsheets or marketing metrics.  Rebrand Success Metrics Tracker | Metric Category | Specific Measurement | Pre-Rebrand Baseline | 3-Month Result | 6-Month Result | % Change | Collection Method | |----------------|----------------------|---------------------|----------------|----------------|----------|-------------------| | Visual Recognition | % correctly identifying brand from logo/visual elements | | | | =IF(D2>0,(D2-C2)/C2100,"N/A") | Before/after surveys | | Desi'
+2025-07-07 04:29:15,590 - root - WARNING - No relevant context found in the handbook for the given lesson.
+2025-07-07 04:29:15,590 - root - INFO - Retrieved context for enrichment:
+No specific context was found in the handbook for this lesson.
+2025-07-07 04:29:48,180 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 04:29:49,725 - output_library_editor - INFO - Learner profile selected: 000 Robotics_target_learner
+2025-07-07 05:41:38,913 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:41:39,064 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:41:39,094 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:41:39,094 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:41:53,775 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md.bak.20250707_054153
+2025-07-07 05:41:53,775 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:43:19,437 - output_library_editor - INFO - Learner profile selected: hnd-graphic-design-profile
+2025-07-07 05:45:55,977 - output_library_editor - INFO - Starting content generation...
+2025-07-07 05:45:55,977 - output_library_editor - INFO - Parent does not have selected_files attribute
+2025-07-07 05:45:55,977 - output_library_editor - INFO - Selected items in file tree: ('I073',)
+2025-07-07 05:45:55,977 - output_library_editor - INFO - Added file path: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:45:55,993 - output_library_editor - INFO - Successfully read file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 05:45:55,993 - output_library_editor - INFO - Generating content with model: claude-3-7-sonnet-20250219
+2025-07-07 05:45:55,993 - output_library_editor - INFO - Using system prompt: 
+2025-07-07 05:45:55,993 - output_library_editor - INFO - Temperature: 0.2
+2025-07-07 05:45:55,993 - ai_api - INFO - Using ANTHROPIC_API_KEY from environment variables
+2025-07-07 05:45:55,993 - ai_api - INFO - Calling Claude API with model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 05:45:55,993 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 05:45:55,997 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-054555.json
+2025-07-07 05:45:55,997 - ai_api - INFO - Making Claude API request with 180s timeout for model: claude-3-7-sonnet-20250219
+2025-07-07 05:46:12,889 - ai_api - INFO - ClaudeAPI call successful: content_enhancement, time=16.89s
+2025-07-07 05:46:12,889 - ai_api - INFO - Claude API call successful: content_enhancement, model=claude-3-7-sonnet-20250219, time=16.90s
+2025-07-07 05:46:27,815 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:27,851 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:27,851 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:27,851 - output_library_editor - INFO - Created new file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:32,177 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:34,562 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_054634
+2025-07-07 05:46:34,562 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:37,162 - output_library_editor - INFO - Selected prompt: Sam The Man_migrated
+2025-07-07 05:46:42,279 - output_library_editor - INFO - Selected 1 files for full document regeneration
+2025-07-07 05:46:42,283 - output_library_editor - INFO - Sent 1 files to full document regeneration tab
+2025-07-07 05:46:43,273 - output_library_editor - INFO - Starting full document regeneration with prompt 'Sam The Man_migrated' and profile 'hnd-graphic-design-profile'
+2025-07-07 05:46:43,273 - output_library_editor - INFO - Processing 1 files with temperature: 0.0
+2025-07-07 05:46:43,283 - output_library_editor - INFO - Starting batch regeneration of 1 files with prompt 'You are a British English spelling specialist. You...'
+2025-07-07 05:46:43,283 - output_library_editor - INFO - Processing file 1/1: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:43,298 - output_library_editor - INFO - Generating context for 18.md...
+2025-07-07 05:46:43,298 - output_library_editor - INFO - Calling Claude Haiku for context generation: 18.md
+2025-07-07 05:46:43,298 - ai_api - INFO - Using ANTHROPIC_API_KEY from environment variables
+2025-07-07 05:46:43,298 - ai_api - INFO - Calling Claude API with model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 05:46:43,298 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 05:46:43,303 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-054643.json
+2025-07-07 05:46:43,303 - ai_api - INFO - Making Claude API request with 120s timeout for model: claude-3-haiku-20240307
+2025-07-07 05:46:48,826 - ai_api - INFO - ClaudeAPI call successful: context_generation, time=5.52s
+2025-07-07 05:46:48,826 - ai_api - INFO - Claude API call successful: context_generation, model=claude-3-haiku-20240307, time=5.53s
+2025-07-07 05:46:48,826 - output_library_editor - INFO - Generated context of 3225 chars for 18.md
+2025-07-07 05:46:48,834 - output_library_editor - INFO - Regenerating content for 18.md...
+2025-07-07 05:46:48,834 - claude_api_impl - INFO - Starting full markdown document regeneration with Claude
+2025-07-07 05:46:48,834 - claude_api_impl - INFO - Making direct API call for full document regeneration
+2025-07-07 05:46:57,755 - claude_api_impl - INFO - Full document regeneration completed in 8.92s
+2025-07-07 05:46:57,757 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_054657
+2025-07-07 05:46:57,757 - output_library_editor - INFO - Successfully processed C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:46:57,757 - output_library_editor - INFO - Batch regeneration completed. Processed 1 of 1 files in 14.47s. Failed: 0
+2025-07-07 05:48:31,552 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:48:31,707 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:48:31,727 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:48:31,727 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 05:49:32,255 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 06:04:00,130 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:01,317 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:01,450 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:01,470 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:01,470 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Starting content generation...
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Parent does not have selected_files attribute
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Selected items in file tree: ('I0F3',)
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Added file path: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Successfully read file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\17 Using Color and Design to Shape Atmosphere.md
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Generating content with model: claude-3-7-sonnet-20250219
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Using system prompt: 
+2025-07-07 06:04:06,011 - output_library_editor - INFO - Temperature: 0.2
+2025-07-07 06:04:06,011 - ai_api - INFO - Calling Claude API with model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 06:04:06,011 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 06:04:06,021 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-060406.json
+2025-07-07 06:04:06,021 - ai_api - INFO - Making Claude API request with 180s timeout for model: claude-3-7-sonnet-20250219
+2025-07-07 06:04:25,083 - ai_api - INFO - ClaudeAPI call successful: content_enhancement, time=19.06s
+2025-07-07 06:04:25,083 - ai_api - INFO - Claude API call successful: content_enhancement, model=claude-3-7-sonnet-20250219, time=19.07s
+2025-07-07 06:05:48,244 - output_library_editor - INFO - Learner profile selected: EXCEL HIGH SCHOOL LEARNER PROFILE — EXECUTIVE SUMMARY
+2025-07-07 06:06:04,421 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 06:06:04,486 - output_library_editor - INFO - Loaded 10 learner profiles
+2025-07-07 06:06:04,486 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\tkinter\__init__.py", line 1967, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\Documents\hope\hope\showup-editor-ui\claude_panel\prompt_manager.py", line 854, in refresh_resources
+    profile_idx = list(self.learner_profiles.keys()).index(current_profile)
+                       ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PromptManager' object has no attribute 'learner_profiles'
+2025-07-07 06:06:07,417 - output_library_editor - INFO - Selected prompt: instructional designer who favors a minimalist approach
+2025-07-07 06:06:13,503 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:06:13,637 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:06:13,667 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:06:13,667 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:08:12,723 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_060812
+2025-07-07 06:08:12,723 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:08:27,977 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_060827
+2025-07-07 06:08:27,977 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:08:36,079 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 06:10:31,968 - output_library_editor - INFO - Starting content generation...
+2025-07-07 06:10:31,968 - output_library_editor - INFO - Parent does not have selected_files attribute
+2025-07-07 06:10:31,968 - output_library_editor - INFO - Selected items in file tree: ('I0F4',)
+2025-07-07 06:10:31,971 - output_library_editor - INFO - Added file path: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:10:31,971 - output_library_editor - INFO - Successfully read file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:10:31,972 - output_library_editor - INFO - Generating content with model: claude-3-7-sonnet-20250219
+2025-07-07 06:10:31,972 - output_library_editor - INFO - Using system prompt: 
+2025-07-07 06:10:31,972 - output_library_editor - INFO - Temperature: 0.2
+2025-07-07 06:10:31,972 - ai_api - INFO - Calling Claude API with model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 06:10:31,972 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 06:10:31,972 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-061031.json
+2025-07-07 06:10:31,972 - ai_api - INFO - Making Claude API request with 180s timeout for model: claude-3-7-sonnet-20250219
+2025-07-07 06:10:46,892 - ai_api - INFO - ClaudeAPI call successful: content_enhancement, time=14.92s
+2025-07-07 06:10:46,892 - ai_api - INFO - Claude API call successful: content_enhancement, model=claude-3-7-sonnet-20250219, time=14.92s
+2025-07-07 06:11:31,859 - output_library_editor - INFO - Learner profile selected: hnd-graphic-design-profile
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Starting content generation...
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Parent does not have selected_files attribute
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Selected items in file tree: ('I0F4',)
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Added file path: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Successfully read file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Generating content with model: claude-3-7-sonnet-20250219
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Using system prompt: 
+2025-07-07 06:12:13,704 - output_library_editor - INFO - Temperature: 0.2
+2025-07-07 06:12:13,704 - ai_api - INFO - Calling Claude API with model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 06:12:13,704 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-7-sonnet-20250219, task_type=content_enhancement
+2025-07-07 06:12:13,708 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-061213.json
+2025-07-07 06:12:13,708 - ai_api - INFO - Making Claude API request with 180s timeout for model: claude-3-7-sonnet-20250219
+2025-07-07 06:12:31,016 - ai_api - INFO - ClaudeAPI call successful: content_enhancement, time=17.31s
+2025-07-07 06:12:31,016 - ai_api - INFO - Claude API call successful: content_enhancement, model=claude-3-7-sonnet-20250219, time=17.31s
+2025-07-07 06:13:05,020 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:13:05,140 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:13:05,161 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:13:05,161 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:14:40,603 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_061440
+2025-07-07 06:14:40,603 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:14:41,913 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 06:14:43,033 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 06:16:07,175 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_061607
+2025-07-07 06:16:07,175 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:11,806 - output_library_editor - INFO - Selected 1 files for full document regeneration
+2025-07-07 06:16:11,806 - output_library_editor - INFO - Sent 1 files to full document regeneration tab
+2025-07-07 06:16:12,995 - output_library_editor - INFO - Starting full document regeneration with prompt '[Custom Prompt]' and profile 'hnd-graphic-design-profile'
+2025-07-07 06:16:12,995 - output_library_editor - INFO - Processing 1 files with temperature: 0.0
+2025-07-07 06:16:12,995 - output_library_editor - INFO - Starting batch regeneration of 1 files with prompt 'You are a Markdown editor specialist.
+
+**Process:*...'
+2025-07-07 06:16:13,005 - output_library_editor - INFO - Processing file 1/1: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:13,005 - output_library_editor - INFO - Generating context for 18.md...
+2025-07-07 06:16:13,005 - output_library_editor - INFO - Calling Claude Haiku for context generation: 18.md
+2025-07-07 06:16:13,005 - ai_api - INFO - Calling Claude API with model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 06:16:13,005 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 06:16:13,005 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-061613.json
+2025-07-07 06:16:13,005 - ai_api - INFO - Making Claude API request with 120s timeout for model: claude-3-haiku-20240307
+2025-07-07 06:16:18,816 - ai_api - INFO - ClaudeAPI call successful: context_generation, time=5.81s
+2025-07-07 06:16:18,816 - ai_api - INFO - Claude API call successful: context_generation, model=claude-3-haiku-20240307, time=5.81s
+2025-07-07 06:16:18,816 - output_library_editor - INFO - Generated context of 3315 chars for 18.md
+2025-07-07 06:16:18,816 - output_library_editor - INFO - Regenerating content for 18.md...
+2025-07-07 06:16:18,816 - claude_api_impl - INFO - Starting full markdown document regeneration with Claude
+2025-07-07 06:16:18,816 - claude_api_impl - INFO - Making direct API call for full document regeneration
+2025-07-07 06:16:30,945 - claude_api_impl - INFO - Full document regeneration completed in 12.13s
+2025-07-07 06:16:30,947 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_061630
+2025-07-07 06:16:30,947 - output_library_editor - INFO - Successfully processed C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:30,947 - output_library_editor - INFO - Batch regeneration completed. Processed 1 of 1 files in 17.95s. Failed: 0
+2025-07-07 06:16:32,288 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:32,458 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:32,478 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:32,478 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:16:55,291 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_061655
+2025-07-07 06:16:55,294 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:17:02,317 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_061702
+2025-07-07 06:17:02,317 - output_library_editor - INFO - Saved file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:17:06,972 - output_library_editor - INFO - Selected prompt: [Custom Prompt]
+2025-07-07 06:20:33,512 - output_library_editor - INFO - Selected 1 files for full document regeneration
+2025-07-07 06:20:33,513 - output_library_editor - INFO - Sent 1 files to full document regeneration tab
+2025-07-07 06:20:35,199 - output_library_editor - INFO - Starting full document regeneration with prompt '[Custom Prompt]' and profile 'hnd-graphic-design-profile'
+2025-07-07 06:20:35,199 - output_library_editor - INFO - Processing 1 files with temperature: 0.0
+2025-07-07 06:20:35,199 - output_library_editor - INFO - Starting batch regeneration of 1 files with prompt 'As an instructional designer who favors a minimali...'
+2025-07-07 06:20:35,199 - output_library_editor - INFO - Processing file 1/1: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:20:35,199 - output_library_editor - INFO - Generating context for 18.md...
+2025-07-07 06:20:35,199 - output_library_editor - INFO - Calling Claude Haiku for context generation: 18.md
+2025-07-07 06:20:35,209 - ai_api - INFO - Calling Claude API with model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 06:20:35,209 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 06:20:35,209 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-062035.json
+2025-07-07 06:20:35,209 - ai_api - INFO - Making Claude API request with 120s timeout for model: claude-3-haiku-20240307
+2025-07-07 06:20:40,700 - ai_api - INFO - ClaudeAPI call successful: context_generation, time=5.49s
+2025-07-07 06:20:40,700 - ai_api - INFO - Claude API call successful: context_generation, model=claude-3-haiku-20240307, time=5.49s
+2025-07-07 06:20:40,700 - output_library_editor - INFO - Generated context of 3153 chars for 18.md
+2025-07-07 06:20:40,709 - output_library_editor - INFO - Regenerating content for 18.md...
+2025-07-07 06:20:40,709 - claude_api_impl - INFO - Starting full markdown document regeneration with Claude
+2025-07-07 06:20:40,709 - claude_api_impl - INFO - Making direct API call for full document regeneration
+2025-07-07 06:20:52,421 - claude_api_impl - INFO - Full document regeneration completed in 11.71s
+2025-07-07 06:20:52,421 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_062052
+2025-07-07 06:20:52,421 - output_library_editor - INFO - Successfully processed C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:20:52,421 - output_library_editor - INFO - Batch regeneration completed. Processed 1 of 1 files in 17.22s. Failed: 0
+2025-07-07 06:21:24,848 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:21:24,985 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:21:25,005 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:21:25,005 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:21:49,778 - output_library_editor - INFO - Selected prompt: Sam The Man_migrated
+2025-07-07 06:21:59,943 - output_library_editor - INFO - Selected 1 files for full document regeneration
+2025-07-07 06:21:59,949 - output_library_editor - INFO - Sent 1 files to full document regeneration tab
+2025-07-07 06:22:00,810 - output_library_editor - INFO - Starting full document regeneration with prompt 'Sam The Man_migrated' and profile 'hnd-graphic-design-profile'
+2025-07-07 06:22:00,820 - output_library_editor - INFO - Processing 1 files with temperature: 0.0
+2025-07-07 06:22:00,820 - output_library_editor - INFO - Starting batch regeneration of 1 files with prompt 'You are a British English spelling specialist. You...'
+2025-07-07 06:22:00,821 - output_library_editor - INFO - Processing file 1/1: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:22:00,821 - output_library_editor - INFO - Generating context for 18.md...
+2025-07-07 06:22:00,821 - output_library_editor - INFO - Calling Claude Haiku for context generation: 18.md
+2025-07-07 06:22:00,821 - ai_api - INFO - Calling Claude API with model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 06:22:00,821 - ai_api - INFO - Calling ClaudeAPI: model=claude-3-haiku-20240307, task_type=context_generation
+2025-07-07 06:22:00,821 - ai_api - INFO - Saved API request to C:\Users\User\Documents\hope\hope\showup-core\logs\claude\request_20250707-062200.json
+2025-07-07 06:22:00,821 - ai_api - INFO - Making Claude API request with 120s timeout for model: claude-3-haiku-20240307
+2025-07-07 06:22:07,731 - ai_api - INFO - ClaudeAPI call successful: context_generation, time=6.91s
+2025-07-07 06:22:07,731 - ai_api - INFO - Claude API call successful: context_generation, model=claude-3-haiku-20240307, time=6.91s
+2025-07-07 06:22:07,731 - output_library_editor - INFO - Generated context of 3578 chars for 18.md
+2025-07-07 06:22:07,731 - output_library_editor - INFO - Regenerating content for 18.md...
+2025-07-07 06:22:07,731 - claude_api_impl - INFO - Starting full markdown document regeneration with Claude
+2025-07-07 06:22:07,731 - claude_api_impl - INFO - Making direct API call for full document regeneration
+2025-07-07 06:22:19,882 - claude_api_impl - INFO - Full document regeneration completed in 12.15s
+2025-07-07 06:22:19,890 - file_utils - INFO - Created backup: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md.bak.20250707_062219
+2025-07-07 06:22:19,890 - output_library_editor - INFO - Successfully processed C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:22:19,890 - output_library_editor - INFO - Batch regeneration completed. Processed 1 of 1 files in 19.07s. Failed: 0
+2025-07-07 06:22:53,365 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:22:54,092 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:22:54,237 - output_library_editor - INFO - Opened file for direct editing: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:22:54,257 - root - INFO - Loaded lesson content from C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 06:22:54,257 - output_library_editor - INFO - Opened file: C:/Users/User/Documents/hope/hope/showup-library/library/GH HND\Lesson 3\18.md
+2025-07-07 07:14:17,249 - root - INFO - Shutting down ProcessPoolExecutor.
+[Subprocess] Successfully imported and instantiated TextbookVectorDB.
+[Subprocess] Starting index_textbook for Marketing Measurables for Design Students_
+[Subprocess Indexing Progress] Marketing Measurables for Design Students_ - Preparing textbook for chunking...: 10%
+[Subprocess Indexing Progress] Marketing Measurables for Design Students_ - Processing text chunks...: 30%
+[Subprocess Indexing Progress] Marketing Measurables for Design Students_ - Finalizing text processing...: 50%
+
+MULTI-FILE EDITING:
+* Select multiple files using Ctrl+click or Shift+click
+* Use one custom prompt and learner profile for all selected files
+* Process all files in a batch with progress tracking
+
+ENHANCED CONTEXT GENERATION:
+* Select previous context files in the "Previous Context" tab
+* System analyzes previous files to prevent example repetition
+* Content is enhanced with awareness of previously generated material
+* Improves coherence and prevents redundancy across multiple files
+
+CONTENT GENERATION:
+* Generate supplementary content like glossaries, summaries, and quizzes
+* Use custom prompts or select from templates
+* Save generated content to specified directories
+* Provides educational resources from existing lesson content
+
