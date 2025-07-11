@@ -1,64 +1,86 @@
+:: ============================================================================
+:: File: run_generator.bat
+:: ============================================================================
 @echo off
 setlocal enabledelayedexpansion
+
 echo Starting ShowupSquared Simplified Content Generator...
 
-REM Set UTF-8 encoding for all Python processes
+:: Set UTF-8 encoding for all Python processes
 set PYTHONIOENCODING=utf-8
 
-REM Check if Python is installed
+:: --- Python and Dependency Checks ---
+echo.
+echo Checking for Python and required libraries...
+
+:: 1. Check for Python
 python --version > nul 2>&1
 if !errorlevel! neq 0 (
-    echo Python is not installed or not in the PATH.
+    echo [ERROR] Python is not installed or not in the PATH.
     echo Please install Python 3.8+ from https://www.python.org/downloads/
     pause
     exit /b 1
 )
 
-REM Check if pandas is installed (main dependency)
-python -c "import pandas" > nul 2>&1
-if !errorlevel! neq 0 (
-    echo Pandas is not installed. Installing required dependencies...
-    pip install pandas
-    if !errorlevel! neq 0 (
-        echo Failed to install dependencies.
-        pause
-        exit /b 1
-    )
+:: 2. Check for requirements.txt and install dependencies
+if not exist "requirements.txt" (
+    echo [ERROR] requirements.txt not found! Cannot verify dependencies.
+    pause
+    exit /b 1
 )
 
-REM Set the base directory to the script location
+echo Installing/verifying libraries from requirements.txt...
+python -m pip install -r requirements.txt
+if !errorlevel! neq 0 (
+    echo [ERROR] Failed to install dependencies from requirements.txt.
+    echo Please check your internet connection and pip installation.
+    pause
+    exit /b 1
+)
+echo Dependencies are up to date.
+
+:: --- Directory Setup ---
 set "BASE_DIR=%~dp0"
 cd /d "%BASE_DIR%"
 
-REM Create required directories if they don't exist
+echo.
+echo Ensuring required directories exist...
 if not exist "logs" mkdir "logs"
-if not exist "logs\prompts" mkdir "logs\prompts"
-if not exist "data" mkdir "data"
-if not exist "templates" mkdir "templates"
 if not exist "output" mkdir "output"
+if not exist "output\generation_results" mkdir "output\generation_results"
+if not exist "output\comparison_results" mkdir "output\comparison_results"
 if not exist "cache" mkdir "cache"
-if not exist "archive" mkdir "archive"
-if not exist "test_data" mkdir "test_data"
 
-REM Define the output directory path without quotes in the variable
-set "OUTPUT_DIR=..\..\..\library\Physical Education\Course Material"
+:: Define the final output directory for the generated content
+set "FINAL_OUTPUT_DIR=..\..\..\library\Physical Education\Course Material"
 
-REM Create the designated output directory if it doesn't exist
-if not exist "!OUTPUT_DIR!" mkdir "!OUTPUT_DIR!"
+:: Create the designated output directory if it doesn't exist
+if not exist "!FINAL_OUTPUT_DIR!" mkdir "!FINAL_OUTPUT_DIR!"
 
-REM Run the application
+:: --- Run Application ---
 echo.
 echo Starting Simplified Content Generator application...
 echo.
 
-REM Check if arguments were provided
+:: Check if arguments were provided to the batch script
 if "%1"=="" (
-    REM No arguments, run with defaults and specified output directory
-    python simplified_app.py --output-dir "!OUTPUT_DIR!"
+    :: No arguments, run with defaults and specified output directory
+    python simplified_app.py --output-dir "!FINAL_OUTPUT_DIR!"
 ) else (
-    REM Pass all arguments to the Python script along with output directory
-    python simplified_app.py --output-dir "!OUTPUT_DIR!" %*
+    :: Pass all batch script arguments to the Python script
+    python simplified_app.py --output-dir "!FINAL_OUTPUT_DIR!" %*
 )
 
+echo.
+echo Script finished. Press any key to exit.
 pause
 endlocal
+
+
+:: ============================================================================
+:: File: requirements.txt
+:: (Save this in the same directory as the batch file)
+:: ============================================================================
+pandas
+torch
+sentence-transformers
