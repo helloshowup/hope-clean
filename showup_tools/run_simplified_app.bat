@@ -23,14 +23,18 @@ if !errorlevel! neq 0 (
     exit /b 1
 )
 
-REM Check if requirements.txt exists
-if not exist "requirements.txt" (
-    echo [ERROR] requirements.txt file not found. Cannot install dependencies.
+REM Define the absolute path to the central requirements file
+set "REQUIREMENTS_FILE=D:\000-SIBU\hope\requirements.txt"
+
+REM Check if requirements.txt exists at the specified path
+if not exist "!REQUIREMENTS_FILE!" (
+    echo [ERROR] requirements.txt file not found at !REQUIREMENTS_FILE!.
+    echo Cannot install dependencies.
     pause
     exit /b 1
 )
 
-REM Create a virtual environment if it doesn't exist
+REM Create a virtual environment in the current directory if it doesn't exist
 if not exist "venv" (
     echo [INFO] Creating virtual environment...
     python -m venv venv
@@ -40,9 +44,9 @@ REM Activate the virtual environment
 echo [INFO] Activating virtual environment...
 call "venv\Scripts\activate.bat"
 
-REM Install all dependencies from requirements.txt
-echo [INFO] Installing/updating dependencies...
-pip install -r requirements.txt
+REM Install all dependencies from the central requirements.txt file
+echo [INFO] Installing/updating dependencies from !REQUIREMENTS_FILE!...
+pip install -r "!REQUIREMENTS_FILE!"
 
 REM ============================================================================
 REM == Application Setup and Execution
@@ -70,13 +74,13 @@ echo.
 echo [INFO] Starting Simplified Content Generator application...
 echo.
 
-REM Check if arguments were provided and run the python script from its subfolder
+REM Check if arguments were provided and run the python script
 if "%1"=="" (
     REM No arguments, run with defaults and specified output directory
-    python "showup_tools\simplified_app.py" --output-dir "!OUTPUT_DIR!"
+    python "simplified_app.py" --output-dir "!OUTPUT_DIR!"
 ) else (
     REM Pass all arguments to the Python script along with output directory
-    python "showup_tools\simplified_app.py" --output-dir "!OUTPUT_DIR!" %*
+    python "simplified_app.py" --output-dir "!OUTPUT_DIR!" %*
 )
 
 pause

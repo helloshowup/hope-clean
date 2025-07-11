@@ -2,3 +2,4 @@ pandas
 torch
 sentence-transformers
 claude-api
+python-dotenv
