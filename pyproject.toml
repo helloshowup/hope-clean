@@ -8,6 +8,7 @@ version = "1.0.0"
 requires-python = ">=3.8"
 dependencies = [
     "anthropic",
+    "claude_api",
     "loguru",
     "numpy",
     "pandas",
