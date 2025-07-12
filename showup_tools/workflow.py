@@ -20,7 +20,9 @@ from .context_builder import build_context_from_adjacent_steps, build_context_fo
 from .content_generator import generate_three_versions_from_plan, extract_educational_content, load_content_generation_template
 from .content_comparator import compare_and_combine
 from .content_reviewer import review_content
-from .ai_detector import detect_ai_patterns, edit_content
+from .ai_detector import run_ai_detection_stage
+from .planning_stage import run_planning_stage
+from .refinement_stage import run_refinement_stage
 from .constants import EXCEL_CLARIFICATION
 from showup_core.api_client import generate_with_claude
 # Import RAG system components
@@ -292,7 +294,7 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
     
     Args:
         row_data_item: Dictionary containing row data and metadata
-        phase: The phase to process ("generate", "compare", "review", "finalize")
+        phase: The phase to process ("plan", "refine", "generate", "compare", "review", "finalize")
         csv_rows: List of all rows from the CSV file
         output_dir: Directory to save output files
         learner_profile: Description of the target learner
@@ -318,8 +320,47 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
         final_dir = os.path.join(output_dir, "final_content")
         
         logger.info(f"Processing {step_info} for phase: {phase}")
-        
-        if phase == "generate":
+
+        if phase == "plan":
+            add_log_entry("Planning", "started", "Generating initial plan")
+            plan_cfg = {
+                "model_id": ui_settings.get(
+                    "planning_model", ui_settings.get("selected_model", "claude-3-haiku-20240307")
+                ),
+                "max_tokens": ui_settings.get("planning_max_tokens", 1000),
+                "temperature": ui_settings.get("planning_temperature", 0.3),
+                "openai_api_key": ui_settings.get("openai_api_key"),
+                "planning_prompt_path": ui_settings.get("planning_prompt_path"),
+            }
+            row_data_item = await run_planning_stage(row_data_item.copy(), plan_cfg)
+            if row_data_item.get("status") != "PLAN_GENERATED":
+                result["status"] = "error"
+                result["error"] = row_data_item.get("error", "planning failed")
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+            else:
+                add_log_entry("Planning", "completed", "Plan generated")
+
+        elif phase == "refine":
+            add_log_entry("Refinement", "started", "Refining plan")
+            refine_cfg = {
+                "model_id": ui_settings.get(
+                    "refinement_model", ui_settings.get("selected_model", "claude-3-haiku-20240307")
+                ),
+                "max_tokens": ui_settings.get("refinement_max_tokens", 1000),
+                "temperature": ui_settings.get("refinement_temperature", 0.3),
+                "openai_api_key": ui_settings.get("openai_api_key"),
+                "critique_prompt_path": ui_settings.get("critique_prompt_path"),
+                "refine_prompt_path": ui_settings.get("refine_prompt_path"),
+            }
+            row_data_item = await run_refinement_stage(row_data_item.copy(), refine_cfg)
+            if row_data_item.get("status") != "PLAN_FINALIZED":
+                result["status"] = "error"
+                result["error"] = row_data_item.get("error", "refinement failed")
+                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+            else:
+                add_log_entry("Refinement", "completed", "Plan refined")
+
+        elif phase == "generate":
             # Content Generation Phase
             # Generate three versions - use initial generation model
             add_log_entry("Generate Content", "started", "Generating three content versions")
@@ -579,7 +620,7 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                 result["review_summary"] = f"Error in review. Using best version as fallback. Error: {str(review_e)}"
             
         elif phase == "finalize":
-            # Content Finalization Phase (AI Detection, Editing, and Saving)
+            # Content Finalization Phase (AI Detection and Saving)
             # Verify we have reviewed content from previous phase
             if "reviewed_content" not in row_data_item:
                 error_msg = f"Missing reviewed_content for {step_info}. Cannot proceed with finalization."
@@ -599,95 +640,59 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                     return row_data_item
             
             reviewed_content = row_data_item["reviewed_content"]
-            
-            # Detect AI patterns and edit content asynchronously using threadpool
-            add_log_entry("Detect AI Patterns", "started", "Detecting AI patterns in content")
-            try:
-                # Use threadpool for potentially CPU-intensive operations
-                with concurrent.futures.ThreadPoolExecutor() as pool:
-                    def _detect_wrapper(text: str) -> Dict[str, Any]:
-                        pass
-                        return detect_ai_patterns(text)
 
-                    # Run AI detection in thread
-                    detected_patterns_future = asyncio.get_event_loop().run_in_executor(
-                        pool, _detect_wrapper, reviewed_content
-                    )
-                    
-                    # Await the detection result
-                    detected_patterns = await detected_patterns_future
-                    
-                    add_log_entry("Detect AI Patterns", "completed", 
-                                f"Detected {detected_patterns.get('count', 0)} AI patterns")
-                    result["ai_patterns_detected"] = detected_patterns.get("count", 0)
-                    
-                    # Run editing in thread
-                    add_log_entry("Edit Content", "started", "Editing content to make it more human-like")
-                    # Since edit_content is an async function, call it directly
-                    # Pass UI settings to ensure token limit is respected
-                    edit_result = await edit_content(
-                        reviewed_content,
-                        detected_patterns,
-                        learner_profile,
-                        ui_settings,
-                    )
-                    pass
-                    
-                    # Unpack the result tuple
-                    final_content, editing_explanation = edit_result
-                    
-                    add_log_entry("Edit Content", "completed", "Content edited successfully")
-                    result["editing_explanation"] = editing_explanation
-                    row_data_item["final_content"] = final_content
-                
-                # Save as markdown
-                add_log_entry("Save Output", "started", "Saving content as markdown")
-                output_path = get_output_path(row, output_dir)
-                metadata = {
-                    "module": row.get("Module", ""),
-                    "lesson": row.get("Lesson", ""),
-                    "step_number": row.get("Step number", ""),
-                    "step_title": row.get("Step title", ""),
-                    "template_type": row.get("Template Type", ""),
-                    "target_learner": learner_profile
-                }
-                saved_path = save_as_markdown(final_content, metadata, output_path)
-                add_log_entry("Save Output", "completed", f"Content saved to {saved_path}")
-                result["output_path"] = saved_path
-                
-                # Save final results to JSON
-                try:
-                    os.makedirs(final_dir, exist_ok=True)
-                    output_file = os.path.join(final_dir, f"{step_info.replace(',', '').replace(' ', '_')}.json")
-                    with open(output_file, 'w', encoding='utf-8') as f:
-                        json.dump({
+            add_log_entry("AI Detection", "started", "Scanning content for AI patterns")
+            ai_patterns_path = ui_settings.get("ai_patterns_path")
+            detection_flags = run_ai_detection_stage(reviewed_content, patterns_file=ai_patterns_path)
+            row_data_item["ai_detection_flags"] = detection_flags
+            add_log_entry("AI Detection", "completed", f"Found {len(detection_flags)} potential issues")
+
+            final_content = reviewed_content
+
+            # Save as markdown
+            add_log_entry("Save Output", "started", "Saving content as markdown")
+            output_path = get_output_path(row, output_dir)
+            metadata = {
+                "module": row.get("Module", ""),
+                "lesson": row.get("Lesson", ""),
+                "step_number": row.get("Step number", ""),
+                "step_title": row.get("Step title", ""),
+                "template_type": row.get("Template Type", ""),
+                "target_learner": learner_profile,
+            }
+            saved_path = save_as_markdown(final_content, metadata, output_path)
+            add_log_entry("Save Output", "completed", f"Content saved to {saved_path}")
+            result["output_path"] = saved_path
+            row_data_item["final_content_path"] = saved_path
+
+            # Save final results to JSON
+            try:
+                os.makedirs(final_dir, exist_ok=True)
+                output_file = os.path.join(
+                    final_dir, f"{step_info.replace(',', '').replace(' ', '_')}.json"
+                )
+                with open(output_file, "w", encoding="utf-8") as f:
+                    json.dump(
+                        {
                             "module": row.get("Module", ""),
                             "lesson": row.get("Lesson", ""),
                             "step_number": row.get("Step number", ""),
                             "step_title": row.get("Step title", ""),
                             "final_content": final_content,
-                            "editing_explanation": editing_explanation,
-                            "ai_patterns_detected": detected_patterns.get("count", 0),
-                            "output_path": saved_path
-                        }, f, indent=2)
-                    logger.info(f"Saved final results to {output_file}")
-                except Exception as save_e:
-                    logger.error(f"Error saving final results: {str(save_e)}")
-                
-                # Update result status
-                result["status"] = "completed"
-                result["completion_timestamp"] = datetime.datetime.now().isoformat()
-                
-            except Exception as finalize_e:
-                logger.error(f"Error in content finalization for {step_info}: {str(finalize_e)}")
-                logger.exception("Exception details:")
-                add_log_entry("Finalize Content", "error", str(finalize_e))
-                row_data_item["error"] = str(finalize_e)
-                
-                # Update result status
-                result["status"] = "error"
-                result["error"] = str(finalize_e)
-                result["completion_timestamp"] = datetime.datetime.now().isoformat()
+                            "ai_detection_flags": detection_flags,
+                            "output_path": saved_path,
+                        },
+                        f,
+                        indent=2,
+                    )
+                logger.info(f"Saved final results to {output_file}")
+            except Exception as save_e:
+                logger.error(f"Error saving final results: {str(save_e)}")
+
+            # Update result status
+            result["status"] = "completed"
+            result["completion_timestamp"] = datetime.datetime.now().isoformat()
+            row_data_item["status"] = "WORKFLOW_COMPLETE"
         
         logger.info(f"Completed phase {phase} for {step_info}")
         return row_data_item
@@ -731,7 +736,7 @@ async def main(csv_path: str,
         ui_settings: Dictionary with UI settings
         selected_modules: Optional list of module names to process (if None, process all)
         instance_id: Instance identifier for managing event loops
-        workflow_phase: Optional phase to execute (options: "generate", "compare", "review", "finalize", or None for all phases)
+        workflow_phase: Optional phase to execute (options: "plan", "refine", "generate", "compare", "review", "finalize", or None for all phases)
         progress_queue: Queue to send progress updates to the UI
         
     Returns:
@@ -753,7 +758,7 @@ async def main(csv_path: str,
         ui_settings = {}
     
     # Define the workflow phases
-    all_phases = ["generate", "compare", "review", "finalize"]
+    all_phases = ["plan", "refine", "generate", "compare", "review", "finalize"]
     
     # Determine which phases to run - more concise implementation
     if workflow_phase is None:
@@ -1203,9 +1208,16 @@ if __name__ == "__main__":
     parser.add_argument("csv_path", help="Path to the CSV file")
     parser.add_argument("course_name", help="Name of the course")
     parser.add_argument("learner_profile", help="Description of the target learner")
-    parser.add_argument("--modules", nargs="+", help="List of modules to process (optional)")
-    parser.add_argument("--phase", choices=["generate", "compare", "review", "finalize"],
-                        help="Optional workflow phase to execute (default: all phases)")
+    parser.add_argument(
+        "--modules",
+        nargs="+",
+        help="List of modules to process (optional)"
+    )
+    parser.add_argument(
+        "--phase",
+        choices=["plan", "refine", "generate", "compare", "review", "finalize"],
+        help="Optional workflow phase to execute (default: all phases)"
+    )
     
     args = parser.parse_args()
     
