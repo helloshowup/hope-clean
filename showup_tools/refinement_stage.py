@@ -9,26 +9,35 @@ from .showup_core.model_config import get_model_provider
 logger = logging.getLogger(__name__)
 
 PROMPTS_DIR = os.path.join(os.path.dirname(__file__), 'prompts')
-CRITIQUE_PROMPT_PATH = os.path.join(PROMPTS_DIR, 'plan_critique_prompt.txt')
-REFINE_PROMPT_PATH = os.path.join(PROMPTS_DIR, 'plan_refine_prompt.txt')
+CRITIQUE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_critique_prompt.txt")
+REFINE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_refine_prompt.txt")
 
-async def run_refinement_stage(row_data_item: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+async def run_refinement_stage(
+    row_data_item: Dict[str, Any], config: Dict[str, Any]
+) -> Dict[str, Any]:
     """Critique and refine an initial plan using either Anthropic or OpenAI models."""
     logger.info("Running refinement stage")
 
+    new_item = row_data_item.copy()
+
+    critique_path = config.get("critique_prompt_path", CRITIQUE_PROMPT_PATH)
+    refine_path = config.get("refine_prompt_path", REFINE_PROMPT_PATH)
+
     try:
-        with open(CRITIQUE_PROMPT_PATH, 'r', encoding='utf-8') as f:
+        with open(critique_path, "r", encoding="utf-8") as f:
             critique_template = f.read()
-        with open(REFINE_PROMPT_PATH, 'r', encoding='utf-8') as f:
+        with open(refine_path, "r", encoding="utf-8") as f:
             refine_template = f.read()
     except FileNotFoundError as e:
         logger.error(f"Refinement prompt not found: {e}")
-        row_data_item['status'] = 'PLAN_FAILED'
-        row_data_item['error'] = f"Prompt not found: {e}"
-        return row_data_item
+        new_item["status"] = "PLAN_FAILED"
+        new_item["error"] = f"Prompt not found: {e}"
+        return new_item
 
-    learner_profile = row_data_item.get('Learner Profile') or row_data_item.get('learner_profile', '')
-    initial_plan_obj = row_data_item.get('initial_plan', {})
+    learner_profile = new_item.get("Learner Profile") or new_item.get(
+        "learner_profile", ""
+    )
+    initial_plan_obj = new_item.get("initial_plan", {})
     initial_plan_str = json.dumps(initial_plan_obj, ensure_ascii=False)
 
     critique_prompt = critique_template.replace('{{learner_profile}}', learner_profile)
@@ -56,7 +65,7 @@ async def run_refinement_stage(row_data_item: Dict[str, Any], config: Dict[str, 
                 model=model_id,
                 task_type='plan_critique'
             )
-        row_data_item['plan_critique'] = critique
+        new_item["plan_critique"] = critique
 
         refine_prompt = refine_template.replace('{{learner_profile}}', learner_profile)
         refine_prompt = refine_prompt.replace('{{initial_plan}}', initial_plan_str)
@@ -79,11 +88,11 @@ async def run_refinement_stage(row_data_item: Dict[str, Any], config: Dict[str, 
                 task_type='plan_refine'
             )
 
-        row_data_item['final_plan'] = json.loads(revised_plan_text)
-        row_data_item['status'] = 'PLAN_FINALIZED'
+        new_item["final_plan"] = json.loads(revised_plan_text)
+        new_item["status"] = "PLAN_FINALIZED"
     except Exception as e:
         logger.error(f"Refinement stage failed: {e}")
-        row_data_item['status'] = 'PLAN_FAILED'
-        row_data_item['error'] = str(e)
+        new_item["status"] = "PLAN_FAILED"
+        new_item["error"] = str(e)
 
-    return row_data_item
+    return new_item
