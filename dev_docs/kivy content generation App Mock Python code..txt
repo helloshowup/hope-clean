@@ -1,0 +1,437 @@
+# main.py
+import kivy
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.progressbar import ProgressBar
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.filechooser import FileChooserListView
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
+from kivy.clock import Clock
+import os
+
+kivy.require('2.0.0') # replace with your Kivy version
+
+class WorkflowAppLayout(BoxLayout):
+    """
+    Main layout for the Workflow Application.
+    Handles UI interactions and updates.
+    """
+    csv_path_input = ObjectProperty(None)
+    status_label = ObjectProperty(None)
+    progress_bar = ObjectProperty(None)
+    output_display = ObjectProperty(None)
+    file_chooser_popup = ObjectProperty(None)
+
+    # Properties to simulate workflow states
+    current_stage_name = StringProperty("Idle")
+    current_progress_value = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.workflow_stages = [
+            "Initializing...",
+            "Planning Stage...",
+            "Refinement Stage...",
+            "Generation Stage...",
+            "Comparison & Review...",
+            "AI Detection...",
+            "Saving Output...",
+            "Workflow Complete!"
+        ]
+        self.current_stage_index = 0
+        self.mock_workflow_event = None
+
+    def show_file_chooser(self):
+        """
+        Opens a file chooser popup to select a CSV file.
+        """
+        self.file_chooser_popup = FileChooserPopup(self)
+        self.add_widget(self.file_chooser_popup)
+
+    def select_csv_file(self, path, filename):
+        """
+        Callback for file chooser to set the selected CSV path.
+        """
+        if filename and filename[0].endswith('.csv'):
+            full_path = os.path.join(path, filename[0])
+            self.csv_path_input.text = full_path
+            self.remove_widget(self.file_chooser_popup)
+            self.file_chooser_popup = None
+        else:
+            self.status_label.text = "Please select a .csv file."
+
+    def cancel_file_chooser(self):
+        """
+        Cancels the file chooser popup.
+        """
+        self.remove_widget(self.file_chooser_popup)
+        self.file_chooser_popup = None
+
+    def start_workflow(self):
+        """
+        Simulates starting the content generation workflow.
+        """
+        csv_file = self.csv_path_input.text
+        if not csv_file or not os.path.exists(csv_file) or not csv_file.endswith('.csv'):
+            self.status_label.text = "Please load a valid CSV file first."
+            return
+
+        self.current_stage_index = 0
+        self.current_progress_value = 0
+        self.output_display.text = ""
+        self.status_label.text = "Workflow started..."
+
+        if self.mock_workflow_event:
+            self.mock_workflow_event.cancel() # Cancel any previous ongoing simulation
+
+        # Start the mock workflow simulation
+        self.mock_workflow_event = Clock.schedule_interval(self._update_mock_workflow, 1.5)
+
+    def _update_mock_workflow(self, dt):
+        """
+        Internal method to simulate workflow progression.
+        """
+        if self.current_stage_index < len(self.workflow_stages):
+            self.current_stage_name = self.workflow_stages[self.current_stage_index]
+            self.current_progress_value = (self.current_stage_index + 1) / len(self.workflow_stages) * 100
+            self.status_label.text = f"Status: {self.current_stage_name}"
+            
+            if self.current_stage_name == "Workflow Complete!":
+                self.mock_workflow_event.cancel()
+                self.output_display.text = "Workflow finished successfully!\n\n" \
+                                           "Sample Final Content:\n\n" \
+                                           "## The Amazing World of Photosynthesis\n" \
+                                           "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods with the help of chlorophyll. This process is vital for life on Earth as it provides the oxygen we breathe and the food we eat.\n\n" \
+                                           "### Scene 1: Sunlight and Leaves\n" \
+                                           "Imagine a tiny factory inside a plant leaf, working tirelessly. Sunlight, water, and carbon dioxide are the raw materials. The chlorophyll in the leaves captures the sun's energy, turning it into chemical energy.\n\n" \
+                                           "### Scene 2: The Chemical Reaction\n" \
+                                           "Inside the factory, water and carbon dioxide undergo a magical transformation. With the captured sunlight energy, they are converted into glucose (sugar), which is the plant's food, and oxygen, which is released into the atmosphere.\n\n" \
+                                           "### AI Detection Flags:\n" \
+                                           " - Pattern: 'In conclusion,', Category: 'Overly Formal Phrases', Index: 500\n" \
+                                           " - Pattern: 'It is important to note that', Category: 'Redundancy', Index: 650"
+                self.view_final_content() # Show final content by default
+
+            self.current_stage_index += 1
+        else:
+            self.mock_workflow_event.cancel()
+
+    def view_final_content(self):
+        """
+        Displays mock final content in the output area.
+        """
+        self.output_display.text = "## Sample Final Content\n\n" \
+                                   "This is where the polished, reviewed content would appear.\n\n" \
+                                   "It would be the best version, potentially merged and enhanced, ready for use.\n\n" \
+                                   "**Key Learning Points:**\n" \
+                                   "- Point 1\n" \
+                                   "- Point 2\n" \
+                                   "- Point 3\n\n" \
+                                   "AI Detection Flags would also be listed here if found."
+
+    def view_initial_plan(self):
+        """
+        Displays mock initial plan JSON in the output area.
+        """
+        self.output_display.text = "## Sample Initial Plan (JSON)\n\n" \
+                                   "```json\n" \
+                                   "{\n" \
+                                   "  \"video_title\": \"Photosynthesis Basics\",\n" \
+                                   "  \"target_audience\": \"Middle School Students\",\n" \
+                                   "  \"learning_objective\": \"Understand photosynthesis process\",\n" \
+                                   "  \"scenes\": [\n" \
+                                   "    {\n" \
+                                   "      \"scene_number\": 1,\n" \
+                                   "      \"scene_title\": \"Intro to Photosynthesis\",\n" \
+                                   "      \"talking_points\": [\"What is it?\", \"Why is it important?\"]\n" \
+                                   "    },\n" \
+                                   "    {\n" \
+                                   "      \"scene_number\": 2,\n" \
+                                   "      \"scene_title\": \"Ingredients & Process\",\n" \
+                                   "      \"talking_points\": [\"Sunlight, Water, CO2\", \"Chlorophyll's role\"]\n" \
+                                   "    }\n" \
+                                   "  ]\n" \
+                                   "}\n" \
+                                   "```"
+
+    def view_ai_flags(self):
+        """
+        Displays mock AI detection flags in the output area.
+        """
+        self.output_display.text = "## Sample AI Detection Flags\n\n" \
+                                   "This section would list any detected AI-generated patterns or phrases.\n\n" \
+                                   "**Detected Flags:**\n" \
+                                   "- **Pattern:** 'In conclusion,', **Category:** 'Overly Formal Phrases', **Index:** 123\n" \
+                                   "- **Pattern:** 'It is important to note that', **Category:** 'Redundancy', **Index:** 456\n" \
+                                   "- **Pattern:** 'As an AI language model,', **Category:** 'AI Disclosure', **Index:** 789\n" \
+                                   "- **Pattern:** 'I hope this helps!', **Category:** 'Common AI Phrase', **Index:** 900"
+
+class FileChooserPopup(BoxLayout):
+    """
+    A simple file chooser popup for selecting CSV files.
+    """
+    caller = ObjectProperty(None)
+
+    def __init__(self, caller, **kwargs):
+        super().__init__(**kwargs)
+        self.caller = caller
+
+class WorkflowApp(App):
+    """
+    The main Kivy application class.
+    """
+    def build(self):
+        return WorkflowAppLayout()
+
+if __name__ == '__main__':
+    WorkflowApp().run()
+```
+
+```kivy
+# workflow_app.kv
+#:kivy 2.0.0
+
+<WorkflowAppLayout>:
+    csv_path_input: _csv_path_input
+    status_label: _status_label
+    progress_bar: _progress_bar
+    output_display: _output_display
+
+    orientation: 'vertical'
+    padding: 20
+    spacing: 15
+    background_color: 0.1, 0.1, 0.1, 1 # Dark background
+
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # Header Section
+    BoxLayout:
+        size_hint_y: 0.1
+        Label:
+            text: "Content Generation Workflow"
+            font_size: '24sp'
+            bold: True
+            color: 0.9, 0.9, 0.9, 1 # Light text
+
+    # Main Content Area
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 0.8
+        spacing: 15
+
+        # Left Panel: Input & Controls
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.35
+            spacing: 10
+            padding: 10
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.2, 0.2, 1 # Slightly lighter dark background
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10,]
+
+            Label:
+                text: "Input & Controls"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            TextInput:
+                id: _csv_path_input
+                hint_text: "Select CSV file path"
+                multiline: False
+                readonly: True
+                size_hint_y: None
+                height: '40dp'
+                background_color: 0.3, 0.3, 0.3, 1
+                foreground_color: 0.9, 0.9, 0.9, 1
+                cursor_color: 0.9, 0.9, 0.9, 1
+                font_size: '14sp'
+                padding: [10, 10]
+                border: [8,8,8,8]
+                radius: [5,]
+
+            Button:
+                text: "Load CSV"
+                size_hint_y: None
+                height: '48dp'
+                on_release: root.show_file_chooser()
+                background_normal: ''
+                background_color: 0.1, 0.5, 0.7, 1 # Blue
+                color: 1, 1, 1, 1
+                font_size: '16sp'
+                bold: True
+                radius: [8,]
+
+            Button:
+                text: "Start Workflow"
+                size_hint_y: None
+                height: '48dp'
+                on_release: root.start_workflow()
+                background_normal: ''
+                background_color: 0.2, 0.7, 0.3, 1 # Green
+                color: 1, 1, 1, 1
+                font_size: '16sp'
+                bold: True
+                radius: [8,]
+
+            # Workflow Status
+            Label:
+                text: "Workflow Status"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            Label:
+                id: _status_label
+                text: root.current_stage_name
+                size_hint_y: None
+                height: '30dp'
+                font_size: '16sp'
+                color: 0.9, 0.9, 0.9, 1
+
+            ProgressBar:
+                id: _progress_bar
+                max: 100
+                value: root.current_progress_value
+                size_hint_y: None
+                height: '20dp'
+                background_color: 0.3, 0.3, 0.3, 1 # Progress bar track
+                foreground_color: 0.2, 0.7, 0.3, 1 # Progress bar fill
+
+            Widget: # Spacer
+                size_hint_y: 1
+
+        # Right Panel: Output Display
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.65
+            spacing: 10
+            padding: 10
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.2, 0.2, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10,]
+
+            Label:
+                text: "Output & Results"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            # Output View Buttons
+            BoxLayout:
+                size_hint_y: None
+                height: '48dp'
+                spacing: 10
+                Button:
+                    text: "Final Content"
+                    on_release: root.view_final_content()
+                    background_normal: ''
+                    background_color: 0.1, 0.6, 0.8, 1 # Light blue
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                Button:
+                    text: "Initial Plan"
+                    on_release: root.view_initial_plan()
+                    background_normal: ''
+                    background_color: 0.1, 0.6, 0.8, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                Button:
+                    text: "AI Flags"
+                    on_release: root.view_ai_flags()
+                    background_normal: ''
+                    background_color: 0.1, 0.6, 0.8, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.3, 0.3, 1 # Output display background
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [5,]
+
+                TextInput:
+                    id: _output_display
+                    text: "Workflow output will appear here. Click 'Start Workflow' after loading a CSV."
+                    readonly: True
+                    font_size: '14sp'
+                    background_color: 0, 0, 0, 0 # Transparent background
+                    foreground_color: 0.9, 0.9, 0.9, 1
+                    padding: [10, 10]
+                    size_hint_y: None
+                    height: self.minimum_height
+                    cursor_color: 0,0,0,0 # Hide cursor for read-only
+                    selection_color: 0.1, 0.5, 0.7, 0.5 # Selection color
+
+# File Chooser Popup Definition
+<FileChooserPopup>:
+    orientation: 'vertical'
+    size_hint: 0.8, 0.8
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    padding: 10
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.15, 0.15, 1 # Darker background for popup
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [15,]
+
+    FileChooserListView:
+        id: file_chooser
+        filters: ['*.csv'] # Only show CSV files
+        path: App.get_running_app().user_data_dir # Start in a sensible directory
+        on_submit: root.caller.select_csv_file(self.path, self.selection)
+
+    BoxLayout:
+        size_hint_y: None
+        height: '48dp'
+        spacing: 10
+        Button:
+            text: "Select"
+            on_release: root.caller.select_csv_file(file_chooser.path, file_chooser.selection)
+            background_normal: ''
+            background_color: 0.2, 0.7, 0.3, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
+        Button:
+            text: "Cancel"
+            on_release: root.caller.cancel_file_chooser()
+            background_normal: ''
+            background_color: 0.7, 0.2, 0.2, 1 # Red
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
