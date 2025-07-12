@@ -356,3 +356,68 @@ def _extract_editing_results(result: str) -> Tuple[str, str]:
         explanation = "No explanation provided."
     
     return edited_text, explanation
+
+
+def _load_ai_patterns(patterns_file: Optional[str] = None) -> Dict[str, Any]:
+    """Load AI detection patterns from JSON file."""
+    if patterns_file is None:
+        patterns_file = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "data", "ai_patterns.json")
+        )
+
+    try:
+        with open(patterns_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        logger.info(f"Loaded AI detection patterns from {patterns_file}")
+        return data
+    except FileNotFoundError:
+        logger.warning(f"AI patterns file not found: {patterns_file}")
+    except Exception as e:
+        logger.error(f"Error loading AI patterns: {e}")
+
+    return {"patterns": [], "phrases": []}
+
+
+def run_ai_detection_stage(content: str, patterns_file: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Scan content for AI signature patterns.
+
+    Args:
+        content: The text to analyze.
+        patterns_file: Optional path to ``ai_patterns.json``. If not provided the
+            default file in the repository ``data`` directory is used.
+
+    Returns:
+        A list of dictionaries with ``pattern``, ``category`` and ``start_index``
+        for each occurrence.
+    """
+
+    patterns_data = _load_ai_patterns(patterns_file)
+    matches: List[Dict[str, Any]] = []
+
+    # Regex based patterns
+    for cat in patterns_data.get("patterns", []):
+        category = cat.get("category", "Unknown")
+        for pattern in cat.get("patterns", []):
+            try:
+                regex = re.compile(pattern, re.IGNORECASE)
+            except re.error as e:  # pragma: no cover - invalid regex should not happen
+                logger.error(f"Invalid regex '{pattern}': {e}")
+                continue
+
+            for m in regex.finditer(content):
+                matches.append(
+                    {"pattern": pattern, "category": category, "start_index": m.start()}
+                )
+
+    # Simple phrases
+    for phrase in patterns_data.get("phrases", []):
+        if not isinstance(phrase, str) or not phrase.strip():
+            continue
+        regex = re.compile(r"\b" + re.escape(phrase) + r"\b", re.IGNORECASE)
+        for m in regex.finditer(content):
+            matches.append(
+                {"pattern": phrase, "category": "phrase", "start_index": m.start()}
+            )
+
+    matches.sort(key=lambda x: x["start_index"])
+    return matches
