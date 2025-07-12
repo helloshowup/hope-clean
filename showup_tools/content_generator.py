@@ -183,25 +183,34 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
     model = ui_settings.get("initial_generation_model", ui_settings.get("selected_model", "claude-3-haiku-20240307"))
 
     temperatures = [0.3, 0.5, 1.0]
-    versions = []
 
-    for idx, temp in enumerate(temperatures):
-        logger.info(f"Generating version {idx+1} with temperature {temp} using model {model}")
-        content = await generate_with_claude(
-            prompt=prompt,
-            max_tokens=max_tokens,
-            temperature=temp,
-            model=model,
-            frequency_penalty=freq_pen,
-            presence_penalty=pres_pen,
-            task_type="content_generation",
+    # Build individual prompts to encourage diversity
+    note = "\n\nNOTE: Provide a distinctly different take for the next version."
+    prompts = [prompt + note * i for i in range(len(temperatures))]
+
+    tasks = []
+    for idx, (temp, version_prompt) in enumerate(zip(temperatures, prompts)):
+        logger.info(
+            f"Generating version {idx+1} with temperature {temp} using model {model}"
         )
-        versions.append(content)
-        # Encourage diversity for the next version
-        prompt += "\n\nNOTE: Provide a distinctly different take for the next version."
+        tasks.append(
+            asyncio.create_task(
+                generate_with_claude(
+                    prompt=version_prompt,
+                    max_tokens=max_tokens,
+                    temperature=temp,
+                    model=model,
+                    frequency_penalty=freq_pen,
+                    presence_penalty=pres_pen,
+                    task_type="content_generation",
+                )
+            )
+        )
+
+    versions = await asyncio.gather(*tasks)
 
     logger.info("Completed generation of all three versions from plan")
-    return versions
+    return list(versions)
 
 
 def extract_educational_content(content: str) -> str:
