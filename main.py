@@ -109,9 +109,9 @@ class WorkflowApp(App):
     def show_file_chooser(self, target_text_input, file_type):
         file_chooser = FileChooserListView(path=os.getcwd())
 
-        def select_file(instance, value):
-            if value:
-                target_text_input.text = value[0]
+        def select_file(instance, selection, touch=None):
+            if selection:
+                target_text_input.text = selection[0]
             popup.dismiss()
 
         file_chooser.bind(on_submit=select_file)
