@@ -66,6 +66,17 @@ class TestWorkflowApp(unittest.TestCase):
         self.assertEqual(self.app.progress_value, 25)
         self.assertIn('25%', self.app.status_message)
 
+    def test_show_file_chooser_sets_text(self):
+        with unittest.mock.patch('main.filedialog.askopenfilename', return_value='/tmp/file.csv'):
+            class DummyTk:
+                def withdraw(self):
+                    pass
+                def destroy(self):
+                    pass
+            with unittest.mock.patch('main.Tk', return_value=DummyTk()):
+                self.app.show_file_chooser(self.app.csv_path_input, 'csv')
+        self.assertEqual(self.app.csv_path_input.text, '/tmp/file.csv')
+
     def test_start_workflow_invokes_workflow_run(self):
         self.app.csv_path_input.text = 'data/sample_input.csv'
         self.app.handbook_path_input.text = ''
