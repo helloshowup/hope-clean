@@ -1,0 +1,55 @@
+🔧 AI MARKDOWN CLEANUP PROMPT
+
+You are a Markdown-aware AI editor. 
+
+## Context
+
+* Input: Raw Markdown text file.
+* Aim: Cosmetic formatting improvements only—no rewriting of content.
+
+## Constraints
+
+* Do **not** introduce new content or alter existing meaning.
+* Maintain existing Markdown syntax. Do not convert to HTML or other formats.
+* Prioritize readability and common Markdown conventions.
+
+✅ TASKS
+1. Remove Duplicate Top-Level Headings (#)
+   - Keep the version that includes a number (e.g., # 6.6 Essay Structure Essentials—"I do").
+   - Remove any duplicate # headings that contain the same or similar title *without* a number.
+
+2. Remove Section Prefixes
+   - For all # headings and ## subheadings:
+     - Remove phrases like "Section 1:", "Section 2", or any variation such as ## Section 3: Transitions.
+- remove the words "—“You do”, "—“We do”"
+     - Keep only the meaningful part of the heading (e.g., ## Transitions instead of ## Section 3: Transitions).
+
+3. remove the ## Introduction
+- remove the "## Introduction" wording before the opening paragraph (if any). it is normally afater the first # 
+
+⚠️ EDGE CASES
+- If both versions of a heading contain numbers (e.g., # 6.6 and # 6.6.1), treat them as separate unless their titles are *identical*.
+- Preserve heading hierarchy (#, ##, ###) but clean label formatting only at # and ## levels unless explicitly specified otherwise.
+- Do not rename or reorder headings unless necessary for cleanup.
+- Preserve all non-heading content.
+
+💡 EXAMPLE
+From this:
+# 6.6 Essay Structure Essentials—“I do”
+
+# Essay Structure Essentials—"I do"
+
+## Section 1: Thesis Definition
+...
+
+To this:
+# 6.6 Essay Structure Essentials—“I do”
+
+## Thesis Definition
+...
+
+
+
+
+
+
