@@ -16,7 +16,12 @@ import logging
 import azure.cognitiveservices.speech as speechsdk
 from typing import Dict, Optional
 from datetime import datetime
-from showup_editor_ui.claude_panel.path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Import common audio processing utilities
 from .audio_processor import escape_xml

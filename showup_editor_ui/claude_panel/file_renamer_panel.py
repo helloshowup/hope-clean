@@ -15,6 +15,14 @@ from typing import List, Dict, Tuple, Optional
 logger = logging.getLogger("output_library_editor")
 
 
+def create_timestamped_backup(file_path: str) -> str:
+    """Create a timestamped backup of *file_path* in the same directory."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = f"{file_path}.bak.{timestamp}"
+    shutil.copy2(file_path, backup_path)
+    return backup_path
+
+
 class FileRenamerPanel:
     """Handles file renaming functionality for standardizing markdown filenames."""
     
@@ -378,10 +386,8 @@ class FileRenamerPanel:
                 try:
                     # Create backup if requested
                     if create_backup:
-                        from showup_core.file_utils import create_timestamped_backup
-
                         backup_dir = os.path.join(os.path.dirname(original_path), "_backups")
-                        create_timestamped_backup(original_path, backup_dir)
+                        create_timestamped_backup(original_path)
                     
                     # Rename the file
                     os.rename(original_path, new_path)

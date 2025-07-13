@@ -14,7 +14,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, scrolledtext, messagebox
 from typing import List
 from datetime import datetime
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Third-party imports
 import requests

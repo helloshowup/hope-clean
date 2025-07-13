@@ -12,11 +12,15 @@ import sys
 import tkinter as tk
 from tkinter import ttk
 
-from .path_utils import get_project_root
+from pathlib import Path
 
 
-# Import the main panel class
-from claude_panel.main_panel import ClaudeAIPanel
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
+
+# The original main panel implementation has been archived.
+ClaudeAIPanel = None
 
 # Configure logging
 log_file = os.path.join(str(get_project_root()), 'showup-editor-ui', 'output_library_editor.log')

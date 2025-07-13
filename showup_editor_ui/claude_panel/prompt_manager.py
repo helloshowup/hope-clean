@@ -11,7 +11,11 @@ import time
 import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-from .path_utils import get_project_root
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Import config manager
 from .config_manager import config_manager

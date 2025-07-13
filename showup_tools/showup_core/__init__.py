@@ -6,7 +6,12 @@ that form the foundation of the ShowupSquared workflow system.
 """
 # Set up basic logging first - we'll configure it properly later
 import logging
-from showup_editor_ui.claude_panel.path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 core_logger = logging.getLogger("core")
 core_logger.setLevel(logging.INFO)
 
@@ -38,41 +43,7 @@ __all__.extend([
     'get_course_content_paths',
 ])
 
-# Import file utilities from file_utils (the dedicated module)
-from .file_utils import (
-    safe_read_file,
-    safe_write_file,
-    ensure_directory_exists,
-    ensure_directory,  # Alias for compatibility
-    archive_file,
-    load_json_file,
-    save_json_file,
-    read_json_file,
-    write_json_file,
-    validate_csv_basics,
-    check_course_content_exists,
-    list_files,
-    file_exists,
-    directory_exists
-)
-
-# Add to public API
-__all__.extend([
-    'safe_read_file',
-    'safe_write_file',
-    'ensure_directory_exists',
-    'ensure_directory',  # Alias for compatibility
-    'archive_file',
-    'load_json_file',
-    'save_json_file',
-    'read_json_file',
-    'write_json_file',
-    'validate_csv_basics',
-    'check_course_content_exists',
-    'list_files',
-    'file_exists',
-    'directory_exists'
-])
+# File utility functions have been archived and are no longer part of the public API.
 
 # Import API utilities and client functions
 from .api_utils import (

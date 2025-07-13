@@ -7,6 +7,8 @@ from tkinter import ttk, messagebox, scrolledtext
 import logging
 import json
 import re
+import datetime
+import shutil
 
 try:
     from nicegui import ui
@@ -18,7 +20,20 @@ except Exception:  # pragma: no cover - optional dependency
 
     ui = _DummyUI()
 
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
+
+
+def create_timestamped_backup(file_path: str) -> str:
+    """Create a timestamped backup of *file_path* in the same directory."""
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = f"{file_path}.bak.{timestamp}"
+    shutil.copy2(file_path, backup_path)
+    return backup_path
 from showup_core.utils import cache_utils, claude_api
 from claude_api import CLAUDE_MODELS
 
@@ -588,8 +603,6 @@ class AIDetector:
                 raise
             
             # Save original as backup
-            from showup_core.file_utils import create_timestamped_backup
-
             backup_path = create_timestamped_backup(file_path)
             
             # Save rewritten content
