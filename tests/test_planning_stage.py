@@ -92,22 +92,6 @@ class TestPlanningStage(unittest.TestCase):
         self.assertEqual(result['status'], 'PLAN_FAILED')
         self.assertIn('bad', result.get('error', ''))
 
-    def test_planning_legacy(self):
-        row = {
-            "content_outline": "Outline",
-            "learner_profile": "Profile",
-            "rationale": "Because",
-            "word_count": 123,
-        }
-        config = {"model_id": "claude-3-haiku-20240307", "use_dynamic_blocks": False}
-        legacy_plan = {"video_title": "t", "scenes": []}
-        with patch('showup_tools.planning_stage.generate_with_claude') as mock_claude:
-            mock_claude.return_value = json.dumps(legacy_plan)
-            with patch('builtins.open', mock_open(read_data='prompt')):
-                result = asyncio.run(run_planning_stage(row, config))
-        self.assertEqual(result['status'], 'PLAN_GENERATED')
-        self.assertEqual(result['initial_plan'], legacy_plan)
-
     def test_planning_accepts_image_placeholder(self):
         row = {
             "content_outline": "Outline",

@@ -1,10 +1,9 @@
 import unittest
 import asyncio
-import importlib
 import sys
 import os
 import json
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 
 # setup paths similar to other tests
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -66,16 +65,6 @@ class TestRefinementStage(unittest.TestCase):
         self.assertEqual(result['status'], 'PLAN_FAILED')
         self.assertIn('bad', result.get('error', ''))
 
-    def test_refinement_legacy(self):
-        legacy_plan = {"video_title": "t", "scenes": []}
-        row = {"initial_plan": legacy_plan, "learner_profile": "profile"}
-        config = {"model_id": "claude-3-haiku-20240307", "use_dynamic_blocks": False}
-        with patch('showup_tools.refinement_stage.generate_with_claude') as mock_claude:
-            mock_claude.side_effect = ['critique', json.dumps(legacy_plan)]
-            with patch('builtins.open', side_effect=[mock_open(read_data='c').return_value, mock_open(read_data='r').return_value]):
-                result = asyncio.run(run_refinement_stage(row, config))
-        self.assertEqual(result['status'], 'PLAN_FINALIZED')
-        self.assertEqual(result['final_plan'], legacy_plan)
 
 if __name__ == '__main__':
     unittest.main()

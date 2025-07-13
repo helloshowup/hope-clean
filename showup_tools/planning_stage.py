@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 PROMPTS_DIR = os.path.join(os.path.dirname(__file__), "prompts")
 PLANNING_PROMPT_PATH = os.path.join(PROMPTS_DIR, "planning_prompt.txt")
-LEGACY_PLANNING_PROMPT_PATH = os.path.join(PROMPTS_DIR, "planning_prompt_legacy.txt")
 
 async def run_planning_stage(
     row_data_item: Dict[str, Any], config: Dict[str, Any]
@@ -22,10 +21,9 @@ async def run_planning_stage(
 
     new_item = row_data_item.copy()
 
-    use_dynamic = config.get("use_dynamic_blocks", True)
     prompt_path = config.get(
         "planning_prompt_path",
-        PLANNING_PROMPT_PATH if use_dynamic else LEGACY_PLANNING_PROMPT_PATH,
+        PLANNING_PROMPT_PATH,
     )
 
     try:
@@ -51,22 +49,14 @@ async def run_planning_stage(
         or config.get("word_count")
         or ""
     )
-    if use_dynamic:
-        block_defs = get_block_type_definitions()
-        prompt = (
-            prompt_template.replace("{{content_outline}}", content_outline)
-            .replace("{{learner_profile}}", learner_profile)
-            .replace("{{rationale}}", rationale)
-            .replace("{{word_count}}", word_count)
-            .replace("{{block_library}}", block_defs)
-        )
-    else:
-        prompt = (
-            prompt_template.replace("{{content_outline}}", content_outline)
-            .replace("{{learner_profile}}", learner_profile)
-            .replace("{{rationale}}", rationale)
-            .replace("{{word_count}}", word_count)
-        )
+    block_defs = get_block_type_definitions()
+    prompt = (
+        prompt_template.replace("{{content_outline}}", content_outline)
+        .replace("{{learner_profile}}", learner_profile)
+        .replace("{{rationale}}", rationale)
+        .replace("{{word_count}}", word_count)
+        .replace("{{block_library}}", block_defs)
+    )
 
     model_id = config.get('model_id', 'claude-3-haiku-20240307')
     provider = get_model_provider(model_id)
@@ -91,10 +81,7 @@ async def run_planning_stage(
                 task_type='planning'
             )
 
-        if use_dynamic:
-            new_item["initial_plan"] = validate_plan(ai_response).model_dump(exclude_none=True)
-        else:
-            new_item["initial_plan"] = json.loads(ai_response)
+        new_item["initial_plan"] = validate_plan(ai_response).model_dump(exclude_none=True)
         new_item["status"] = "PLAN_GENERATED"
     except Exception as e:
         logger.error(f"Planning stage failed: {e}")
