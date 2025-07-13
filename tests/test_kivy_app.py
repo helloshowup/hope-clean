@@ -33,5 +33,12 @@ class TestWorkflowApp(unittest.TestCase):
             root_widget.select_csv_file(tmpdir, ["sample.csv"])
             self.assertEqual(root_widget.learner_profile_preview.text, "Profile text")
 
+    def test_file_chooser_uses_app_user_data_dir(self):
+        app = WorkflowApp()
+        root_widget = app.build()
+        root_widget.show_file_chooser()
+        chooser_path = root_widget.file_chooser_popup.ids.file_chooser.path
+        self.assertEqual(chooser_path, app.user_data_dir)
+
 if __name__ == '__main__':
     unittest.main()

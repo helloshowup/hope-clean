@@ -354,7 +354,7 @@
     FileChooserListView:
         id: file_chooser
         filters: ['*.csv']
-        path: App.get_running_app().user_data_dir
+        path: app.user_data_dir
         on_submit: root.caller.select_csv_file(self.path, self.selection)
 
     BoxLayout:
@@ -384,7 +384,7 @@
     FileChooserListView:
         id: file_chooser
         filters: ['*.pdf', '*.md', '*.txt']
-        path: App.get_running_app().user_data_dir
+        path: app.user_data_dir
         on_submit: root.caller.select_handbook_file(self.path, self.selection)
 
     BoxLayout:
@@ -414,7 +414,7 @@
     FileChooserListView:
         id: file_chooser
         dirselect: True
-        path: App.get_running_app().user_data_dir
+        path: app.user_data_dir
         on_submit: root.caller.select_directory(self.selection)
 
     BoxLayout:
