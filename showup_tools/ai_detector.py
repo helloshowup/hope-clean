@@ -233,8 +233,10 @@ def _load_ai_phrases() -> Dict[str, Any]:
     logger.info("Loading AI phrases")
 
     try:
-        # Path to AI phrases JSON file
-        file_path = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\data\\ai_phrases.json"
+        # Path to AI phrases JSON file relative to repository root
+        file_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "data", "ai_phrases.json")
+        )
 
         if not os.path.exists(file_path):
             logger.warning(f"AI phrases file not found: {file_path}")

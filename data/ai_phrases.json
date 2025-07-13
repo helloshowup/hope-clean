@@ -1,0 +1,6 @@
+{
+    "patterns": [
+        {"category": "test", "patterns": ["foo"]}
+    ],
+    "phrases": ["bar"]
+}
