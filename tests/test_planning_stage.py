@@ -21,7 +21,12 @@ from showup_tools.planning_stage import run_planning_stage
 
 class TestPlanningStage(unittest.TestCase):
     def test_planning_with_claude(self):
-        row = {"content_outline": "Outline"}
+        row = {
+            "content_outline": "Outline",
+            "learner_profile": "Profile",
+            "rationale": "Because",
+            "word_count": 123,
+        }
         config = {"model_id": "claude-3-haiku-20240307"}
         good_plan = {
             "content_blocks": [
@@ -31,12 +36,22 @@ class TestPlanningStage(unittest.TestCase):
         with patch('showup_tools.planning_stage.generate_with_claude') as mock_claude:
             mock_claude.return_value = json.dumps(good_plan)
             result = asyncio.run(run_planning_stage(row, config))
+            called_prompt = mock_claude.call_args.args[0]
+        self.assertIn("Outline", called_prompt)
+        self.assertIn("Profile", called_prompt)
+        self.assertIn("Because", called_prompt)
+        self.assertIn("123", called_prompt)
         self.assertEqual(result['status'], 'PLAN_GENERATED')
         self.assertEqual(result['initial_plan'], good_plan)
         mock_claude.assert_called()
 
     def test_planning_with_openai(self):
-        row = {"content_outline": "Outline"}
+        row = {
+            "content_outline": "Outline",
+            "learner_profile": "Profile",
+            "rationale": "Because",
+            "word_count": 123,
+        }
         config = {"model_id": "gpt-4", "openai_api_key": "x"}
 
         mock_resp = MagicMock()
@@ -53,13 +68,23 @@ class TestPlanningStage(unittest.TestCase):
             client = mock_openai.return_value
             client.chat.completions.create.return_value = mock_resp
             result = asyncio.run(run_planning_stage(row, config))
+            called_prompt = client.chat.completions.create.call_args.kwargs['messages'][0]['content']
+        self.assertIn("Outline", called_prompt)
+        self.assertIn("Profile", called_prompt)
+        self.assertIn("Because", called_prompt)
+        self.assertIn("123", called_prompt)
 
         self.assertEqual(result['status'], 'PLAN_GENERATED')
         self.assertEqual(result['initial_plan'], good_plan)
         mock_openai.assert_called()
 
     def test_planning_validation_error(self):
-        row = {"content_outline": "Outline"}
+        row = {
+            "content_outline": "Outline",
+            "learner_profile": "Profile",
+            "rationale": "Because",
+            "word_count": 123,
+        }
         config = {"model_id": "claude-3-haiku-20240307"}
         with patch('showup_tools.planning_stage.generate_with_claude') as mock_claude:
             mock_claude.return_value = '{"bad": true}'
@@ -68,7 +93,12 @@ class TestPlanningStage(unittest.TestCase):
         self.assertIn('bad', result.get('error', ''))
 
     def test_planning_legacy(self):
-        row = {"content_outline": "Outline"}
+        row = {
+            "content_outline": "Outline",
+            "learner_profile": "Profile",
+            "rationale": "Because",
+            "word_count": 123,
+        }
         config = {"model_id": "claude-3-haiku-20240307", "use_dynamic_blocks": False}
         legacy_plan = {"video_title": "t", "scenes": []}
         with patch('showup_tools.planning_stage.generate_with_claude') as mock_claude:

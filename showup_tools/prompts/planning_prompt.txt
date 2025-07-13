@@ -3,6 +3,14 @@ content blocks from the library below.
 Block Library:
 {{block_library}}
 
+Learner Profile:
+{{learner_profile}}
+
+Rationale:
+{{rationale}}
+
+Target Word Count: {{word_count}}
+
 Guidelines:
 - Start with one `lesson_metadata` block and end with `key_takeaways`.
 - Other blocks may be repeated as needed to cover the outline.
