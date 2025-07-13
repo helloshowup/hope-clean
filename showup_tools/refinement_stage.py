@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from .showup_core.api_client import generate_with_claude
 from .showup_core.model_config import get_model_provider
+from .block_library import get_block_type_definitions, validate_plan
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,11 @@ async def run_refinement_stage(
     initial_plan_obj = new_item.get("initial_plan", {})
     initial_plan_str = json.dumps(initial_plan_obj, ensure_ascii=False)
 
+    block_defs = get_block_type_definitions()
+
     critique_prompt = critique_template.replace('{{learner_profile}}', learner_profile)
     critique_prompt = critique_prompt.replace('{{initial_plan}}', initial_plan_str)
+    critique_prompt = critique_prompt.replace('{{block_library}}', block_defs)
 
     model_id = config.get('model_id', 'claude-3-haiku-20240307')
     provider = get_model_provider(model_id)
@@ -70,6 +74,7 @@ async def run_refinement_stage(
         refine_prompt = refine_template.replace('{{learner_profile}}', learner_profile)
         refine_prompt = refine_prompt.replace('{{initial_plan}}', initial_plan_str)
         refine_prompt = refine_prompt.replace('{{critique}}', critique)
+        refine_prompt = refine_prompt.replace('{{block_library}}', block_defs)
 
         if provider == 'openai':
             response2 = client.chat.completions.create(
@@ -88,7 +93,7 @@ async def run_refinement_stage(
                 task_type='plan_refine'
             )
 
-        new_item["final_plan"] = json.loads(revised_plan_text)
+        new_item["final_plan"] = validate_plan(revised_plan_text).model_dump(exclude_none=True)
         new_item["status"] = "PLAN_FINALIZED"
     except Exception as e:
         logger.error(f"Refinement stage failed: {e}")

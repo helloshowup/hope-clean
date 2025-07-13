@@ -1,4 +1,9 @@
-You are an expert instructional designer. Review the plan below for the given learner profile and provide a short critique.
+You are an expert instructional designer. Review the plan below for the given learner profile. The plan consists of an array `content_blocks` using block types from the library.
+
+Block Library:
+{{block_library}}
+
+Provide a short critique focusing on block choice, order and completeness.
 
 Learner Profile:
 {{learner_profile}}
