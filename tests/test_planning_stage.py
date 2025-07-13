@@ -6,13 +6,6 @@ import os
 import json
 from unittest.mock import patch, MagicMock, mock_open
 
-# setup paths similar to other tests
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-paths = [os.path.join(root_dir, 'showup_tools'), root_dir]
-for p in paths:
-    if p not in sys.path:
-        sys.path.insert(0, p)
-
 # provide stub for openai if missing
 if 'openai' not in sys.modules:
     sys.modules['openai'] = MagicMock()

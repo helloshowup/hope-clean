@@ -83,13 +83,10 @@ def clear_stubs():
         sys.modules.pop(name, None)
 
 
-def test_main_adds_project_root(tmp_path):
+def test_main_executes_with_standard_path(tmp_path):
     root, tools_dir = setup_temp_environment(tmp_path)
     main_src = Path(__file__).resolve().parents[1] / 'main.py'
     shutil.copy2(main_src, root / 'main.py')
-
-    if str(root) in sys.path:
-        sys.path.remove(str(root))
 
     orig_workflow = sys.modules.get('showup_tools.workflow')
     for k in list(sys.modules.keys()):
@@ -98,13 +95,13 @@ def test_main_adds_project_root(tmp_path):
 
     add_stubs()
 
-    loader = importlib.machinery.SourceFileLoader('main', str(root / 'main.py'))
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    main_module = importlib.util.module_from_spec(spec)
-    loader.exec_module(main_module)
-
+    sys.path.insert(0, str(root))
     try:
-        assert str(root) in sys.path
+        loader = importlib.machinery.SourceFileLoader('main', str(root / 'main.py'))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        main_module = importlib.util.module_from_spec(spec)
+        loader.exec_module(main_module)
+
         wf = importlib.import_module('showup_tools.workflow')
         assert wf.run_workflow() == {'status': 'ok'}
     finally:

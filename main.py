@@ -4,12 +4,6 @@ kivy.require('2.3.1')  # Ensure minimum Kivy version
 import sys
 import os
 
-# --- CRITICAL FIX: Add project root to sys.path before any local imports ---
-project_root = os.path.abspath(os.path.dirname(__file__))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-# --- END OF CRITICAL FIX ---
-
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label

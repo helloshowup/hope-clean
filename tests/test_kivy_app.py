@@ -3,10 +3,6 @@ import unittest.mock
 import os
 import sys
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
-
 os.environ['KIVY_NO_ARGS'] = '1'
 
 import types
@@ -14,10 +10,13 @@ import types
 class TestWorkflowApp(unittest.TestCase):
     def setUp(self):
         # Insert stub modules before importing the application
-        self.kivy_stub_path = os.path.join(os.path.dirname(__file__), 'kivy_stub')
-        if self.kivy_stub_path not in sys.path:
-            sys.path.insert(0, self.kivy_stub_path)
+        tests_dir = os.path.dirname(__file__)
+        project_root = os.path.abspath(os.path.join(tests_dir, '..'))
+        for p in (tests_dir, project_root):
+            if p not in sys.path:
+                sys.path.insert(0, p)
         import kivy_stub
+        self.kivy_stub_path = os.path.join(tests_dir, 'kivy_stub')
         sys.modules['kivy'] = kivy_stub
 
         # Preserve original workflow modules to restore later
