@@ -26,6 +26,14 @@ from .refinement_stage import run_refinement_stage
 from .learning_sections import generate_lo_and_kt_from_content
 from .markdown_utils import insert_sections_in_markdown
 from .constants import EXCEL_CLARIFICATION
+import sys
+import os
+
+# Add the project root to the Python path so showup_core can be imported
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from showup_core.api_client import generate_with_claude
 # Import RAG system components
 from showup_tools.simplified_app.rag_system.token_counter import count_tokens
