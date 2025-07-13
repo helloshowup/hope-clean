@@ -1,0 +1,237 @@
+#:kivy 2.0.0
+
+<WorkflowAppLayout>:
+    csv_path_input: _csv_path_input
+    status_label: _status_label
+    progress_bar: _progress_bar
+    output_display: _output_display
+
+    orientation: 'vertical'
+    padding: 20
+    spacing: 15
+    background_color: 0.1, 0.1, 0.1, 1
+
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        size_hint_y: 0.1
+        Label:
+            text: "Content Generation Workflow"
+            font_size: '24sp'
+            bold: True
+            color: 0.9, 0.9, 0.9, 1
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 0.8
+        spacing: 15
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.35
+            spacing: 10
+            padding: 10
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.2, 0.2, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10,]
+
+            Label:
+                text: "Input & Controls"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            TextInput:
+                id: _csv_path_input
+                hint_text: "Select CSV file path"
+                multiline: False
+                readonly: True
+                size_hint_y: None
+                height: '40dp'
+                background_color: 0.3, 0.3, 0.3, 1
+                foreground_color: 0.9, 0.9, 0.9, 1
+                cursor_color: 0.9, 0.9, 0.9, 1
+                font_size: '14sp'
+                padding: [10, 10]
+                border: [8,8,8,8]
+                radius: [5,]
+
+            Button:
+                text: "Load CSV"
+                size_hint_y: None
+                height: '48dp'
+                on_release: root.show_file_chooser()
+                background_normal: ''
+                background_color: 0.1, 0.5, 0.7, 1
+                color: 1, 1, 1, 1
+                font_size: '16sp'
+                bold: True
+                radius: [8,]
+
+            Button:
+                text: "Start Workflow"
+                size_hint_y: None
+                height: '48dp'
+                on_release: root.start_workflow()
+                background_normal: ''
+                background_color: 0.2, 0.7, 0.3, 1
+                color: 1, 1, 1, 1
+                font_size: '16sp'
+                bold: True
+                radius: [8,]
+
+            Label:
+                text: "Workflow Status"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            Label:
+                id: _status_label
+                text: root.current_stage_name
+                size_hint_y: None
+                height: '30dp'
+                font_size: '16sp'
+                color: 0.9, 0.9, 0.9, 1
+
+            ProgressBar:
+                id: _progress_bar
+                max: 100
+                value: root.current_progress_value
+                size_hint_y: None
+                height: '20dp'
+                background_color: 0.3, 0.3, 0.3, 1
+                foreground_color: 0.2, 0.7, 0.3, 1
+
+            Widget:
+                size_hint_y: 1
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.65
+            spacing: 10
+            padding: 10
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.2, 0.2, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10,]
+
+            Label:
+                text: "Output & Results"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            BoxLayout:
+                size_hint_y: None
+                height: '48dp'
+                spacing: 10
+                Button:
+                    text: "Final Content"
+                    on_release: root.view_final_content()
+                    background_normal: ''
+                    background_color: 0.1, 0.6, 0.8, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                Button:
+                    text: "Initial Plan"
+                    on_release: root.view_initial_plan()
+                    background_normal: ''
+                    background_color: 0.1, 0.6, 0.8, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                Button:
+                    text: "AI Flags"
+                    on_release: root.view_ai_flags()
+                    background_normal: ''
+                    background_color: 0.1, 0.6, 0.8, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.3, 0.3, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [5,]
+
+                TextInput:
+                    id: _output_display
+                    text: "Workflow output will appear here. Click 'Start Workflow' after loading a CSV."
+                    readonly: True
+                    font_size: '14sp'
+                    background_color: 0, 0, 0, 0
+                    foreground_color: 0.9, 0.9, 0.9, 1
+                    padding: [10, 10]
+                    size_hint_y: None
+                    height: self.minimum_height
+                    cursor_color: 0,0,0,0
+                    selection_color: 0.1, 0.5, 0.7, 0.5
+
+<FileChooserPopup>:
+    orientation: 'vertical'
+    size_hint: 0.8, 0.8
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    padding: 10
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.15, 0.15, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [15,]
+
+    FileChooserListView:
+        id: file_chooser
+        filters: ['*.csv']
+        path: App.get_running_app().user_data_dir
+        on_submit: root.caller.select_csv_file(self.path, self.selection)
+
+    BoxLayout:
+        size_hint_y: None
+        height: '48dp'
+        spacing: 10
+        Button:
+            text: "Select"
+            on_release: root.caller.select_csv_file(file_chooser.path, file_chooser.selection)
+            background_normal: ''
+            background_color: 0.2, 0.7, 0.3, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
+        Button:
+            text: "Cancel"
+            on_release: root.caller.cancel_file_chooser()
+            background_normal: ''
+            background_color: 0.7, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
