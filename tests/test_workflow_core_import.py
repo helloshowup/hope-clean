@@ -109,6 +109,7 @@ def test_main_executes_with_standard_path(tmp_path):
     sys.modules['showup_tools.workflow'] = wf
     wf_spec.loader.exec_module(wf)
 
+
     try:
         loader = importlib.machinery.SourceFileLoader('main', str(root / 'main.py'))
         spec = importlib.util.spec_from_loader(loader.name, loader)
