@@ -85,6 +85,7 @@
                 radius: [8,]
 
             Button:
+                id: _start_button
                 text: "Start Workflow"
                 size_hint_y: None
                 height: '48dp'
@@ -122,7 +123,7 @@
                 foreground_color: 0.2, 0.7, 0.3, 1
 
             Label:
-                text: "Student Handbook Integration"
+                text: "Reference Handbook Integration"
                 size_hint_y: None
                 height: '30dp'
                 font_size: '18sp'
@@ -139,8 +140,9 @@
                     size_hint_x: None
                     width: '30dp'
                     color: 0.2, 0.7, 0.3, 1
+                    on_active: root.update_handbook_usage(self.active)
                 Label:
-                    text: "Pull relevant information from student handbook before generation."
+                    text: "Pull relevant information from reference handbook before generation."
                     text_size: self.width, None
                     halign: 'left'
                     valign: 'middle'
@@ -153,7 +155,7 @@
                 spacing: 10
                 TextInput:
                     id: _handbook_path_input
-                    hint_text: "Student Handbook File"
+                    hint_text: "Reference Handbook File"
                     multiline: False
                     readonly: True
                     background_color: 0.3, 0.3, 0.3, 1
@@ -383,7 +385,7 @@
 <HandbookChooserPopup@FileChooserPopup>:
     FileChooserListView:
         id: file_chooser
-        filters: ['*.pdf', '*.md', '*.txt']
+        filters: ['*.pdf', '*.md']
         path: app.user_data_dir
         on_submit: root.caller.select_handbook_file(self.path, self.selection)
 

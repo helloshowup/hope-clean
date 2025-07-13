@@ -27,6 +27,7 @@ from showup_core.api_client import generate_with_claude
 from showup_tools.simplified_app.rag_system.token_counter import count_tokens
 from showup_tools.simplified_app.rag_system.cache_manager import cache
 from showup_tools.simplified_app.rag_system.textbook_vector_db import get_vector_db
+from showup_tools.simplified_app.rag_system.ingest_textbook import extract_text_from_file
 import hashlib
 # Batch processing functionality removed as per requirement
 from .output_manager import save_as_markdown, create_output_directory, save_generation_summary, save_workflow_log
@@ -178,17 +179,17 @@ def chunk_content(content: str, max_chunk_size: int = 8000) -> List[str]:
 
 async def extract_student_handbook_information(content_outline: str, handbook_path: str, ui_settings: Dict[str, Any]) -> str:
     """
-    Extract relevant information from the student handbook based on content outline.
+    Extract relevant information from the reference handbook based on content outline.
     
     Args:
         content_outline: The content outline to use for finding relevant information
-        handbook_path: Path to the student handbook file
+        handbook_path: Path to the reference handbook file
         ui_settings: Dictionary with UI settings
         
     Returns:
         String containing the relevant information extracted from the handbook
     """
-    logger.info(f"Extracting relevant information from student handbook: {handbook_path}")
+    logger.info(f"Extracting relevant information from reference handbook: {handbook_path}")
     
     try:
         # Get the model to use for extraction - use the initial generation model from UI settings
@@ -227,18 +228,21 @@ async def extract_student_handbook_information(content_outline: str, handbook_pa
                 logger.info("Retrieved handbook extraction from cache")
                 return cached_result
                 
-            # Use the vector database to find relevant chunks
-            # Create a textbook ID based on the path
+            # Prepare handbook text and index
             textbook_id = hashlib.md5(handbook_path.encode()).hexdigest()
 
-            # Get vector DB instance lazily
-            db = get_vector_db()
+            handbook_text = extract_text_from_file(handbook_path)
+            if not handbook_text:
+                raise RuntimeError("Failed to read handbook text")
 
-            # Get relevant chunks from the vector database
+            db = get_vector_db()
+            db.index_textbook(handbook_text, textbook_id)
+
+            # Query for relevant chunks
             relevant_chunks = db.query_textbook(
                 query=query_text,
                 textbook_id=textbook_id,
-                top_k=5  # Get top 5 most relevant chunks
+                top_k=5
             )
             
             # Guard against silent RAG failure
@@ -251,10 +255,8 @@ async def extract_student_handbook_information(content_outline: str, handbook_pa
                 logger.info(f"Found {len(relevant_chunks)} relevant chunks using RAG")
                 
                 # Calculate token savings
-                with open(handbook_path, 'r', encoding='utf-8') as f:
-                    full_content = f.read()
-                    
-                full_token_count = count_tokens(full_content)
+                # Use already extracted handbook text for token savings
+                full_token_count = count_tokens(handbook_text)
                 result_token_count = count_tokens(result)
                 
                 token_savings = full_token_count - result_token_count
@@ -326,35 +328,41 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             variables = row_data_item["variables"]
             template = row_data_item["template"]
             
-            # Check if student handbook extraction is enabled
-            use_student_handbook = ui_settings.get("use_student_handbook", False)
-            student_handbook_path = ui_settings.get("student_handbook_path", "")
+            # Check if reference handbook extraction is enabled
+            use_reference_handbook = ui_settings.get(
+                "use_reference_handbook",
+                ui_settings.get("use_student_handbook", False),
+            )
+            reference_handbook_path = ui_settings.get(
+                "reference_handbook_path",
+                ui_settings.get("student_handbook_path", ""),
+            )
             
-            # Extract information from student handbook if enabled
-            if use_student_handbook and student_handbook_path and os.path.exists(student_handbook_path):
-                add_log_entry("Student Handbook", "started", "Extracting relevant information from student handbook")
+            # Extract information from reference handbook if enabled
+            if use_reference_handbook and reference_handbook_path and os.path.exists(reference_handbook_path):
+                add_log_entry("Reference Handbook", "started", "Extracting relevant information from reference handbook")
                 try:
                     # Get content outline for extraction
                     content_outline = row.get("Content Outline", row.get("Content outline", ""))
                     if content_outline:
-                        # Extract relevant information from student handbook
-                        handbook_info = await extract_student_handbook_information(content_outline, student_handbook_path, ui_settings)
-                        
+                        # Extract relevant information from reference handbook
+                        handbook_info = await extract_student_handbook_information(content_outline, reference_handbook_path, ui_settings)
+
                         # Add extracted information to variables
-                        variables["student_handbook_info"] = handbook_info
-                        
+                        variables["reference_handbook_info"] = handbook_info
+
                         # Update template to include handbook information if needed
-                        if "{{student_handbook_info}}" not in template:
-                            # Add a section for student handbook information in the template
-                            handbook_section = "{{content_outline}}\n\nRELEVANT INFORMATION FROM STUDENT HANDBOOK:\n{{student_handbook_info}}\n"
+                        if "{{reference_handbook_info}}" not in template:
+                            # Add a section for reference handbook information in the template
+                            handbook_section = "{{content_outline}}\n\nRELEVANT INFORMATION FROM REFERENCE HANDBOOK:\n{{reference_handbook_info}}\n"
                             template = template.replace("{{content_outline}}", handbook_section)
                         
-                        add_log_entry("Student Handbook", "completed", "Successfully extracted information from student handbook")
+                        add_log_entry("Reference Handbook", "completed", "Successfully extracted information from reference handbook")
                     else:
-                        add_log_entry("Student Handbook", "warning", "No content outline found, skipping handbook extraction")
+                        add_log_entry("Reference Handbook", "warning", "No content outline found, skipping handbook extraction")
                 except Exception as e:
-                    add_log_entry("Student Handbook", "error", f"Failed to extract information from handbook: {str(e)}")
-                    logger.exception("Exception during student handbook extraction:")
+                    add_log_entry("Reference Handbook", "error", f"Failed to extract information from handbook: {str(e)}")
+                    logger.exception("Exception during reference handbook extraction:")
             
             # ===================================================================
             # METADATA MANAGEMENT FOR LEARNER PROFILE
