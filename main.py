@@ -15,8 +15,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
-from kivy.uix.filechooser import FileChooserListView
-from kivy.uix.popup import Popup
+import tkinter as tk
+from tkinter import filedialog
 from kivy.uix.progressbar import ProgressBar
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
@@ -107,18 +107,20 @@ class WorkflowApp(App):
         self.start_button.disabled = value or (run_workflow is None)
 
     def show_file_chooser(self, target_text_input, file_type):
-        file_chooser = FileChooserListView(path=os.getcwd())
-
-        def select_file(instance, selection, touch=None):
-            if selection:
-                target_text_input.text = selection[0]
-            popup.dismiss()
-
-        file_chooser.bind(on_submit=select_file)
-        file_chooser.bind(on_select=select_file)
-
-        popup = Popup(title=f"Select {file_type.capitalize()} File", content=file_chooser, size_hint=(0.9, 0.9))
-        popup.open()
+        """Open an OS file dialog and set the selected path."""
+        root = None
+        try:
+            root = tk.Tk()
+            root.withdraw()
+        except tk.TclError:
+            root = None
+        try:
+            file_path = filedialog.askopenfilename(title=f"Select {file_type.capitalize()} File")
+        finally:
+            if root is not None:
+                root.destroy()
+        if file_path:
+            target_text_input.text = file_path
 
     def start_workflow(self, instance):
         if self.workflow_running:
