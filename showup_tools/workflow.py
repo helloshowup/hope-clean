@@ -331,6 +331,7 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                 "temperature": ui_settings.get("planning_temperature", 0.3),
                 "openai_api_key": ui_settings.get("openai_api_key"),
                 "planning_prompt_path": ui_settings.get("planning_prompt_path"),
+                "use_dynamic_blocks": ui_settings.get("use_dynamic_blocks", True),
             }
             row_data_item = await run_planning_stage(row_data_item.copy(), plan_cfg)
             if row_data_item.get("status") != "PLAN_GENERATED":
@@ -351,6 +352,7 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                 "openai_api_key": ui_settings.get("openai_api_key"),
                 "critique_prompt_path": ui_settings.get("critique_prompt_path"),
                 "refine_prompt_path": ui_settings.get("refine_prompt_path"),
+                "use_dynamic_blocks": ui_settings.get("use_dynamic_blocks", True),
             }
             row_data_item = await run_refinement_stage(row_data_item.copy(), refine_cfg)
             if row_data_item.get("status") != "PLAN_FINALIZED":
@@ -434,6 +436,7 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                 generation_settings = ui_settings.copy()
                 generation_settings["selected_model"] = initial_model
                 generation_settings["using_initial_generation_model"] = True
+                generation_settings["use_dynamic_blocks"] = ui_settings.get("use_dynamic_blocks", True)
 
                 logger.info(f"Using initial generation model: {initial_model} for generating three versions")
 

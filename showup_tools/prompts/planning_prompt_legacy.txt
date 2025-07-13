@@ -1,0 +1,4 @@
+You are a planning assistant tasked with creating a lesson plan.
+Use the following outline:
+{{content_outline}}
+Respond with a JSON object representing the plan.

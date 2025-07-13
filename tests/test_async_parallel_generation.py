@@ -7,14 +7,14 @@ from showup_tools.content_generator import generate_three_versions_from_plan
 
 class TestAsyncParallelGeneration(unittest.TestCase):
     def test_parallel_speed(self):
-        final_plan = {"plan": "x"}
+        final_plan = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
         ui_settings = {}
 
         async def fake_generate_with_claude(**kwargs):
             await asyncio.sleep(0.1)
             return str(kwargs.get("temperature"))
 
-        m = mock_open(read_data="Prompt {{final_plan}}")
+        m = mock_open(read_data="Prompt {{block}}")
         with patch("builtins.open", m):
             with patch(
                 "showup_tools.content_generator.generate_with_claude",
