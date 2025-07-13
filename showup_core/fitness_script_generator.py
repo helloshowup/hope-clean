@@ -18,7 +18,7 @@ from pathlib import Path
 
 def get_project_root() -> Path:
     """Return the project root directory."""
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[1]
 
 # Ensure we can find the root directory to load the .env file
 root_dir = str(get_project_root())

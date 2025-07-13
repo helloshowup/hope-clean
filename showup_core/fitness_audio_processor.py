@@ -21,7 +21,7 @@ from pathlib import Path
 
 def get_project_root() -> Path:
     """Return the project root directory."""
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[1]
 
 # Import common audio processing utilities
 from .audio_processor import escape_xml

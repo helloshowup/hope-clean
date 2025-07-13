@@ -3,8 +3,8 @@ import json
 import logging
 from typing import Dict, Any
 
-from .showup_core.api_client import generate_with_claude
-from .showup_core.model_config import get_model_provider
+from showup_core.api_client import generate_with_claude
+from showup_core.model_config import get_model_provider
 from .block_library import get_block_type_definitions, validate_plan
 
 logger = logging.getLogger(__name__)
