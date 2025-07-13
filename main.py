@@ -9,6 +9,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.filechooser import FileChooserListView
 from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.clock import Clock
+from kivy.lang import Builder
 import os
 
 kivy.require('2.0.0')
@@ -161,6 +162,7 @@ class FileChooserPopup(BoxLayout):
 class WorkflowApp(App):
     """The main Kivy application class."""
     def build(self):
+        Builder.load_file('workflow_app.kv')
         return WorkflowAppLayout()
 
 if __name__ == '__main__':
