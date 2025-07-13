@@ -11,16 +11,24 @@ from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.clock import Clock
 from kivy.lang import Builder
 import os
+import pandas as pd
 
 kivy.require('2.0.0')
 
 class WorkflowAppLayout(BoxLayout):
     """Main layout for the Workflow Application."""
     csv_path_input = ObjectProperty(None)
+    handbook_checkbox = ObjectProperty(None)
+    handbook_path_input = ObjectProperty(None)
+    output_dir_input = ObjectProperty(None)
+    save_to_input = ObjectProperty(None)
+    learner_profile_preview = ObjectProperty(None)
     status_label = ObjectProperty(None)
     progress_bar = ObjectProperty(None)
     output_display = ObjectProperty(None)
     file_chooser_popup = ObjectProperty(None)
+    _directory_target = ObjectProperty(None, allownone=True)
+    config = ObjectProperty(None)
 
     current_stage_name = StringProperty("Idle")
     current_progress_value = NumericProperty(0)
@@ -39,10 +47,28 @@ class WorkflowAppLayout(BoxLayout):
         ]
         self.current_stage_index = 0
         self.mock_workflow_event = None
+        self.config = {}
 
     def show_file_chooser(self):
         """Opens a file chooser popup to select a CSV file."""
         self.file_chooser_popup = FileChooserPopup(self)
+        self.add_widget(self.file_chooser_popup)
+
+    def show_handbook_chooser(self):
+        """Open a popup to select the student handbook file."""
+        self.file_chooser_popup = HandbookChooserPopup(self)
+        self.add_widget(self.file_chooser_popup)
+
+    def show_output_dir_chooser(self):
+        """Open a popup to select the output directory."""
+        self._directory_target = self.output_dir_input
+        self.file_chooser_popup = DirectoryChooserPopup(self)
+        self.add_widget(self.file_chooser_popup)
+
+    def show_save_to_chooser(self):
+        """Open a popup to select directory for generated content."""
+        self._directory_target = self.save_to_input
+        self.file_chooser_popup = DirectoryChooserPopup(self)
         self.add_widget(self.file_chooser_popup)
 
     def select_csv_file(self, path, filename):
@@ -50,15 +76,53 @@ class WorkflowAppLayout(BoxLayout):
         if filename and filename[0].endswith('.csv'):
             full_path = os.path.join(path, filename[0])
             self.csv_path_input.text = full_path
-            self.remove_widget(self.file_chooser_popup)
-            self.file_chooser_popup = None
+            self.load_learner_profile(full_path)
+            if self.file_chooser_popup:
+                self.remove_widget(self.file_chooser_popup)
+                self.file_chooser_popup = None
         else:
             self.status_label.text = "Please select a .csv file."
 
+    def select_handbook_file(self, path, filename):
+        """Callback to set the selected handbook file."""
+        if filename:
+            full_path = os.path.join(path, filename[0])
+            self.handbook_path_input.text = full_path
+            if self.file_chooser_popup:
+                self.remove_widget(self.file_chooser_popup)
+                self.file_chooser_popup = None
+        else:
+            self.status_label.text = "Please select a file."
+
+    def select_directory(self, selection):
+        """Callback to set the selected directory."""
+        if selection:
+            self._directory_target.text = selection[0]
+            if self.file_chooser_popup:
+                self.remove_widget(self.file_chooser_popup)
+                self.file_chooser_popup = None
+            self._directory_target = None
+        else:
+            self.status_label.text = "Please select a directory."
+
     def cancel_file_chooser(self):
         """Cancels the file chooser popup."""
-        self.remove_widget(self.file_chooser_popup)
-        self.file_chooser_popup = None
+        if self.file_chooser_popup:
+            self.remove_widget(self.file_chooser_popup)
+            self.file_chooser_popup = None
+
+    def load_learner_profile(self, csv_path: str):
+        """Load the learner profile from the first row of the CSV, if present."""
+        try:
+            df = pd.read_csv(csv_path)
+        except Exception as exc:
+            self.status_label.text = f"Failed to read CSV: {exc}"
+            return
+        if 'learner_profile' in df.columns and not df['learner_profile'].isna().all():
+            profile = df['learner_profile'].dropna().iloc[0]
+            self.learner_profile_preview.text = str(profile)
+        else:
+            self.learner_profile_preview.text = ""
 
     def start_workflow(self):
         """Simulates starting the content generation workflow."""
@@ -71,6 +135,15 @@ class WorkflowAppLayout(BoxLayout):
         self.current_progress_value = 0
         self.output_display.text = ""
         self.status_label.text = "Workflow started..."
+
+        self.config = {
+            "csv_path": csv_file,
+            "handbook_path": self.handbook_path_input.text,
+            "use_handbook": bool(self.handbook_checkbox.active),
+            "output_dir": self.output_dir_input.text,
+            "save_to": self.save_to_input.text,
+            "learner_profile": self.learner_profile_preview.text,
+        }
 
         if self.mock_workflow_event:
             self.mock_workflow_event.cancel()
@@ -158,6 +231,16 @@ class FileChooserPopup(BoxLayout):
     def __init__(self, caller, **kwargs):
         super().__init__(**kwargs)
         self.caller = caller
+
+
+class HandbookChooserPopup(FileChooserPopup):
+    """Popup for selecting a handbook file."""
+    pass
+
+
+class DirectoryChooserPopup(FileChooserPopup):
+    """Popup for selecting a directory."""
+    pass
 
 class WorkflowApp(App):
     """The main Kivy application class."""
