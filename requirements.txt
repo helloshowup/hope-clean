@@ -1,6 +1,6 @@
 pandas
 torch
-sentence-transformers
+sentence-transformers>=2.2.2
 claude-api
 python-dotenv
 black
@@ -11,4 +11,9 @@ openai
 anthropic
 kivy
 pyinstaller
+tiktoken
+langchain
+faiss-gpu
+pypdf2
+pdfminer.six
 
