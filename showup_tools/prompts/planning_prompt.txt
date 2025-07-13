@@ -12,7 +12,11 @@ Rationale:
 Target Word Count: {{word_count}}
 
 Guidelines:
-- Start with one `lesson_metadata` block and end with `key_takeaways`.
+- Start with one `lesson_metadata` block.
+- Include occasional `image_placeholder` blocks to break up long stretches of text. Aim to insert one roughly after every 2–3 `explanatory_text` blocks or about every 300 words.
+- These visuals do not need to illustrate a specific concept; their purpose is to provide a rest for the reader's eyes.
+- Ensure no more than three text-heavy blocks appear in a row without a `diagram_placeholder` or generic `image_placeholder`.
+- Do NOT include `learning_objectives` or `key_takeaways` blocks; these will be added automatically later.
 - Other blocks may be repeated as needed to cover the outline.
 
 Outline:

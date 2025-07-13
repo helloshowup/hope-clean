@@ -296,6 +296,31 @@
 {
   "block_type": "diagram_placeholder",
   "concept_to_illustrate": "The cyclical nature of motivation",
+---
+
+**13\. `image_placeholder`**
+
+* **Purpose:** Marks a generic image to break up long sections of text.
+* **Key Components/Attributes:**
+  * `type: "image_placeholder"`
+  * `description: str` (Brief description of the image or visual)
+  * `caption: Optional[str]` (Suggested caption for the image)
+  * `placement_suggestion: Optional[str]` (Where the image might appear, e.g., "after the third paragraph")
+* **Placement Guidelines:** Use after 2–3 explanatory blocks or around every ~300 words to improve readability.
+* **Example Usage:**
+  JSON
+
+```json
+{
+  "block_type": "image_placeholder",
+  "description": "A relevant photo or graphic to break up text",
+  "placement_suggestion": "after the third paragraph"
+}
+```
+
+*
+* **Notes:** These blocks provide visual rest points and do not need to depict a specific concept.
+
   "description": "A diagram showing motivation as a cycle: Initial Excitement -> Motivation Dip (challenges) -> Stable Engagement -> Renewal. Include arrows indicating progression.",
   "caption": "Figure 1: The Cyclical Nature of Motivation",
   "placement_suggestion": "after 'Understanding Motivation Cycles' section"

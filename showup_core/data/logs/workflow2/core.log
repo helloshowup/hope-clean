@@ -4,3 +4,7 @@
 2025-07-11 10:32:39,648 - core - INFO - Initializing ShowupSquared core module
 2025-07-11 10:44:32,057 - core - INFO - Initializing ShowupSquared core module
 2025-07-11 10:23:11,851 - core - INFO - Initializing ShowupSquared core module
+2025-07-13 07:34:31,280 - core - INFO - Initializing ShowupSquared core module
+2025-07-13 07:34:31,281 - core - WARNING - Could not import HTML converter modules: No module named 'showup_core.html_converter'
+2025-07-13 07:34:31,282 - core - WARNING - Could not import utility functions: No module named 'cache_utils'
+2025-07-13 07:34:31,283 - core - INFO - Initializing ShowupSquared core module
