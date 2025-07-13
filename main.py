@@ -6,7 +6,6 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.progressbar import ProgressBar
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.filechooser import FileChooserListView
 from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -14,6 +13,8 @@ import os
 import threading
 import pandas as pd
 import logging
+import tkinter as tk
+from tkinter import filedialog
 
 kivy.require('2.0.0')
 logger = logging.getLogger(__name__)
@@ -29,8 +30,6 @@ class WorkflowAppLayout(BoxLayout):
     status_label = ObjectProperty(None)
     progress_bar = ObjectProperty(None)
     output_display = ObjectProperty(None)
-    file_chooser_popup = ObjectProperty(None)
-    _directory_target = ObjectProperty(None, allownone=True)
     config = ObjectProperty(None)
 
     current_stage_name = StringProperty("Idle")
@@ -53,36 +52,71 @@ class WorkflowAppLayout(BoxLayout):
         self.config = {}
 
     def show_file_chooser(self):
-        """Opens a file chooser popup to select a CSV file."""
-        self.file_chooser_popup = FileChooserPopup(self)
-        self.add_widget(self.file_chooser_popup)
+        """Open a native dialog to select a CSV file."""
+        root = tk.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename(
+            title="Select CSV File",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+        )
+        root.destroy()
+        if file_path:
+            self.csv_path_input.text = file_path
+            self.load_learner_profile(file_path)
+            self.status_label.text = "CSV file selected."
+        else:
+            self.status_label.text = "No CSV file selected."
 
     def show_handbook_chooser(self):
-        """Open a popup to select the reference handbook file."""
-        self.file_chooser_popup = HandbookChooserPopup(self)
-        self.add_widget(self.file_chooser_popup)
+        """Open a native dialog to select the reference handbook file."""
+        root = tk.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename(
+            title="Select Handbook File",
+            filetypes=[("PDF files", "*.pdf"), ("Markdown files", "*.md"), ("All files", "*.*")],
+        )
+        root.destroy()
+        if file_path:
+            if not file_path.lower().endswith((".pdf", ".md")):
+                self.status_label.text = "Unsupported file type. Please select a PDF or Markdown file."
+                return
+            self.handbook_path_input.text = file_path
+            self.config["reference_handbook_path"] = file_path
+            self.config["use_reference_handbook"] = bool(self.handbook_checkbox.active)
+            self.status_label.text = "Handbook file selected."
+        else:
+            self.status_label.text = "No handbook file selected."
 
     def show_output_dir_chooser(self):
-        """Open a popup to select the output directory."""
-        self._directory_target = self.output_dir_input
-        self.file_chooser_popup = DirectoryChooserPopup(self)
-        self.add_widget(self.file_chooser_popup)
+        """Open a native dialog to select the output directory."""
+        root = tk.Tk()
+        root.withdraw()
+        directory = filedialog.askdirectory(title="Select Output Directory")
+        root.destroy()
+        if directory:
+            self.output_dir_input.text = directory
+            self.status_label.text = "Output directory selected."
+        else:
+            self.status_label.text = "No output directory selected."
 
     def show_save_to_chooser(self):
-        """Open a popup to select directory for generated content."""
-        self._directory_target = self.save_to_input
-        self.file_chooser_popup = DirectoryChooserPopup(self)
-        self.add_widget(self.file_chooser_popup)
+        """Open a native dialog to select directory for generated content."""
+        root = tk.Tk()
+        root.withdraw()
+        directory = filedialog.askdirectory(title="Save Generated Content To")
+        root.destroy()
+        if directory:
+            self.save_to_input.text = directory
+            self.status_label.text = "Save directory selected."
+        else:
+            self.status_label.text = "No save directory selected."
 
     def select_csv_file(self, path, filename):
-        """Callback for file chooser to set the selected CSV path."""
+        """Set the selected CSV path. Intended for testing."""
         if filename and filename[0].endswith('.csv'):
             full_path = os.path.join(path, filename[0])
             self.csv_path_input.text = full_path
             self.load_learner_profile(full_path)
-            if self.file_chooser_popup:
-                self.remove_widget(self.file_chooser_popup)
-                self.file_chooser_popup = None
         else:
             self.status_label.text = "Please select a .csv file."
 
@@ -96,22 +130,8 @@ class WorkflowAppLayout(BoxLayout):
             self.handbook_path_input.text = full_path
             self.config['reference_handbook_path'] = full_path
             self.config['use_reference_handbook'] = bool(self.handbook_checkbox.active)
-            if self.file_chooser_popup:
-                self.remove_widget(self.file_chooser_popup)
-                self.file_chooser_popup = None
         else:
             self.status_label.text = "Please select a file."
-
-    def select_directory(self, selection):
-        """Callback to set the selected directory."""
-        if selection:
-            self._directory_target.text = selection[0]
-            if self.file_chooser_popup:
-                self.remove_widget(self.file_chooser_popup)
-                self.file_chooser_popup = None
-            self._directory_target = None
-        else:
-            self.status_label.text = "Please select a directory."
 
     def update_handbook_usage(self, active):
         """Update config when handbook usage checkbox changes."""
@@ -119,11 +139,6 @@ class WorkflowAppLayout(BoxLayout):
         if not active:
             self.config['reference_handbook_path'] = ''
 
-    def cancel_file_chooser(self):
-        """Cancels the file chooser popup."""
-        if self.file_chooser_popup:
-            self.remove_widget(self.file_chooser_popup)
-            self.file_chooser_popup = None
 
     def update_handbook_progress(self, message: str, percent: float):
         """Update status and progress bar from background handbook indexing."""
@@ -284,23 +299,6 @@ class WorkflowAppLayout(BoxLayout):
             "- **Pattern:** 'I hope this helps!', **Category:** 'Common AI Phrase', **Index:** 900"
         )
 
-class FileChooserPopup(BoxLayout):
-    """A simple file chooser popup for selecting CSV files."""
-    caller = ObjectProperty(None)
-
-    def __init__(self, caller, **kwargs):
-        super().__init__(**kwargs)
-        self.caller = caller
-
-
-class HandbookChooserPopup(FileChooserPopup):
-    """Popup for selecting a handbook file."""
-    pass
-
-
-class DirectoryChooserPopup(FileChooserPopup):
-    """Popup for selecting a directory."""
-    pass
 
 class WorkflowApp(App):
     """The main Kivy application class."""

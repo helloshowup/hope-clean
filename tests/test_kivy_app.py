@@ -1,6 +1,7 @@
 import unittest
 import os
 import sys
+from unittest.mock import patch
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if root_dir not in sys.path:
@@ -33,12 +34,12 @@ class TestWorkflowApp(unittest.TestCase):
             root_widget.select_csv_file(tmpdir, ["sample.csv"])
             self.assertEqual(root_widget.learner_profile_preview.text, "Profile text")
 
-    def test_file_chooser_uses_app_user_data_dir(self):
+    def test_file_chooser_updates_csv_path(self):
         app = WorkflowApp()
         root_widget = app.build()
-        root_widget.show_file_chooser()
-        chooser_path = root_widget.file_chooser_popup.ids.file_chooser.path
-        self.assertEqual(chooser_path, app.user_data_dir)
+        with patch('tkinter.filedialog.askopenfilename', return_value='/tmp/test.csv'):
+            root_widget.show_file_chooser()
+        self.assertEqual(root_widget.csv_path_input.text, '/tmp/test.csv')
 
     def test_handbook_selection_updates_config(self):
         app = WorkflowApp()
