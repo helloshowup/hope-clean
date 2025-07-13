@@ -32,6 +32,6 @@ def get_api_storage_path(module_name: str, filename: str) -> Path:
         >>> with open(path, 'w') as f:
         >>>     json.dump(response_data, f)
     """
-    root = Path(__file__).parents[2] / "data" / "stored_api_calls" / module_name
+    root = Path(__file__).parents[1] / "data" / "stored_api_calls" / module_name
     root.mkdir(parents=True, exist_ok=True)
     return root / filename

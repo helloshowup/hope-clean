@@ -12,7 +12,7 @@ from pathlib import Path
 
 def get_project_root() -> Path:
     """Return the project root directory."""
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[1]
 
 # Calculate BASE_DIR relative to this module's location
 # Since this file is in ShowupSquaredV3/core, we need to go up one level to reach the project root
