@@ -15,13 +15,13 @@ from main import WorkflowApp
 
 class TestWorkflowApp(unittest.TestCase):
     def setUp(self):
-        dummy_pkg = types.ModuleType('simplified_workflow')
-        dummy_mod = types.ModuleType('simplified_workflow.workflow')
+        dummy_pkg = types.ModuleType('showup_tools')
+        dummy_mod = types.ModuleType('showup_tools.workflow')
 
         def dummy_run_workflow(*a, **k):
             return {'status': 'ok'}
 
-        dummy_run_workflow.__module__ = 'simplified_workflow.workflow'
+        dummy_run_workflow.__module__ = 'showup_tools.workflow'
 
         def dummy_setup_logging(*a, **k):
             return 'test.log'
@@ -30,15 +30,15 @@ class TestWorkflowApp(unittest.TestCase):
         dummy_mod.setup_logging = dummy_setup_logging
         dummy_pkg.run_workflow = dummy_run_workflow
         dummy_pkg.setup_logging = dummy_setup_logging
-        sys.modules['simplified_workflow'] = dummy_pkg
-        sys.modules['simplified_workflow.workflow'] = dummy_mod
+        sys.modules['showup_tools'] = dummy_pkg
+        sys.modules['showup_tools.workflow'] = dummy_mod
 
         self.app = WorkflowApp()
         self.root_widget = self.app.build()
 
     def tearDown(self):
-        sys.modules.pop('simplified_workflow', None)
-        sys.modules.pop('simplified_workflow.workflow', None)
+        sys.modules.pop('showup_tools', None)
+        sys.modules.pop('showup_tools.workflow', None)
 
     def test_build_has_inputs(self):
         self.assertIsNotNone(self.app.csv_path_input)
@@ -59,15 +59,15 @@ class TestWorkflowApp(unittest.TestCase):
         self.assertEqual(self.app.progress_value, 25)
         self.assertIn('25%', self.app.status_message)
 
-    def test_start_workflow_invokes_simplified_run(self):
+    def test_start_workflow_invokes_workflow_run(self):
         self.app.csv_path_input.text = 'data/sample_input.csv'
         self.app.handbook_path_input.text = ''
         self.app.course_name_input.text = 'Course'
         self.app.learner_profile_input.text = 'Learner'
 
-        # ensure the imported run_workflow comes from simplified_workflow
+        # ensure the imported run_workflow comes from showup_tools
         import main
-        self.assertEqual(main.run_workflow.__module__, 'simplified_workflow.workflow')
+        self.assertEqual(main.run_workflow.__module__, 'showup_tools.workflow')
 
         class DummyThread:
             def __init__(self, target, args):
