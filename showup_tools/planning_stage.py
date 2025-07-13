@@ -1,11 +1,11 @@
 import os
-import json
 import logging
 import asyncio
 from typing import Dict, Any
 
 from .showup_core.api_client import generate_with_claude
 from .showup_core.model_config import get_model_provider
+from .block_library import get_block_type_definitions, validate_plan
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,11 @@ async def run_planning_stage(
     content_outline = new_item.get("Content Outline") or new_item.get(
         "content_outline", ""
     )
-    prompt = prompt_template.replace('{{content_outline}}', content_outline)
+    block_defs = get_block_type_definitions()
+    prompt = (
+        prompt_template.replace('{{content_outline}}', content_outline)
+        .replace('{{block_library}}', block_defs)
+    )
 
     model_id = config.get('model_id', 'claude-3-haiku-20240307')
     provider = get_model_provider(model_id)
@@ -60,7 +64,7 @@ async def run_planning_stage(
                 task_type='planning'
             )
 
-        new_item["initial_plan"] = json.loads(ai_response)
+        new_item["initial_plan"] = validate_plan(ai_response).model_dump(exclude_none=True)
         new_item["status"] = "PLAN_GENERATED"
     except Exception as e:
         logger.error(f"Planning stage failed: {e}")
