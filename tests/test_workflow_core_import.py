@@ -32,13 +32,13 @@ def add_stubs():
     import importlib
     from pathlib import Path
 
-    # Ensure the stub package directory is on sys.path
     kivy_stub_path = Path(__file__).resolve().parent / 'kivy_stub'
-    if str(kivy_stub_path) not in sys.path:
-        sys.path.insert(0, str(kivy_stub_path))
-
-    # Base kivy stub package
-    kivy_stub = importlib.import_module('kivy_stub')
+    spec = importlib.util.spec_from_file_location(
+        'kivy_stub', kivy_stub_path / '__init__.py',
+        submodule_search_locations=[str(kivy_stub_path)]
+    )
+    kivy_stub = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(kivy_stub)
     sys.modules['kivy'] = kivy_stub
 
     # Core subpackages/modules referenced by main.py
@@ -83,6 +83,7 @@ def clear_stubs():
         sys.modules.pop(name, None)
 
 
+
 def test_main_executes_with_standard_path(tmp_path):
     root, tools_dir = setup_temp_environment(tmp_path)
     main_src = Path(__file__).resolve().parents[1] / 'main.py'
@@ -95,7 +96,20 @@ def test_main_executes_with_standard_path(tmp_path):
 
     add_stubs()
 
-    sys.path.insert(0, str(root))
+    # Load the temporary workflow package without modifying sys.path
+    pkg_spec = importlib.util.spec_from_file_location(
+        'showup_tools', tools_dir / '__init__.py', submodule_search_locations=[str(tools_dir)]
+    )
+    pkg = importlib.util.module_from_spec(pkg_spec)
+    sys.modules['showup_tools'] = pkg
+    pkg_spec.loader.exec_module(pkg)
+
+    wf_spec = importlib.util.spec_from_file_location('showup_tools.workflow', tools_dir / 'workflow.py')
+    wf = importlib.util.module_from_spec(wf_spec)
+    sys.modules['showup_tools.workflow'] = wf
+    wf_spec.loader.exec_module(wf)
+
+
     try:
         loader = importlib.machinery.SourceFileLoader('main', str(root / 'main.py'))
         spec = importlib.util.spec_from_loader(loader.name, loader)
@@ -105,8 +119,6 @@ def test_main_executes_with_standard_path(tmp_path):
         wf = importlib.import_module('showup_tools.workflow')
         assert wf.run_workflow() == {'status': 'ok'}
     finally:
-        if str(root) in sys.path:
-            sys.path.remove(str(root))
         clear_stubs()
         sys.modules.pop('showup_tools.workflow', None)
         if orig_workflow is not None:
