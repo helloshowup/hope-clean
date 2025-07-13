@@ -7,4 +7,7 @@ black
 flake8
 isort
 pydantic>=2
+openai
+anthropic
+kivy
 
