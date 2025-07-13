@@ -1,4 +1,4 @@
-Module,Lesson,Step number,Step title,Template Type,What is the rationale for this step,Content Outline
-M1,Lesson 1,1,Introduction to Photography,Article,Provide background on the course,"This step outlines the goals and expectations for students."
-M1,Lesson 1,2,Camera Basics,Video,Build foundational knowledge,"Cover camera parts, settings, and basic operation."
-M1,Lesson 2,1,Lighting Fundamentals,Article,Explain the importance of lighting,"Discuss natural vs. artificial light and how to use both effectively."
+Module,Lesson,Step title,Template Type,rationale,Content Outline,learner_profile,word_count
+M1,Lesson 1,Introduction to Photography,Article,Provide background on the course,This step outlines the goals and expectations for students.,,
+M1,Lesson 1,Camera Basics,Video,Build foundational knowledge,"Cover camera parts, settings, and basic operation.",,
+M1,Lesson 2,Lighting Fundamentals,Article,Explain the importance of lighting,Discuss natural vs. artificial light and how to use both effectively.,,
