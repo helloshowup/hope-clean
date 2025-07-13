@@ -20,11 +20,67 @@ def setup_temp_environment(tmp_path: Path):
 
 
 def add_stubs():
-    pass
+    """Install kivy stub modules into ``sys.modules``.
+
+    ``main.py`` imports several submodules from the real ``kivy`` package. The
+    test environment does not have Kivy installed, so we provide lightweight
+    stand-ins located under ``tests.kivy_stub``.  This function registers the
+    stub package and all required submodules under the names that ``main.py``
+    expects so import statements succeed without the real dependency.
+    """
+
+    import importlib
+    from pathlib import Path
+
+    # Ensure the stub package directory is on sys.path
+    kivy_stub_path = Path(__file__).resolve().parent / 'kivy_stub'
+    if str(kivy_stub_path) not in sys.path:
+        sys.path.insert(0, str(kivy_stub_path))
+
+    # Base kivy stub package
+    kivy_stub = importlib.import_module('kivy_stub')
+    sys.modules['kivy'] = kivy_stub
+
+    # Core subpackages/modules referenced by main.py
+    mappings = {
+        'kivy.app': 'kivy_stub.app',
+        'kivy.clock': 'kivy_stub.clock',
+        'kivy.properties': 'kivy_stub.properties',
+        'kivy.uix': 'kivy_stub.uix',
+        'kivy.uix.boxlayout': 'kivy_stub.uix.boxlayout',
+        'kivy.uix.label': 'kivy_stub.uix.label',
+        'kivy.uix.textinput': 'kivy_stub.uix.textinput',
+        'kivy.uix.button': 'kivy_stub.uix.button',
+        'kivy.uix.progressbar': 'kivy_stub.uix.progressbar',
+        # Additional stubs that exist in the stub package
+        'kivy.uix.filechooser': 'kivy_stub.uix.filechooser',
+        'kivy.uix.popup': 'kivy_stub.uix.popup',
+    }
+
+    for target, source in mappings.items():
+        sys.modules[target] = importlib.import_module(source)
 
 
 def clear_stubs():
-    pass
+    """Remove any stub modules that were inserted by :func:`add_stubs`."""
+
+    prefixes = [
+        'kivy',
+        'kivy.app',
+        'kivy.clock',
+        'kivy.properties',
+        'kivy.uix',
+        'kivy.uix.boxlayout',
+        'kivy.uix.label',
+        'kivy.uix.textinput',
+        'kivy.uix.button',
+        'kivy.uix.progressbar',
+        'kivy.uix.filechooser',
+        'kivy.uix.popup',
+    ]
+
+    for name in prefixes:
+        sys.modules.pop(name, None)
 
 
 def test_main_adds_project_root(tmp_path):
