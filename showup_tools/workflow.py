@@ -6,6 +6,16 @@ This module orchestrates the entire workflow, from reading the CSV file to savin
 
 import logging
 import os
+import sys
+
+# --- START OF CRITICAL FIX ---
+# Add the project root to the Python path to allow direct import of showup_core
+# This assumes showup_tools is directly in the project root, and showup_core is also at the root.
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+# --- END OF CRITICAL FIX ---
+
 import datetime
 import asyncio
 from typing import Dict, List, Any, Optional
@@ -24,15 +34,9 @@ from .ai_detector import run_ai_detection_stage
 from .planning_stage import run_planning_stage
 from .refinement_stage import run_refinement_stage
 from .learning_sections import generate_lo_and_kt_from_content
+
 from .markdown_utils import insert_sections_in_markdown
 from .constants import EXCEL_CLARIFICATION
-import sys
-import os
-
-# Add the project root to the Python path so showup_core can be imported
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
 
 from showup_core.api_client import generate_with_claude
 # Import RAG system components
