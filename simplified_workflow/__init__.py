@@ -9,5 +9,6 @@ The workflow is designed to be simple, maintainable, and focused on personal uti
 """
 
 from .workflow import main as run_workflow, setup_logging
+from . import rag_system, learning_sections, markdown_utils
 
-__all__ = ['run_workflow', 'setup_logging']
+__all__ = ['run_workflow', 'setup_logging', 'rag_system', 'learning_sections', 'markdown_utils']

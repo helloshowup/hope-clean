@@ -10,30 +10,35 @@ if root_dir not in sys.path:
 os.environ['KIVY_NO_ARGS'] = '1'
 
 import types
-dummy_pkg = types.ModuleType('simplified_workflow')
-dummy_mod = types.ModuleType('simplified_workflow.workflow')
-
-def dummy_run_workflow(*a, **k):
-    return {'status': 'ok'}
-
-dummy_run_workflow.__module__ = 'simplified_workflow.workflow'
-
-def dummy_setup_logging(*a, **k):
-    return 'test.log'
-
-dummy_mod.run_workflow = dummy_run_workflow
-dummy_mod.setup_logging = dummy_setup_logging
-dummy_pkg.run_workflow = dummy_run_workflow
-dummy_pkg.setup_logging = dummy_setup_logging
-sys.modules['simplified_workflow'] = dummy_pkg
-sys.modules['simplified_workflow.workflow'] = dummy_mod
 
 from main import WorkflowApp
 
 class TestWorkflowApp(unittest.TestCase):
     def setUp(self):
+        dummy_pkg = types.ModuleType('simplified_workflow')
+        dummy_mod = types.ModuleType('simplified_workflow.workflow')
+
+        def dummy_run_workflow(*a, **k):
+            return {'status': 'ok'}
+
+        dummy_run_workflow.__module__ = 'simplified_workflow.workflow'
+
+        def dummy_setup_logging(*a, **k):
+            return 'test.log'
+
+        dummy_mod.run_workflow = dummy_run_workflow
+        dummy_mod.setup_logging = dummy_setup_logging
+        dummy_pkg.run_workflow = dummy_run_workflow
+        dummy_pkg.setup_logging = dummy_setup_logging
+        sys.modules['simplified_workflow'] = dummy_pkg
+        sys.modules['simplified_workflow.workflow'] = dummy_mod
+
         self.app = WorkflowApp()
         self.root_widget = self.app.build()
+
+    def tearDown(self):
+        sys.modules.pop('simplified_workflow', None)
+        sys.modules.pop('simplified_workflow.workflow', None)
 
     def test_build_has_inputs(self):
         self.assertIsNotNone(self.app.csv_path_input)

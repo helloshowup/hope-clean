@@ -21,8 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import our RAG components (with relative imports for standalone script)
-from showup_tools.simplified_app.rag_system.token_counter import count_tokens
-from showup_tools.simplified_app.rag_system.textbook_vector_db import vector_db
+from .token_counter import count_tokens
+from .textbook_vector_db import vector_db
 
 
 async def analyze_token_savings(handbook_path, query):

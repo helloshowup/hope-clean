@@ -10,8 +10,8 @@ for p in paths:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from showup_tools.markdown_utils import insert_sections_in_markdown
-from showup_tools.learning_sections import generate_lo_and_kt_from_content
+from simplified_workflow.markdown_utils import insert_sections_in_markdown
+from simplified_workflow.learning_sections import generate_lo_and_kt_from_content
 
 class TestLearningSections(unittest.TestCase):
     def test_insert_after_intro(self):
@@ -24,7 +24,7 @@ class TestLearningSections(unittest.TestCase):
     def test_generate_learning_sections(self):
         prompt = "Prompt {{content}}"
         with patch('builtins.open', mock_open(read_data=prompt)):
-            with patch('showup_tools.learning_sections.generate_with_claude') as mock_gen:
+            with patch('simplified_workflow.learning_sections.generate_with_claude') as mock_gen:
                 mock_gen.return_value = "## Learning Objectives\n- O\n## Key Takeaways\n- K"
                 lo, kt = asyncio.run(generate_lo_and_kt_from_content('x', model='m'))
         self.assertEqual(lo, "## Learning Objectives\n- O")

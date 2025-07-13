@@ -24,17 +24,17 @@ from .content_reviewer import review_content
 from .ai_detector import run_ai_detection_stage
 from .planning_stage import run_planning_stage
 from .refinement_stage import run_refinement_stage
-from .learning_sections import generate_lo_and_kt_from_content
+from simplified_workflow.learning_sections import generate_lo_and_kt_from_content
 
-from .markdown_utils import insert_sections_in_markdown
+from simplified_workflow.markdown_utils import insert_sections_in_markdown
 from .constants import EXCEL_CLARIFICATION
 
 from showup_core.api_client import generate_with_claude
 # Import RAG system components
-from showup_tools.simplified_app.rag_system.token_counter import count_tokens
-from showup_tools.simplified_app.rag_system.cache_manager import cache
-from showup_tools.simplified_app.rag_system.textbook_vector_db import get_vector_db
-from showup_tools.simplified_app.rag_system.ingest_textbook import extract_text_from_file
+from simplified_workflow.rag_system.token_counter import count_tokens
+from simplified_workflow.rag_system.cache_manager import cache
+from simplified_workflow.rag_system.textbook_vector_db import get_vector_db
+from simplified_workflow.rag_system.ingest_textbook import extract_text_from_file
 import hashlib
 # Batch processing functionality removed as per requirement
 from .output_manager import save_as_markdown, create_output_directory, save_generation_summary, save_workflow_log
