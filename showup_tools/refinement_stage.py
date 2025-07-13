@@ -5,12 +5,15 @@ from typing import Dict, Any
 
 from .showup_core.api_client import generate_with_claude
 from .showup_core.model_config import get_model_provider
+from .block_library import get_block_type_definitions, validate_plan
 
 logger = logging.getLogger(__name__)
 
 PROMPTS_DIR = os.path.join(os.path.dirname(__file__), 'prompts')
 CRITIQUE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_critique_prompt.txt")
 REFINE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_refine_prompt.txt")
+LEGACY_CRITIQUE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_critique_prompt_legacy.txt")
+LEGACY_REFINE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_refine_prompt_legacy.txt")
 
 async def run_refinement_stage(
     row_data_item: Dict[str, Any], config: Dict[str, Any]
@@ -20,8 +23,16 @@ async def run_refinement_stage(
 
     new_item = row_data_item.copy()
 
-    critique_path = config.get("critique_prompt_path", CRITIQUE_PROMPT_PATH)
-    refine_path = config.get("refine_prompt_path", REFINE_PROMPT_PATH)
+    use_dynamic = config.get("use_dynamic_blocks", True)
+
+    critique_path = config.get(
+        "critique_prompt_path",
+        CRITIQUE_PROMPT_PATH if use_dynamic else LEGACY_CRITIQUE_PROMPT_PATH,
+    )
+    refine_path = config.get(
+        "refine_prompt_path",
+        REFINE_PROMPT_PATH if use_dynamic else LEGACY_REFINE_PROMPT_PATH,
+    )
 
     try:
         with open(critique_path, "r", encoding="utf-8") as f:
@@ -40,8 +51,15 @@ async def run_refinement_stage(
     initial_plan_obj = new_item.get("initial_plan", {})
     initial_plan_str = json.dumps(initial_plan_obj, ensure_ascii=False)
 
+    if use_dynamic:
+        block_defs = get_block_type_definitions()
+    else:
+        block_defs = None
+
     critique_prompt = critique_template.replace('{{learner_profile}}', learner_profile)
     critique_prompt = critique_prompt.replace('{{initial_plan}}', initial_plan_str)
+    if block_defs is not None:
+        critique_prompt = critique_prompt.replace('{{block_library}}', block_defs)
 
     model_id = config.get('model_id', 'claude-3-haiku-20240307')
     provider = get_model_provider(model_id)
@@ -70,6 +88,8 @@ async def run_refinement_stage(
         refine_prompt = refine_template.replace('{{learner_profile}}', learner_profile)
         refine_prompt = refine_prompt.replace('{{initial_plan}}', initial_plan_str)
         refine_prompt = refine_prompt.replace('{{critique}}', critique)
+        if block_defs is not None:
+            refine_prompt = refine_prompt.replace('{{block_library}}', block_defs)
 
         if provider == 'openai':
             response2 = client.chat.completions.create(
@@ -88,7 +108,10 @@ async def run_refinement_stage(
                 task_type='plan_refine'
             )
 
-        new_item["final_plan"] = json.loads(revised_plan_text)
+        if use_dynamic:
+            new_item["final_plan"] = validate_plan(revised_plan_text).model_dump(exclude_none=True)
+        else:
+            new_item["final_plan"] = json.loads(revised_plan_text)
         new_item["status"] = "PLAN_FINALIZED"
     except Exception as e:
         logger.error(f"Refinement stage failed: {e}")

@@ -37,13 +37,63 @@ class TestWorkflowIntegration(unittest.TestCase):
 
         def fake_plan(d, cfg):
             nd = d.copy()
-            nd["initial_plan"] = {"plan": "p"}
+            nd["initial_plan"] = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
             nd["status"] = "PLAN_GENERATED"
             return nd
 
         def fake_refine(d, cfg):
             nd = d.copy()
-            nd["final_plan"] = {"plan": "fp"}
+            nd["final_plan"] = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
+            nd["status"] = "PLAN_FINALIZED"
+            return nd
+
+        with patch("showup_tools.workflow.run_planning_stage", side_effect=fake_plan), \
+             patch("showup_tools.workflow.run_refinement_stage", side_effect=fake_refine), \
+             patch("showup_tools.workflow.generate_three_versions_from_plan", return_value=["a", "b", "c"]), \
+             patch("showup_tools.workflow.compare_and_combine", return_value=("best", "exp")), \
+             patch("showup_tools.workflow.review_content", return_value=("reviewed", "sum")), \
+             patch("showup_tools.workflow.run_ai_detection_stage", return_value=[{"pattern": "x"}]), \
+             patch("showup_tools.workflow.save_as_markdown", return_value="out.md"):
+            phases = ["plan", "refine", "generate", "compare", "review", "finalize"]
+            for ph in phases:
+                item = asyncio.run(
+                    process_row_for_phase(item, ph, csv_rows, ".", "profile", "id", ui)
+                )
+
+        self.assertEqual(item["status"], "WORKFLOW_COMPLETE")
+        self.assertEqual(item["final_content_path"], "out.md")
+        self.assertEqual(item["ai_detection_flags"], [{"pattern": "x"}])
+
+    def test_full_sequence_legacy(self):
+        row = {
+            "Module": "M1",
+            "Lesson": "L1",
+            "Step number": "1",
+            "Step title": "S",
+            "Content Outline": "outline",
+        }
+        result = {"log_entries": []}
+        item = {
+            "row_index": 0,
+            "row": row,
+            "variables": {},
+            "template": "",
+            "context": {},
+            "result": result,
+            "add_log_entry": lambda *a, **k: None,
+        }
+        csv_rows = [row]
+        ui = {"use_dynamic_blocks": False}
+
+        def fake_plan(d, cfg):
+            nd = d.copy()
+            nd["initial_plan"] = {"video_title": "t", "scenes": []}
+            nd["status"] = "PLAN_GENERATED"
+            return nd
+
+        def fake_refine(d, cfg):
+            nd = d.copy()
+            nd["final_plan"] = {"video_title": "t", "scenes": []}
             nd["status"] = "PLAN_FINALIZED"
             return nd
 

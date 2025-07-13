@@ -6,3 +6,5 @@ python-dotenv
 black
 flake8
 isort
+pydantic>=2
+

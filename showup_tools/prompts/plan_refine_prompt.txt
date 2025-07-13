@@ -1,4 +1,7 @@
-You are an expert instructional designer. Using the learner profile and critique, improve the initial plan.
+You are an expert instructional designer. Using the learner profile and critique, improve the initial plan. Use only block types from the library and ensure the plan begins with `lesson_metadata` and ends with `key_takeaways`.
+
+Block Library:
+{{block_library}}
 
 Learner Profile:
 {{learner_profile}}
@@ -9,4 +12,5 @@ Initial Plan:
 Critique:
 {{critique}}
 
-Respond with a JSON object representing the revised plan.
+Respond only with JSON:
+{"content_blocks": [{...}]}

@@ -3,7 +3,8 @@ import asyncio
 import importlib
 import sys
 import os
-from unittest.mock import patch, MagicMock
+import json
+from unittest.mock import patch, MagicMock, mock_open
 
 # setup paths similar to other tests
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -20,18 +21,20 @@ from showup_tools.refinement_stage import run_refinement_stage
 
 class TestRefinementStage(unittest.TestCase):
     def test_refinement_with_claude(self):
-        row = {"initial_plan": {"plan": "orig"}, "learner_profile": "profile"}
+        good_plan = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
+        row = {"initial_plan": good_plan, "learner_profile": "profile"}
         config = {"model_id": "claude-3-haiku-20240307"}
         with patch('showup_tools.refinement_stage.generate_with_claude') as mock_claude:
-            mock_claude.side_effect = ['critique', '{"plan": "improved"}']
+            mock_claude.side_effect = ['critique', json.dumps(good_plan)]
             result = asyncio.run(run_refinement_stage(row, config))
         self.assertEqual(result['status'], 'PLAN_FINALIZED')
         self.assertEqual(result['plan_critique'], 'critique')
-        self.assertEqual(result['final_plan']['plan'], 'improved')
+        self.assertEqual(result['final_plan'], good_plan)
         self.assertEqual(mock_claude.call_count, 2)
 
     def test_refinement_with_openai(self):
-        row = {"initial_plan": {"plan": "orig"}, "learner_profile": "profile"}
+        good_plan = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
+        row = {"initial_plan": good_plan, "learner_profile": "profile"}
         config = {"model_id": "gpt-4", "openai_api_key": "x"}
 
         mock_resp1 = MagicMock()
@@ -41,7 +44,7 @@ class TestRefinementStage(unittest.TestCase):
 
         mock_resp2 = MagicMock()
         mock_choice2 = MagicMock()
-        mock_choice2.message.content = '{"plan": "improved"}'
+        mock_choice2.message.content = json.dumps(good_plan)
         mock_resp2.choices = [mock_choice2]
 
         with patch('openai.OpenAI') as mock_openai:
@@ -51,8 +54,28 @@ class TestRefinementStage(unittest.TestCase):
 
         self.assertEqual(result['status'], 'PLAN_FINALIZED')
         self.assertEqual(result['plan_critique'], 'critique')
-        self.assertEqual(result['final_plan']['plan'], 'improved')
+        self.assertEqual(result['final_plan'], good_plan)
         mock_openai.assert_called()
+
+    def test_refinement_validation_error(self):
+        row = {"initial_plan": {"content_blocks": []}, "learner_profile": "profile"}
+        config = {"model_id": "claude-3-haiku-20240307"}
+        with patch('showup_tools.refinement_stage.generate_with_claude') as mock_claude:
+            mock_claude.side_effect = ['critique', '{"bad": true}']
+            result = asyncio.run(run_refinement_stage(row, config))
+        self.assertEqual(result['status'], 'PLAN_FAILED')
+        self.assertIn('bad', result.get('error', ''))
+
+    def test_refinement_legacy(self):
+        legacy_plan = {"video_title": "t", "scenes": []}
+        row = {"initial_plan": legacy_plan, "learner_profile": "profile"}
+        config = {"model_id": "claude-3-haiku-20240307", "use_dynamic_blocks": False}
+        with patch('showup_tools.refinement_stage.generate_with_claude') as mock_claude:
+            mock_claude.side_effect = ['critique', json.dumps(legacy_plan)]
+            with patch('builtins.open', side_effect=[mock_open(read_data='c').return_value, mock_open(read_data='r').return_value]):
+                result = asyncio.run(run_refinement_stage(row, config))
+        self.assertEqual(result['status'], 'PLAN_FINALIZED')
+        self.assertEqual(result['final_plan'], legacy_plan)
 
 if __name__ == '__main__':
     unittest.main()
