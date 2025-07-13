@@ -21,6 +21,22 @@ from .constants import EXCEL_CLARIFICATION
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_generator")
 
+# Simple block-specific instructions used when generating content
+BLOCK_INSTRUCTIONS = {
+    "lesson_metadata": "Write a header using the title and optional subtitle.",
+    "learning_objectives": "Present the objectives as a bulleted list.",
+    "introduction": "Compose an engaging introduction based on the content_summary and optional hook_suggestion.",
+    "section_heading": "Output an H{level} heading titled '{title}'.",
+    "explanatory_text": "Explain the topic covering the key_points. Apply tone_suggestion if provided.",
+    "list_block": "Create a {list_type} list titled '{heading}' expanding each item in items_summary.",
+    "example_analysis": "Describe the example, initial_statement, improved_version_summary and explanation_points.",
+    "process_steps": "Outline the process with the given steps, using introductory_text if present.",
+    "reflection_prompt": "Provide the questions as a reflection exercise with the prompt_heading.",
+    "key_takeaways": "Summarize the key points as bullet list.",
+    "diagram_placeholder": "Give a detailed textual description for the diagram concept_to_illustrate.",
+    "flowchart_placeholder": "Give a detailed textual description for the flowchart process_name.",
+}
+
 async def generate_content(variables: Dict[str, str], template: str, settings: Optional[Dict[str, Any]] = None) -> str:
     """
     Generate content using Claude API.
@@ -162,7 +178,7 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
             raise RuntimeError(f"Error during asynchronous operation: {error_msg}")
 
 async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_settings: Optional[Dict[str, Any]] = None) -> List[str]:
-    """Generate three script versions from a finalized plan."""
+    """Generate three content versions from a finalized plan using block-by-block prompts."""
 
     if ui_settings is None:
         ui_settings = {}
@@ -175,38 +191,41 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
         logger.error(f"Generation prompt not found: {prompt_path}")
         raise
 
-    prompt = prompt_template.replace("{{final_plan}}", json.dumps(final_plan, ensure_ascii=False))
-
     max_tokens = ui_settings.get("generation_settings", {}).get("max_tokens", 4000)
     freq_pen = ui_settings.get("generation_settings", {}).get("frequency_penalty", 0.0)
     pres_pen = ui_settings.get("generation_settings", {}).get("presence_penalty", 0.0)
     model = ui_settings.get("initial_generation_model", ui_settings.get("selected_model", "claude-3-haiku-20240307"))
+    total_words = ui_settings.get("generation_settings", {}).get("word_count", 500)
+
+    content_blocks = final_plan.get("content_blocks", [])
+    if not isinstance(content_blocks, list):
+        raise ValueError("final_plan must contain content_blocks list")
+
+    per_block_words = max(1, total_words // max(len(content_blocks), 1))
+
+    async def generate_version(temp: float) -> str:
+        parts = []
+        for block in content_blocks:
+            instruction = BLOCK_INSTRUCTIONS.get(block.get("block_type", ""), "Expand this block into lesson content.")
+            prompt = (
+                prompt_template.replace("{{block}}", json.dumps(block, ensure_ascii=False))
+                .replace("{{instruction}}", instruction.format(**block))
+                .replace("{{word_count}}", str(per_block_words))
+            )
+            result = await generate_with_claude(
+                prompt=prompt,
+                max_tokens=max_tokens,
+                temperature=temp,
+                model=model,
+                frequency_penalty=freq_pen,
+                presence_penalty=pres_pen,
+                task_type="content_generation",
+            )
+            parts.append(result.strip())
+        return "\n\n".join(parts)
 
     temperatures = [0.3, 0.5, 1.0]
-
-    # Build individual prompts to encourage diversity
-    note = "\n\nNOTE: Provide a distinctly different take for the next version."
-    prompts = [prompt + note * i for i in range(len(temperatures))]
-
-    tasks = []
-    for idx, (temp, version_prompt) in enumerate(zip(temperatures, prompts)):
-        logger.info(
-            f"Generating version {idx+1} with temperature {temp} using model {model}"
-        )
-        tasks.append(
-            asyncio.create_task(
-                generate_with_claude(
-                    prompt=version_prompt,
-                    max_tokens=max_tokens,
-                    temperature=temp,
-                    model=model,
-                    frequency_penalty=freq_pen,
-                    presence_penalty=pres_pen,
-                    task_type="content_generation",
-                )
-            )
-        )
-
+    tasks = [asyncio.create_task(generate_version(t)) for t in temperatures]
     versions = await asyncio.gather(*tasks)
 
     logger.info("Completed generation of all three versions from plan")

@@ -37,13 +37,13 @@ class TestWorkflowIntegration(unittest.TestCase):
 
         def fake_plan(d, cfg):
             nd = d.copy()
-            nd["initial_plan"] = {"plan": "p"}
+            nd["initial_plan"] = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
             nd["status"] = "PLAN_GENERATED"
             return nd
 
         def fake_refine(d, cfg):
             nd = d.copy()
-            nd["final_plan"] = {"plan": "fp"}
+            nd["final_plan"] = {"content_blocks": [{"block_type": "lesson_metadata", "title": "t", "module_id": "m"}]}
             nd["status"] = "PLAN_FINALIZED"
             return nd
 

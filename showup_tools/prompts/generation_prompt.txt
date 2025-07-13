@@ -1,2 +1,11 @@
-Write an educational video script based on the following finalized plan:
-{{final_plan}}
+You are generating lesson content block by block.
+The entire lesson should be roughly {{word_count}} words in total.
+Use Markdown formatting when appropriate.
+
+Block details:
+{{block}}
+
+Instruction:
+{{instruction}}
+
+Write only the content for this block.
