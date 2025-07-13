@@ -11,9 +11,12 @@ from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.clock import Clock
 from kivy.lang import Builder
 import os
+import threading
 import pandas as pd
+import logging
 
 kivy.require('2.0.0')
+logger = logging.getLogger(__name__)
 
 class WorkflowAppLayout(BoxLayout):
     """Main layout for the Workflow Application."""
@@ -55,7 +58,7 @@ class WorkflowAppLayout(BoxLayout):
         self.add_widget(self.file_chooser_popup)
 
     def show_handbook_chooser(self):
-        """Open a popup to select the student handbook file."""
+        """Open a popup to select the reference handbook file."""
         self.file_chooser_popup = HandbookChooserPopup(self)
         self.add_widget(self.file_chooser_popup)
 
@@ -84,10 +87,15 @@ class WorkflowAppLayout(BoxLayout):
             self.status_label.text = "Please select a .csv file."
 
     def select_handbook_file(self, path, filename):
-        """Callback to set the selected handbook file."""
+        """Callback to set the selected reference handbook file."""
         if filename:
             full_path = os.path.join(path, filename[0])
+            if not full_path.lower().endswith(('.pdf', '.md')):
+                self.status_label.text = 'Unsupported file type. Please select a PDF or Markdown file.'
+                return
             self.handbook_path_input.text = full_path
+            self.config['reference_handbook_path'] = full_path
+            self.config['use_reference_handbook'] = bool(self.handbook_checkbox.active)
             if self.file_chooser_popup:
                 self.remove_widget(self.file_chooser_popup)
                 self.file_chooser_popup = None
@@ -105,11 +113,25 @@ class WorkflowAppLayout(BoxLayout):
         else:
             self.status_label.text = "Please select a directory."
 
+    def update_handbook_usage(self, active):
+        """Update config when handbook usage checkbox changes."""
+        self.config['use_reference_handbook'] = bool(active)
+        if not active:
+            self.config['reference_handbook_path'] = ''
+
     def cancel_file_chooser(self):
         """Cancels the file chooser popup."""
         if self.file_chooser_popup:
             self.remove_widget(self.file_chooser_popup)
             self.file_chooser_popup = None
+
+    def update_handbook_progress(self, message: str, percent: float):
+        """Update status and progress bar from background handbook indexing."""
+        def update(_dt):
+            self.status_label.text = f"Processing Handbook: {message}"
+            self.progress_bar.value = percent
+            self.status_label.color = (1, 1, 1, 1)
+        Clock.schedule_once(update, 0)
 
     def load_learner_profile(self, csv_path: str):
         """Load the learner profile from the first row of the CSV, if present."""
@@ -131,6 +153,43 @@ class WorkflowAppLayout(BoxLayout):
             self.status_label.text = "Please load a valid CSV file first."
             return
 
+        def begin_mock_workflow(dt=None):
+            if self.mock_workflow_event:
+                self.mock_workflow_event.cancel()
+            self.progress_bar.value = 0
+            self.status_label.text = "Workflow started..."
+            self.mock_workflow_event = Clock.schedule_interval(self._update_mock_workflow, 1.5)
+
+        def progress_callback(message, percent):
+            self.update_handbook_progress(message, percent)
+
+        def index_and_start():
+            try:
+                from showup_tools.simplified_app.rag_system.textbook_vector_db import get_vector_db
+                from showup_tools.simplified_app.rag_system.ingest_textbook import extract_text_from_file
+                import hashlib
+
+                handbook_path = self.handbook_path_input.text
+                if not handbook_path.lower().endswith(('.pdf', '.md')):
+                    raise RuntimeError('Unsupported file type. Please select a PDF or Markdown file.')
+                handbook_text = extract_text_from_file(handbook_path)
+                if not handbook_text:
+                    raise RuntimeError('Failed to read handbook text')
+
+                textbook_id = hashlib.md5(handbook_path.encode()).hexdigest()
+                db = get_vector_db()
+                db.index_textbook(handbook_text, textbook_id, progress_callback=progress_callback)
+
+                Clock.schedule_once(begin_mock_workflow, 0)
+            except Exception as exc:
+                logger.exception("Handbook indexing failed")
+                def update(_dt):
+                    self.status_label.text = f"Error: Handbook indexing failed. See logs."
+                    self.status_label.color = (1, 0, 0, 1)
+                Clock.schedule_once(update, 0)
+            finally:
+                Clock.schedule_once(lambda _dt: setattr(self.ids._start_button, 'disabled', False), 0)
+
         self.current_stage_index = 0
         self.current_progress_value = 0
         self.output_display.text = ""
@@ -138,17 +197,18 @@ class WorkflowAppLayout(BoxLayout):
 
         self.config = {
             "csv_path": csv_file,
-            "handbook_path": self.handbook_path_input.text,
-            "use_handbook": bool(self.handbook_checkbox.active),
+            "reference_handbook_path": self.handbook_path_input.text,
+            "use_reference_handbook": bool(self.handbook_checkbox.active),
             "output_dir": self.output_dir_input.text,
             "save_to": self.save_to_input.text,
             "learner_profile": self.learner_profile_preview.text,
         }
 
-        if self.mock_workflow_event:
-            self.mock_workflow_event.cancel()
-
-        self.mock_workflow_event = Clock.schedule_interval(self._update_mock_workflow, 1.5)
+        if self.config.get("use_reference_handbook") and self.config.get("reference_handbook_path"):
+            self.ids._start_button.disabled = True
+            threading.Thread(target=index_and_start, daemon=True).start()
+        else:
+            begin_mock_workflow()
 
     def _update_mock_workflow(self, dt):
         """Internal method to simulate workflow progression."""

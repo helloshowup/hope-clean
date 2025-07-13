@@ -367,17 +367,17 @@ class SimplifiedContentGeneratorApp:
             'Each template type can have different character and token limits.'
             , style='BG.TLabel').pack(anchor=tk.W, padx=5)
         handbook_frame = ttk.LabelFrame(main_frame, text=
-            'Student Handbook Integration', style='BG.TLabelframe')
+            'Reference Handbook Integration', style='BG.TLabelframe')
         handbook_frame.pack(fill=tk.X, pady=10, padx=5)
         self.use_handbook_var = tk.BooleanVar(value=False)
         handbook_checkbox_frame = ttk.Frame(handbook_frame, style='BG.TFrame')
         handbook_checkbox_frame.pack(fill=tk.X, pady=5)
         ttk.Checkbutton(handbook_checkbox_frame, text=
-            'Pull relevant information from student handbook before generation'
+            'Pull relevant information from reference handbook before generation'
             , variable=self.use_handbook_var).pack(side=tk.LEFT, padx=5)
         handbook_file_frame = ttk.Frame(handbook_frame, style='BG.TFrame')
         handbook_file_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(handbook_file_frame, text='Student Handbook File:', style
+        ttk.Label(handbook_file_frame, text='Reference Handbook File:', style
             ='BG.TLabel').pack(side=tk.LEFT, padx=5)
         self.handbook_path_var = tk.StringVar()
         output_dir_frame = ttk.LabelFrame(main_frame, text=
@@ -398,7 +398,7 @@ class SimplifiedContentGeneratorApp:
         ttk.Button(handbook_file_frame, text='Browse...', command=self.
             _browse_handbook).pack(side=tk.LEFT, padx=5)
         ttk.Label(handbook_frame, text=
-            'This feature extracts relevant information from the student handbook based on the content outline'
+            'This feature extracts relevant information from the reference handbook based on the content outline'
             , style='BG.TLabel').pack(anchor=tk.W, padx=5, pady=(0, 5))
         ttk.Label(handbook_frame, text=
             'and includes it in the content generation process.', style=
@@ -512,14 +512,14 @@ class SimplifiedContentGeneratorApp:
                 ='DEBUG')
 
     def _browse_handbook(self):
-        """Browse for student handbook file"""
+        """Browse for reference handbook file"""
         filename = filedialog.askopenfilename(title=
-            'Select Student Handbook File', filetypes=[('Text Files',
+            'Select Reference Handbook File', filetypes=[('Text Files',
             '*.txt'), ('PDF Files', '*.pdf'), ('Markdown Files', '*.md'), (
             'All Files', '*.*')])
         if filename:
             self.handbook_path_var.set(filename)
-            self._log(f'Selected student handbook file: {filename}')
+            self._log(f'Selected reference handbook file: {filename}')
             if not self.use_handbook_var.get():
                 self.use_handbook_var.set(True)
 
@@ -788,12 +788,12 @@ class SimplifiedContentGeneratorApp:
         self.settings['selected_model'] = selected_model
         initial_model_display = self.initial_model_var.get()
         initial_model = self.model_display_to_id.get(initial_model_display, '')
-        use_student_handbook = self.use_handbook_var.get()
-        student_handbook_path = self.handbook_path_var.get(
-            ) if use_student_handbook else ''
-        if use_student_handbook and not os.path.exists(student_handbook_path):
+        use_reference_handbook = self.use_handbook_var.get()
+        reference_handbook_path = self.handbook_path_var.get(
+            ) if use_reference_handbook else ''
+        if use_reference_handbook and not os.path.exists(reference_handbook_path):
             messagebox.showwarning('Invalid Handbook',
-                'Please select a valid student handbook file or disable the feature'
+                'Please select a valid reference handbook file or disable the feature'
                 )
             return
         if selected_modules:
@@ -822,13 +822,13 @@ class SimplifiedContentGeneratorApp:
         )
         threading.Thread(
             target=self._run_generation,
-            args=(selected_modules, None, use_student_handbook, student_handbook_path, output_dir),
+            args=(selected_modules, None, use_reference_handbook, reference_handbook_path, output_dir),
             daemon=True,
         ).start()
         self._monitor_progress()
 
     def _run_generation(self, selected_modules=None, workflow_phase=None,
-        use_student_handbook=False, student_handbook_path='', output_dir=
+        use_reference_handbook=False, reference_handbook_path='', output_dir=
         'output'):
         """Run content generation in a separate thread with optional workflow phase"""
         try:
@@ -872,19 +872,19 @@ class SimplifiedContentGeneratorApp:
             initial_model_id = self.model_display_to_id.get(
                 initial_model_display, 'claude-3-haiku-20240307')
             updated_settings['initial_generation_model'] = initial_model_id
-            updated_settings['use_student_handbook'] = use_student_handbook
-            updated_settings['student_handbook_path'] = student_handbook_path
+            updated_settings['use_reference_handbook'] = use_reference_handbook
+            updated_settings['reference_handbook_path'] = reference_handbook_path
             
             # Add template directory if specified
             template_dir = self.template_dir_var.get()
             if template_dir and os.path.exists(template_dir):
                 updated_settings['template_directory'] = template_dir
                 self._log(f'Using template directory: {template_dir}', level='INFO')
-            if use_student_handbook:
-                self._log(f'Using student handbook: {student_handbook_path}',
+            if use_reference_handbook:
+                self._log(f'Using reference handbook: {reference_handbook_path}',
                     level='INFO')
             else:
-                self._log('Student handbook extraction disabled', level='INFO')
+                self._log('Reference handbook extraction disabled', level='INFO')
             self._log(
                 f"Using word count: {updated_settings['generation_settings']['word_count']} words"
                 )

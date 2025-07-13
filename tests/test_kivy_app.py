@@ -40,5 +40,22 @@ class TestWorkflowApp(unittest.TestCase):
         chooser_path = root_widget.file_chooser_popup.ids.file_chooser.path
         self.assertEqual(chooser_path, app.user_data_dir)
 
+    def test_handbook_selection_updates_config(self):
+        app = WorkflowApp()
+        root_widget = app.build()
+        root_widget.handbook_checkbox.active = True
+        root_widget.select_handbook_file('/tmp', ['handbook.md'])
+        self.assertEqual(root_widget.config.get('reference_handbook_path'), '/tmp/handbook.md')
+        self.assertTrue(root_widget.config.get('use_reference_handbook'))
+
+    def test_update_handbook_progress(self):
+        app = WorkflowApp()
+        root_widget = app.build()
+        root_widget.update_handbook_progress('Loading', 50)
+        from kivy.clock import Clock
+        Clock.tick()
+        self.assertEqual(root_widget.status_label.text, 'Processing Handbook: Loading')
+        self.assertEqual(root_widget.progress_bar.value, 50)
+
 if __name__ == '__main__':
     unittest.main()

@@ -121,12 +121,13 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
             "Failure to include these tags exactly as specified will cause system errors."
         )
 
-        # Check if handbook_path is provided to use RAG-enhanced generation
-        handbook_path = variables.get('handbook_path', None)
-        
+        # Check if reference_handbook_path is provided to use RAG-enhanced generation
+        handbook_path = variables.get('reference_handbook_path', None)
+
         if handbook_path and os.path.exists(handbook_path):
             logger.info(f"Using RAG system with handbook: {handbook_path}")
             # Use the RAG-enhanced content generation
+            variables['handbook_path'] = handbook_path
             content = await enhanced_generate_content(
                 variables=variables,
                 template=prompt,  # We've already done the variable substitution
