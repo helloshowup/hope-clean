@@ -1,0 +1,55 @@
+@echo off
+REM ShowupSquared Kivy App Launcher
+
+REM Change directory to the location of this script (repo root)
+set SCRIPT_DIR=%~dp0
+cd /d "%SCRIPT_DIR%"
+
+ECHO Checking for Python...
+where python >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO Python is not installed or not in PATH.
+    pause
+    exit /B 1
+)
+
+set VENV_DIR=venv
+IF NOT EXIST "%VENV_DIR%\Scripts\activate.bat" (
+    ECHO Creating virtual environment...
+    python -m venv "%VENV_DIR%"
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO Failed to create virtual environment.
+        pause
+        exit /B 1
+    )
+)
+
+CALL "%VENV_DIR%\Scripts\activate.bat"
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO Failed to activate virtual environment.
+    pause
+    exit /B 1
+)
+
+IF EXIST requirements.txt (
+    ECHO Installing dependencies from requirements.txt...
+    pip install -r requirements.txt
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO Failed to install required packages.
+        pause
+        exit /B 1
+    )
+) ELSE (
+    ECHO requirements.txt not found. Skipping dependency installation.
+)
+
+ECHO Launching Kivy application...
+python main.py
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO Kivy application exited with errors.
+    pause
+    exit /B %ERRORLEVEL%
+)
+
+ECHO Kivy application closed.
+pause
