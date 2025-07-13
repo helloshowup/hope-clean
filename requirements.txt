@@ -13,7 +13,7 @@ kivy
 pyinstaller
 tiktoken
 langchain
-faiss-gpu
+faiss-cpu
 pypdf2
 pdfminer.six
 
