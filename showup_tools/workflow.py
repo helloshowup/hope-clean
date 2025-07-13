@@ -39,7 +39,7 @@ from .output_manager import save_as_markdown, create_output_directory, save_gene
 # Set up logger
 logger = logging.getLogger("simplified_workflow")
 
-def setup_logging(log_level=logging.INFO):
+def setup_logging(log_level=logging.DEBUG):
     """
     Set up logging configuration.
     
