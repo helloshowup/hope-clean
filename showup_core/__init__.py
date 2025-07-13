@@ -86,34 +86,6 @@ try:
 except ImportError as e:
     core_logger.warning(f"Could not import API client functions: {e}")
 
-# Try to import HTML utilities
-try:
-    from showup_core.html_converter import (
-        process_html_metadata,
-        create_html_base,
-        process_html_section,
-        convert_markdown_to_html,
-        convert_lesson_to_html,
-        convert_module_to_html,
-        generate_content_html,
-        generate_enhancement_comparison_report,
-        HTMLConverter
-    )
-    
-    # Add to public API
-    __all__.extend([
-        'process_html_metadata',
-        'create_html_base',
-        'process_html_section',
-        'convert_markdown_to_html',
-        'convert_lesson_to_html',
-        'convert_module_to_html',
-        'generate_content_html',
-        'generate_enhancement_comparison_report',
-        'HTMLConverter'
-    ])
-except ImportError as e:
-    core_logger.warning(f"Could not import HTML converter modules: {e}")
 
 # Try to import content enhancer modules
 try:
