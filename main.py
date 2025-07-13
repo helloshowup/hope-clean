@@ -29,11 +29,11 @@ import logging
 import datetime
 import traceback
 
-# Import the simplified workflow implementation
+# Import the full workflow implementation with planning and refinement
 try:
-    from simplified_workflow.workflow import run_workflow, setup_logging
+    from showup_tools.workflow import run_workflow, setup_logging
 except ImportError as e:
-    logging.error(f"Failed to import simplified workflow module: {e}")
+    logging.error(f"Failed to import workflow module: {e}")
     run_workflow = None
     setup_logging = None
 
@@ -47,7 +47,7 @@ class WorkflowApp(App):
     output_info = StringProperty("")
 
     def build(self):
-        self.title = "ShowUp AI Content Generation (Simplified Workflow)"
+        self.title = "ShowUp AI Content Generation"
 
         main_layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
         input_grid = BoxLayout(orientation='vertical', size_hint_y=None, height=300, spacing=5)
