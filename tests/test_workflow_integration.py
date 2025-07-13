@@ -53,6 +53,7 @@ class TestWorkflowIntegration(unittest.TestCase):
              patch("showup_tools.workflow.compare_and_combine", return_value=("best", "exp")), \
              patch("showup_tools.workflow.review_content", return_value=("reviewed", "sum")), \
              patch("showup_tools.workflow.run_ai_detection_stage", return_value=[{"pattern": "x"}]), \
+             patch("showup_tools.workflow.generate_lo_and_kt_from_content", return_value=("LO", "KT")), \
              patch("showup_tools.workflow.save_as_markdown", return_value="out.md"):
             phases = ["plan", "refine", "generate", "compare", "review", "finalize"]
             for ph in phases:
@@ -103,6 +104,7 @@ class TestWorkflowIntegration(unittest.TestCase):
              patch("showup_tools.workflow.compare_and_combine", return_value=("best", "exp")), \
              patch("showup_tools.workflow.review_content", return_value=("reviewed", "sum")), \
              patch("showup_tools.workflow.run_ai_detection_stage", return_value=[{"pattern": "x"}]), \
+             patch("showup_tools.workflow.generate_lo_and_kt_from_content", return_value=("LO", "KT")), \
              patch("showup_tools.workflow.save_as_markdown", return_value="out.md"):
             phases = ["plan", "refine", "generate", "compare", "review", "finalize"]
             for ph in phases:

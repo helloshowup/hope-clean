@@ -90,6 +90,13 @@ BLOCK_LIBRARY = {
             "placement_suggestion": "Optional[str]",
         }
     },
+    "image_placeholder": {
+        "fields": {
+            "description": "str",
+            "caption": "Optional[str]",
+            "placement_suggestion": "Optional[str]",
+        }
+    },
 }
 
 

@@ -108,5 +108,25 @@ class TestPlanningStage(unittest.TestCase):
         self.assertEqual(result['status'], 'PLAN_GENERATED')
         self.assertEqual(result['initial_plan'], legacy_plan)
 
+    def test_planning_accepts_image_placeholder(self):
+        row = {
+            "content_outline": "Outline",
+            "learner_profile": "Profile",
+            "rationale": "Because",
+            "word_count": 123,
+        }
+        config = {"model_id": "claude-3-haiku-20240307"}
+        plan = {
+            "content_blocks": [
+                {"block_type": "lesson_metadata", "title": "t", "module_id": "m"},
+                {"block_type": "image_placeholder", "description": "A break"},
+            ]
+        }
+        with patch('showup_tools.planning_stage.generate_with_claude') as mock_claude:
+            mock_claude.return_value = json.dumps(plan)
+            result = asyncio.run(run_planning_stage(row, config))
+        self.assertEqual(result['status'], 'PLAN_GENERATED')
+        self.assertEqual(result['initial_plan'], plan)
+
 if __name__ == '__main__':
     unittest.main()

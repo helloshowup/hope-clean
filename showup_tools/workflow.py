@@ -23,6 +23,8 @@ from .content_reviewer import review_content
 from .ai_detector import run_ai_detection_stage
 from .planning_stage import run_planning_stage
 from .refinement_stage import run_refinement_stage
+from .learning_sections import generate_lo_and_kt_from_content
+from .markdown_utils import insert_sections_in_markdown
 from .constants import EXCEL_CLARIFICATION
 from showup_core.api_client import generate_with_claude
 # Import RAG system components
@@ -643,6 +645,18 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                     return row_data_item
             
             reviewed_content = row_data_item["reviewed_content"]
+
+            try:
+                lo_sec, kt_sec = await generate_lo_and_kt_from_content(
+                    reviewed_content,
+                    model=ui_settings.get("selected_model", "claude-3-haiku-20240307"),
+                )
+                reviewed_content = insert_sections_in_markdown(reviewed_content, lo_sec, position="after_intro")
+                reviewed_content = insert_sections_in_markdown(reviewed_content, kt_sec, position="end")
+                row_data_item["reviewed_content"] = reviewed_content
+                logger.info("Inserted Learning Objectives and Key Takeaways into content")
+            except Exception as e:
+                logger.error(f"LO/KT generation failed: {e}")
 
             add_log_entry("AI Detection", "started", "Scanning content for AI patterns")
             ai_patterns_path = ui_settings.get("ai_patterns_path")
