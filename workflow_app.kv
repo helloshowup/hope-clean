@@ -2,6 +2,11 @@
 
 <WorkflowAppLayout>:
     csv_path_input: _csv_path_input
+    handbook_checkbox: _handbook_checkbox
+    handbook_path_input: _handbook_path_input
+    output_dir_input: _output_dir_input
+    save_to_input: _save_to_input
+    learner_profile_preview: _learner_profile_preview
     status_label: _status_label
     progress_bar: _progress_bar
     output_display: _output_display
@@ -116,6 +121,145 @@
                 background_color: 0.3, 0.3, 0.3, 1
                 foreground_color: 0.2, 0.7, 0.3, 1
 
+            Label:
+                text: "Student Handbook Integration"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '30dp'
+                spacing: 10
+                CheckBox:
+                    id: _handbook_checkbox
+                    size_hint_x: None
+                    width: '30dp'
+                    color: 0.2, 0.7, 0.3, 1
+                Label:
+                    text: "Pull relevant information from student handbook before generation."
+                    text_size: self.width, None
+                    halign: 'left'
+                    valign: 'middle'
+                    color: 0.9, 0.9, 0.9, 1
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '40dp'
+                spacing: 10
+                TextInput:
+                    id: _handbook_path_input
+                    hint_text: "Student Handbook File"
+                    multiline: False
+                    readonly: True
+                    background_color: 0.3, 0.3, 0.3, 1
+                    foreground_color: 0.9, 0.9, 0.9, 1
+                    cursor_color: 0.9, 0.9, 0.9, 1
+                    font_size: '14sp'
+                    padding: [10, 10]
+                    border: [8,8,8,8]
+                    radius: [5,]
+                Button:
+                    text: "Browse..."
+                    size_hint_x: None
+                    width: '90dp'
+                    background_normal: ''
+                    background_color: 0.1, 0.5, 0.7, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                    on_release: root.show_handbook_chooser()
+
+            Label:
+                text: "Output Settings"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '40dp'
+                spacing: 10
+                TextInput:
+                    id: _output_dir_input
+                    hint_text: "Output Directory"
+                    multiline: False
+                    readonly: True
+                    background_color: 0.3, 0.3, 0.3, 1
+                    foreground_color: 0.9, 0.9, 0.9, 1
+                    cursor_color: 0.9, 0.9, 0.9, 1
+                    font_size: '14sp'
+                    padding: [10, 10]
+                    border: [8,8,8,8]
+                    radius: [5,]
+                Button:
+                    text: "Browse..."
+                    size_hint_x: None
+                    width: '90dp'
+                    background_normal: ''
+                    background_color: 0.1, 0.5, 0.7, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                    on_release: root.show_output_dir_chooser()
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '40dp'
+                spacing: 10
+                TextInput:
+                    id: _save_to_input
+                    hint_text: "Save Generated Content To"
+                    multiline: False
+                    readonly: True
+                    background_color: 0.3, 0.3, 0.3, 1
+                    foreground_color: 0.9, 0.9, 0.9, 1
+                    cursor_color: 0.9, 0.9, 0.9, 1
+                    font_size: '14sp'
+                    padding: [10, 10]
+                    border: [8,8,8,8]
+                    radius: [5,]
+                Button:
+                    text: "Browse..."
+                    size_hint_x: None
+                    width: '90dp'
+                    background_normal: ''
+                    background_color: 0.1, 0.5, 0.7, 1
+                    color: 1, 1, 1, 1
+                    font_size: '14sp'
+                    radius: [8,]
+                    on_release: root.show_save_to_chooser()
+
+            Label:
+                text: "Learner Profile Preview"
+                size_hint_y: None
+                height: '30dp'
+                font_size: '18sp'
+                bold: True
+                color: 0.8, 0.8, 0.8, 1
+
+            TextInput:
+                id: _learner_profile_preview
+                text: ''
+                readonly: True
+                size_hint_y: None
+                height: '100dp'
+                background_color: 0.3, 0.3, 0.3, 1
+                foreground_color: 0.9, 0.9, 0.9, 1
+                font_size: '14sp'
+                padding: [10, 10]
+                cursor_color: 0.9, 0.9, 0.9, 1
+                border: [8,8,8,8]
+                radius: [5,]
+
             Widget:
                 size_hint_y: 1
 
@@ -220,6 +364,66 @@
         Button:
             text: "Select"
             on_release: root.caller.select_csv_file(file_chooser.path, file_chooser.selection)
+            background_normal: ''
+            background_color: 0.2, 0.7, 0.3, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
+        Button:
+            text: "Cancel"
+            on_release: root.caller.cancel_file_chooser()
+            background_normal: ''
+            background_color: 0.7, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
+
+<HandbookChooserPopup@FileChooserPopup>:
+    FileChooserListView:
+        id: file_chooser
+        filters: ['*.pdf', '*.md', '*.txt']
+        path: App.get_running_app().user_data_dir
+        on_submit: root.caller.select_handbook_file(self.path, self.selection)
+
+    BoxLayout:
+        size_hint_y: None
+        height: '48dp'
+        spacing: 10
+        Button:
+            text: "Select"
+            on_release: root.caller.select_handbook_file(file_chooser.path, file_chooser.selection)
+            background_normal: ''
+            background_color: 0.2, 0.7, 0.3, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
+        Button:
+            text: "Cancel"
+            on_release: root.caller.cancel_file_chooser()
+            background_normal: ''
+            background_color: 0.7, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+            radius: [8,]
+
+<DirectoryChooserPopup@FileChooserPopup>:
+    FileChooserListView:
+        id: file_chooser
+        dirselect: True
+        path: App.get_running_app().user_data_dir
+        on_submit: root.caller.select_directory(self.selection)
+
+    BoxLayout:
+        size_hint_y: None
+        height: '48dp'
+        spacing: 10
+        Button:
+            text: "Select"
+            on_release: root.caller.select_directory(file_chooser.selection)
             background_normal: ''
             background_color: 0.2, 0.7, 0.3, 1
             color: 1, 1, 1, 1
