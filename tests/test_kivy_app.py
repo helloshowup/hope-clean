@@ -15,8 +15,27 @@ import types
 kivy_stub_path = os.path.join(os.path.dirname(__file__), 'kivy_stub')
 if kivy_stub_path not in sys.path:
     sys.path.insert(0, kivy_stub_path)
+
 import kivy_stub
 sys.modules['kivy'] = kivy_stub
+
+dummy_pkg = types.ModuleType('showup_tools')
+dummy_mod = types.ModuleType('showup_tools.workflow')
+
+def dummy_run_workflow(*a, **k):
+    return {'status': 'ok'}
+
+dummy_run_workflow.__module__ = 'showup_tools.workflow'
+
+def dummy_setup_logging(*a, **k):
+    return 'test.log'
+
+dummy_mod.run_workflow = dummy_run_workflow
+dummy_mod.setup_logging = dummy_setup_logging
+dummy_pkg.run_workflow = dummy_run_workflow
+dummy_pkg.setup_logging = dummy_setup_logging
+sys.modules['showup_tools'] = dummy_pkg
+sys.modules['showup_tools.workflow'] = dummy_mod
 
 from main import WorkflowApp
 
@@ -88,6 +107,13 @@ class TestWorkflowApp(unittest.TestCase):
             with unittest.mock.patch.object(self.app, 'run_workflow_in_thread') as mock_run:
                 self.app.start_workflow(None)
                 mock_run.assert_called_once()
+
+    def test_show_file_chooser_sets_text(self):
+        self.app.csv_path_input.text = ''
+        with unittest.mock.patch('tkinter.filedialog.askopenfilename', return_value='/tmp/test.csv') as mock_dialog:
+            self.app.show_file_chooser(self.app.csv_path_input, 'csv')
+            mock_dialog.assert_called_once()
+        self.assertEqual(self.app.csv_path_input.text, '/tmp/test.csv')
 
 if __name__ == '__main__':
     unittest.main()
