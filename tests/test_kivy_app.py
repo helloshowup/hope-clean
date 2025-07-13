@@ -11,6 +11,13 @@ os.environ['KIVY_NO_ARGS'] = '1'
 
 import types
 
+# Make the stub Kivy package available under the real package name
+kivy_stub_path = os.path.join(os.path.dirname(__file__), 'kivy_stub')
+if kivy_stub_path not in sys.path:
+    sys.path.insert(0, kivy_stub_path)
+import kivy_stub
+sys.modules['kivy'] = kivy_stub
+
 from main import WorkflowApp
 
 class TestWorkflowApp(unittest.TestCase):
