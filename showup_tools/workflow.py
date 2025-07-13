@@ -6,15 +6,6 @@ This module orchestrates the entire workflow, from reading the CSV file to savin
 
 import logging
 import os
-import sys
-
-# --- START OF CRITICAL FIX ---
-# Add the project root to the Python path to allow direct import of showup_core
-# This assumes showup_tools is directly in the project root, and showup_core is also at the root.
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-# --- END OF CRITICAL FIX ---
 
 import datetime
 import asyncio
