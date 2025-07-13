@@ -3,10 +3,6 @@ import unittest.mock
 import os
 import sys
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
-
 os.environ['KIVY_NO_ARGS'] = '1'
 
 import types
@@ -14,10 +10,16 @@ import types
 class TestWorkflowApp(unittest.TestCase):
     def setUp(self):
         # Insert stub modules before importing the application
-        self.kivy_stub_path = os.path.join(os.path.dirname(__file__), 'kivy_stub')
-        if self.kivy_stub_path not in sys.path:
-            sys.path.insert(0, self.kivy_stub_path)
-        import kivy_stub
+        import importlib.util
+        tests_dir = os.path.dirname(__file__)
+        self.kivy_stub_path = os.path.join(tests_dir, 'kivy_stub')
+
+        spec = importlib.util.spec_from_file_location(
+            'kivy_stub', os.path.join(self.kivy_stub_path, '__init__.py'),
+            submodule_search_locations=[self.kivy_stub_path]
+        )
+        kivy_stub = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(kivy_stub)
         sys.modules['kivy'] = kivy_stub
 
         # Preserve original workflow modules to restore later
@@ -42,8 +44,13 @@ class TestWorkflowApp(unittest.TestCase):
         sys.modules['showup_tools'] = dummy_pkg
         sys.modules['showup_tools.workflow'] = dummy_mod
 
-        from main import WorkflowApp
-        self.app = WorkflowApp()
+        import importlib.util
+        main_path = os.path.abspath(os.path.join(tests_dir, '..', 'main.py'))
+        loader = importlib.machinery.SourceFileLoader('main', main_path)
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        main_module = importlib.util.module_from_spec(spec)
+        loader.exec_module(main_module)
+        self.app = main_module.WorkflowApp()
         self.root_widget = self.app.build()
 
     def tearDown(self):
@@ -83,8 +90,13 @@ class TestWorkflowApp(unittest.TestCase):
         self.app.learner_profile_input.text = 'Learner'
 
         # ensure the imported run_workflow comes from showup_tools
-        import main
-        self.assertEqual(main.run_workflow.__module__, 'showup_tools.workflow')
+        import importlib.util
+        main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'main.py'))
+        loader = importlib.machinery.SourceFileLoader('main', main_path)
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        main_module = importlib.util.module_from_spec(spec)
+        loader.exec_module(main_module)
+        self.assertEqual(main_module.run_workflow.__module__, 'showup_tools.workflow')
 
         class DummyThread:
             def __init__(self, target, args):

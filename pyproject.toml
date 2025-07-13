@@ -32,6 +32,5 @@ dev = [
     "isort",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-exclude = ["tests", "dev_docs"]
+[tool.setuptools]
+packages = {find = {where = ["."], include = ["showup_core*", "showup_tools*", "simplified_workflow*", "showup_editor_ui*"], exclude = ["tests", "dev_docs"]}}

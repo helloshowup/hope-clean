@@ -4,12 +4,6 @@ import sys
 import os
 from unittest.mock import patch, mock_open
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-paths = [os.path.join(root_dir, 'showup_tools'), root_dir]
-for p in paths:
-    if p not in sys.path:
-        sys.path.insert(0, p)
-
 from simplified_workflow.markdown_utils import insert_sections_in_markdown
 from simplified_workflow.learning_sections import generate_lo_and_kt_from_content
 

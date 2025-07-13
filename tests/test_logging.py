@@ -3,13 +3,6 @@ import os
 import sys
 import logging
 
-# setup paths similar to other tests
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-paths = [os.path.join(root_dir, "showup_tools"), root_dir]
-for p in paths:
-    if p not in sys.path:
-        sys.path.insert(0, p)
-
 if "showup_core" in sys.modules:
     del sys.modules["showup_core"]
 

@@ -5,12 +5,6 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-paths = [os.path.join(root_dir, 'showup_tools'), root_dir]
-for p in paths:
-    if p not in sys.path:
-        sys.path.insert(0, p)
-
 from simplified_workflow.workflow import extract_student_handbook_information
 
 class TestDynamicRagWorkflow(unittest.TestCase):
