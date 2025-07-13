@@ -10,7 +10,7 @@ This repository implements an **AI-driven content generation pipeline** for educ
 
 * *Kivy App UI:* The GUI (driven by `main.py`) provides fields to input a content CSV, toggle handbook usage, specify output locations, and preview a learner profile[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L18-L26)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L136-L144). It also shows a status label, progress bar, and output preview area to monitor the workflow stages.
 
-* *Launching Pipeline:* Clicking the **Start Workflow** button in the app triggers the pipeline. (Currently, the Kivy app simulates the workflow progression with placeholder outputs[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L150-L158)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L160-L168), as integration with the full backend pipeline is in progress. See **Planned Enhancements** below.)
+* *Launching Pipeline:* Clicking the **Start Workflow** button now runs the full pipeline using `simplified_workflow.run_workflow`. The progress bar and status messages reflect real execution results.
 
 ## **AI Content Generation Pipeline Stages**
 
@@ -110,7 +110,7 @@ Currently, this Editor UI is **not yet integrated** with the main Kivy workflow.
 
 This project is under active development. Several features are recent additions or still in progress. As you onboard, keep in mind the following planned enhancements and stubs:
 
-* **Integration of Actual Workflow in Kivy UI:** The current Kivy app UI demonstrates the workflow with a simulated progress loop and sample output[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L150-L158)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L160-L168). The next step is connecting the “Start Workflow” button to run the real asynchronous pipeline (likely by invoking the `simplified_workflow.run_workflow` coroutine in a background thread or `asyncio` loop). Bridging this gap will allow end-to-end content generation directly from the Kivy app.
+* **Integration of Actual Workflow in Kivy UI:** The Kivy app now runs the real pipeline by invoking `simplified_workflow.run_workflow` in a background thread when you click **Start Workflow**, enabling end-to-end content generation directly from the UI.
 
 * **Learning Objectives & Key Takeaways Generation:** The automatic LO/KT generation at finalization is now implemented[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_tools/workflow.py#L647-L655), inserting those sections into content. However, this relies on the AI correctly formatting the output (with "\#\# Learning Objectives" and "\#\# Key Takeaways" headings). There are basic parsing checks[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_tools/learning_sections.py#L30-L38) and error handling in place, but further refinement (e.g., ensuring bullet formatting or allowing customization of these sections) is an area of ongoing improvement. If the AI output format changes, this component may need updating.
 

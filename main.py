@@ -29,11 +29,11 @@ import logging
 import datetime
 import traceback
 
-# Import the main workflow function from showup_tools
+# Import the simplified workflow implementation
 try:
-    from showup_tools.workflow import run_workflow, setup_logging
+    from simplified_workflow.workflow import run_workflow, setup_logging
 except ImportError as e:
-    logging.error(f"Failed to import workflow module: {e}")
+    logging.error(f"Failed to import simplified workflow module: {e}")
     run_workflow = None
     setup_logging = None
 
