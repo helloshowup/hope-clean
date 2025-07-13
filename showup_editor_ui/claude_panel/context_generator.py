@@ -6,7 +6,12 @@ import threading
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 import logging
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Import Claude API functionality
 from claude_api import generate_with_claude_haiku

@@ -6,9 +6,19 @@ import re
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 import threading
+import datetime
+import shutil
 
 # Get logger
 logger = logging.getLogger("output_library_editor")
+
+
+def create_timestamped_backup(file_path: str) -> str:
+    """Create a timestamped backup of *file_path* in the same directory."""
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = f"{file_path}.bak.{timestamp}"
+    shutil.copy2(file_path, backup_path)
+    return backup_path
 
 class MarkdownTools:
     """Provides batch markdown editing tools for the ClaudeAIPanel."""
@@ -233,8 +243,6 @@ class MarkdownTools:
                         content = f.read()
                     
                     # Make a backup copy
-                    from showup_core.file_utils import create_timestamped_backup
-
                     backup_path = create_timestamped_backup(file_path)
                     
                     # Apply each selected tool

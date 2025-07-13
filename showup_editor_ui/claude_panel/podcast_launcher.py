@@ -11,7 +11,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import subprocess
 import logging
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Get logger
 logger = logging.getLogger("podcast_launcher")

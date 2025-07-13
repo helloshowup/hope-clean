@@ -10,7 +10,17 @@ import logging
 from typing import Dict, Any, List, Optional, Union, Tuple
 
 # Import from core modules
-from .file_utils import safe_read_file
+
+
+def safe_read_file(file_path: str, encodings: List[str] | None = None) -> tuple[bool, str]:
+    encodings = encodings or ["utf-8"]
+    for enc in encodings:
+        try:
+            with open(file_path, "r", encoding=enc) as f:
+                return True, f.read()
+        except Exception:
+            continue
+    return False, "Could not read file"
 from .api_utils import extract_response_content
 
 # Configure logger

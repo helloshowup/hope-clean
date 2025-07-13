@@ -9,7 +9,14 @@ import os
 import logging
 import shutil
 from datetime import datetime
-from .file_utils import create_timestamped_backup
+def create_timestamped_backup(file_path: str, backup_dir: str | None = None) -> str:
+    """Create a timestamped backup of *file_path*."""
+    backup_dir = backup_dir or os.path.dirname(file_path)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = os.path.join(backup_dir, f"{os.path.basename(file_path)}.bak.{timestamp}")
+    os.makedirs(backup_dir, exist_ok=True)
+    shutil.copy2(file_path, backup_path)
+    return backup_path
 
 # Set up logging
 logger = logging.getLogger('claude_editor')

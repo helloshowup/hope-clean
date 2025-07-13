@@ -5,7 +5,12 @@ import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 import logging
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Import cache utilities
 from cache_utils import get_cache_instance

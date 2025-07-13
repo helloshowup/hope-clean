@@ -13,7 +13,27 @@ import json
 from pathlib import Path
 
 # Import from core modules
-from .file_utils import safe_read_file, safe_write_file
+
+
+def safe_read_file(file_path: str, encodings: List[str] | None = None) -> tuple[bool, str]:
+    encodings = encodings or ["utf-8"]
+    for enc in encodings:
+        try:
+            with open(file_path, "r", encoding=enc) as f:
+                return True, f.read()
+        except Exception:
+            continue
+    return False, "Could not read file"
+
+
+def safe_write_file(file_path: str, content: str, encoding: str = "utf-8") -> tuple[bool, str]:
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding=encoding) as f:
+            f.write(content)
+        return True, ""
+    except Exception as e:
+        return False, str(e)
 
 # Configure logger
 logger = logging.getLogger('html_utils')

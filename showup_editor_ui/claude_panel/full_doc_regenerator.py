@@ -10,7 +10,20 @@ from tkinter import ttk, messagebox, filedialog
 from datetime import datetime
 import json
 import threading
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
+
+
+def create_timestamped_backup(file_path: str) -> str:
+    """Create a timestamped backup of *file_path* in the same directory."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = f"{file_path}.bak.{timestamp}"
+    shutil.copy2(file_path, backup_path)
+    return backup_path
 
 # Import Claude API functions directly from the module
 from claude_api import (
@@ -360,8 +373,6 @@ class FullDocRegenerator:
                 # Save the regenerated content
                 if regenerated_content:
                     # Create backup file
-                    from showup_core.file_utils import create_timestamped_backup
-
                     create_timestamped_backup(file_path)
                     
                     # Save the regenerated content over the original file

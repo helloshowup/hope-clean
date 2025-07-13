@@ -10,7 +10,11 @@ import os
 import json
 import logging
 from pathlib import Path
-from .path_utils import get_project_root
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Get logger
 logger = logging.getLogger("output_library_editor")

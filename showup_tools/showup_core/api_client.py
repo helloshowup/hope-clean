@@ -13,7 +13,12 @@ import logging
 import hashlib
 import datetime
 from typing import Dict, Optional
-from showup_editor_ui.claude_panel.path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 from .model_config import DEFAULT_MODEL, DEFAULT_CONTEXT_MODEL
 
 try:

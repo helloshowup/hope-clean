@@ -11,6 +11,20 @@ from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger("csv_parser")
 
+
+def file_exists(file_path: str) -> bool:
+    return os.path.isfile(file_path)
+
+
+def safe_write_file(file_path: str, content: str, encoding: str = "utf-8") -> tuple[bool, str]:
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding=encoding) as f:
+            f.write(content)
+        return True, ""
+    except Exception as e:
+        return False, str(e)
+
 def extract_lessons_and_steps_from_csv(csv_path: str) -> Dict[str, List[Dict[str, Any]]]:
     """
     Extract both lesson and step information from a CSV file.
@@ -258,8 +272,6 @@ def ensure_ai_phrases_file(file_path: str = "data/config/ai_phrases.json") -> bo
     Returns:
         True if file exists or was created, False on error
     """
-    from .file_utils import file_exists, safe_write_file
-    
     logger.info(f"Ensuring AI phrases file exists at {file_path}")
     
     if file_exists(file_path):

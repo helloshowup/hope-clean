@@ -13,7 +13,12 @@ import logging
 import requests
 from dotenv import load_dotenv
 import sys
-from showup_editor_ui.claude_panel.path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 
 # Ensure we can find the root directory to load the .env file
 root_dir = str(get_project_root())

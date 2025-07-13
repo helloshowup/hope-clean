@@ -3,7 +3,22 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog, Menu
-from .path_utils import get_project_root
+from pathlib import Path
+import datetime
+import shutil
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
+
+
+def create_timestamped_backup(file_path: str) -> str:
+    """Create a timestamped backup of *file_path* in the same directory."""
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = f"{file_path}.bak.{timestamp}"
+    shutil.copy2(file_path, backup_path)
+    return backup_path
 
 # Try to import pyperclip, but gracefully handle if it's missing
 try:
@@ -189,8 +204,6 @@ class MarkdownEditor:
             
             # Create backup of original file
             if os.path.exists(self.current_file_path):
-                from showup_core.file_utils import create_timestamped_backup
-
                 create_timestamped_backup(self.current_file_path)
             
             # Save content to file

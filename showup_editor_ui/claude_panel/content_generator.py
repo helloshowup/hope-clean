@@ -6,7 +6,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 import logging
 import sys
-from .path_utils import get_project_root
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    """Return the project root directory."""
+    return Path(__file__).resolve().parents[2]
 # Dynamic import of cache_utils.py from root directory
 from importlib.util import spec_from_file_location, module_from_spec
 
