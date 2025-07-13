@@ -11,7 +11,7 @@ import json
 import logging
 import datetime
 from typing import Tuple, Dict, Any, Optional, List
-from showup_editor_ui.claude_panel.path_utils import get_project_root
+from .path_utils import get_project_root
 from .config import DIRS, AVAILABLE_COURSES
 
 # Configure logging

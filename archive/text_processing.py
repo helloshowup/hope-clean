@@ -13,7 +13,7 @@ import re
 import glob
 import logging
 from typing import Dict, List
-from showup_editor_ui.claude_panel.path_utils import get_project_root
+from .path_utils import get_project_root
 
 logger = logging.getLogger('podcast_generator')
 
