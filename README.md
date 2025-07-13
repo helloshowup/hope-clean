@@ -123,3 +123,16 @@ This project is under active development. Several features are recent additions 
 * **Module Stubs and Archive:** The repository’s `archive/` folder contains older versions of modules (e.g., early `workflow.py.bak` files) and scripts that are no longer active. If you encounter references to the `simplified_app` or `simplified_workflow` modules, note that these were part of a previous iteration using a Tkinter GUI (`showup_tools/simplified_app.py`)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_tools/simplified_app.py#L64-L73)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_tools/simplified_app.py#L66-L74). The current direction is to consolidate everything into the main application pipeline. Be cautious of any lingering references or stub functions that might still exist but are not fully integrated.
 
 By keeping these points in mind, a new developer can navigate the codebase more effectively. The **focus** of this README is to map out the end-to-end flow of how a piece of educational content goes from a row in a CSV to a polished lesson file with objectives and more. As development continues, this document should be updated to reflect the implementation status of each feature. Feel free to cross-reference the code modules cited above to dive deeper into each stage of the workflow. Happy coding, and welcome to the ShowUp content generation project\!
+
+## Repository Structure and Import Strategy
+
+To ensure a clean, maintainable, and robust codebase, the project uses standard Python packaging practices. All modules are automatically discovered without any manual `sys.path` tweaks or custom import hooks.
+
+**Key Principles:**
+
+* **Standardized Package Naming**: All package directories follow normal Python naming conventions (e.g., `showup_core` instead of `showup-core`). Import statements match these directory names directly.
+* **Automatic Package Discovery**: `pyproject.toml` is configured so that `setuptools` automatically finds all packages within the repository. This simplifies installation and testing.
+* **No Manual Path Adjustments**: Legacy helpers that added entries to `sys.path` or used custom path finders have been removed. The standard Python import mechanism is relied upon exclusively.
+
+Developers should follow these conventions whenever adding new modules so that imports remain consistent and reliable.
+

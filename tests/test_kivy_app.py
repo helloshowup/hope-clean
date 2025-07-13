@@ -3,10 +3,6 @@ import unittest.mock
 import os
 import sys
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
-
 os.environ['KIVY_NO_ARGS'] = '1'
 
 import types
@@ -19,25 +15,16 @@ if kivy_stub_path not in sys.path:
 import kivy_stub
 sys.modules['kivy'] = kivy_stub
 
-dummy_pkg = types.ModuleType('showup_tools')
-dummy_mod = types.ModuleType('showup_tools.workflow')
 
-def dummy_run_workflow(*a, **k):
-    return {'status': 'ok'}
+import importlib.util
+from pathlib import Path
 
-dummy_run_workflow.__module__ = 'showup_tools.workflow'
-
-def dummy_setup_logging(*a, **k):
-    return 'test.log'
-
-dummy_mod.run_workflow = dummy_run_workflow
-dummy_mod.setup_logging = dummy_setup_logging
-dummy_pkg.run_workflow = dummy_run_workflow
-dummy_pkg.setup_logging = dummy_setup_logging
-sys.modules['showup_tools'] = dummy_pkg
-sys.modules['showup_tools.workflow'] = dummy_mod
-
-from main import WorkflowApp
+main_spec = importlib.util.spec_from_file_location(
+    'main', Path(__file__).resolve().parents[1] / 'main.py'
+)
+main = importlib.util.module_from_spec(main_spec)
+main_spec.loader.exec_module(main)
+WorkflowApp = main.WorkflowApp
 
 class TestWorkflowApp(unittest.TestCase):
     def setUp(self):
@@ -92,7 +79,6 @@ class TestWorkflowApp(unittest.TestCase):
         self.app.learner_profile_input.text = 'Learner'
 
         # ensure the imported run_workflow comes from showup_tools
-        import main
         self.assertEqual(main.run_workflow.__module__, 'showup_tools.workflow')
 
         class DummyThread:

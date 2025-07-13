@@ -88,8 +88,8 @@ def test_main_adds_project_root(tmp_path):
     main_src = Path(__file__).resolve().parents[1] / 'main.py'
     shutil.copy2(main_src, root / 'main.py')
 
-    if str(root) in sys.path:
-        sys.path.remove(str(root))
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
 
     orig_workflow = sys.modules.get('showup_tools.workflow')
     for k in list(sys.modules.keys()):
@@ -104,7 +104,6 @@ def test_main_adds_project_root(tmp_path):
     loader.exec_module(main_module)
 
     try:
-        assert str(root) in sys.path
         wf = importlib.import_module('showup_tools.workflow')
         assert wf.run_workflow() == {'status': 'ok'}
     finally:
