@@ -21,7 +21,9 @@ class TestDynamicRagWorkflow(unittest.TestCase):
         handbook_text = 'some text'
         textbook_id = hashlib.md5(handbook_path.encode()).hexdigest()
         with patch('showup_tools.workflow.extract_text_from_file', return_value=handbook_text) as p_extract, \
-             patch('showup_tools.workflow.get_vector_db') as p_get_db:
+             patch('showup_tools.workflow.get_vector_db') as p_get_db, \
+             patch('showup_tools.workflow.cache.get', return_value=None), \
+             patch('showup_tools.workflow.cache.set'):
             mock_db = MagicMock()
             mock_db.query_textbook.return_value = ['chunk']
             p_get_db.return_value = mock_db
