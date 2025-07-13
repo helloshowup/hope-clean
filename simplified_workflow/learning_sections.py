@@ -1,7 +1,7 @@
 import os
 import logging
 from typing import Tuple
-from .showup_core.api_client import generate_with_claude
+from showup_core.api_client import generate_with_claude
 
 logger = logging.getLogger(__name__)
 

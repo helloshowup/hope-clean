@@ -38,7 +38,7 @@ except ImportError:
         logger.warning("pdfminer not installed. Will try other PDF methods.")
 
 # Use a proper relative import for the package
-from showup_tools.simplified_app.rag_system.textbook_vector_db import vector_db
+from .textbook_vector_db import vector_db
 
 
 def extract_text_from_file(file_path: str) -> Optional[str]:

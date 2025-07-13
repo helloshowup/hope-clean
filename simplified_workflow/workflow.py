@@ -24,10 +24,10 @@ from .ai_detector import detect_ai_patterns, edit_content
 from .constants import EXCEL_CLARIFICATION
 from showup_core.api_client import generate_with_claude
 # Import RAG system components
-from showup_tools.simplified_app.rag_system.token_counter import count_tokens
-from showup_tools.simplified_app.rag_system.cache_manager import cache
-from showup_tools.simplified_app.rag_system.textbook_vector_db import get_vector_db
-from showup_tools.simplified_app.rag_system.ingest_textbook import extract_text_from_file
+from simplified_workflow.rag_system.token_counter import count_tokens
+from simplified_workflow.rag_system.cache_manager import cache
+from simplified_workflow.rag_system.textbook_vector_db import get_vector_db
+from simplified_workflow.rag_system.ingest_textbook import extract_text_from_file
 import hashlib
 # Batch processing functionality removed as per requirement
 from .output_manager import save_as_markdown, create_output_directory, save_generation_summary, save_workflow_log

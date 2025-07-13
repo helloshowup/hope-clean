@@ -11,7 +11,7 @@ for p in paths:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from showup_tools.workflow import extract_student_handbook_information
+from simplified_workflow.workflow import extract_student_handbook_information
 
 class TestDynamicRagWorkflow(unittest.TestCase):
     def test_index_and_query_called(self):
@@ -20,10 +20,10 @@ class TestDynamicRagWorkflow(unittest.TestCase):
         content_outline = 'outline'
         handbook_text = 'some text'
         textbook_id = hashlib.md5(handbook_path.encode()).hexdigest()
-        with patch('showup_tools.workflow.extract_text_from_file', return_value=handbook_text) as p_extract, \
-             patch('showup_tools.workflow.get_vector_db') as p_get_db, \
-             patch('showup_tools.workflow.cache.get', return_value=None), \
-             patch('showup_tools.workflow.cache.set'):
+        with patch('simplified_workflow.workflow.extract_text_from_file', return_value=handbook_text) as p_extract, \
+             patch('simplified_workflow.workflow.get_vector_db') as p_get_db, \
+             patch('simplified_workflow.workflow.cache.get', return_value=None), \
+             patch('simplified_workflow.workflow.cache.set'):
             mock_db = MagicMock()
             mock_db.query_textbook.return_value = ['chunk']
             p_get_db.return_value = mock_db
