@@ -24,7 +24,7 @@ Each block type in the library has:
 * **`placement guidelines`**: General rules about where this block typically appears in a lesson (e.g., `learning_objectives` usually near the start, `key_takeaways` at the end).  
 * **`Output Format`**: How the block should be represented in the final generated content (e.g., a Markdown heading, a paragraph, a bulleted list, a specific placeholder tag).
 
-**Where it's defined:** The Block Library specification is embedded within the Planner Agent's prompt (`prompts/planning_prompt.txt`) \[cite: Research Validation of AI Content Generation Workflow.md\], often in a concise, type-definition style to optimize token usage.
+**Where it's defined:** The Block Library specification is embedded within the Planner Agent's prompt (`showup_tools/prompts/planning_prompt.txt`) \[cite: Research Validation of AI Content Generation Workflow.md\], often in a concise, type-definition style to optimize token usage.
 
 ## **3\. Stage 2: The Planning Stage (The "Architect")**
 
