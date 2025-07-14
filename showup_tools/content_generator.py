@@ -191,10 +191,11 @@ async def generate_three_versions_from_plan(
     use_dynamic = ui_settings.get("use_dynamic_blocks", True) and not template
     system_prompt = load_prompt("system/ai_editor_system_message")
 
-    prompt_template = load_prompt("generation/generation_prompt")
-    if not prompt_template:
+    try:
+        prompt_template = load_prompt("generation/generation_prompt")
+    except FileNotFoundError:
         logger.error("Generation prompt not found")
-        raise FileNotFoundError("generation prompt missing")
+        raise
 
     max_tokens = ui_settings.get("generation_settings", {}).get("max_tokens", 4000)
     freq_pen = ui_settings.get("generation_settings", {}).get("frequency_penalty", 0.0)

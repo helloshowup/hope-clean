@@ -20,9 +20,10 @@ async def run_refinement_stage(
 
     critique_path = config.get("critique_prompt_path") or "planning/plan_critique_prompt"
     refine_path = config.get("refine_prompt_path") or "planning/plan_refine_prompt"
-    critique_template = load_prompt(critique_path)
-    refine_template = load_prompt(refine_path)
-    if not critique_template or not refine_template:
+    try:
+        critique_template = load_prompt(critique_path)
+        refine_template = load_prompt(refine_path)
+    except FileNotFoundError:
         logger.error("Refinement prompts not found")
         new_item["status"] = "PLAN_FAILED"
         new_item["error"] = "Prompt not found"
