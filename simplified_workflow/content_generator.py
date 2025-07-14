@@ -15,7 +15,7 @@ from typing import Dict, List, Any, Optional
 from showup_core.api_client import generate_with_ai
 # Import RAG system
 from simplified_workflow.rag_system import enhanced_generate_content
-from .constants import EXCEL_CLARIFICATION
+from showup_tools.constants import EXCEL_CLARIFICATION
 from showup_core.utils import load_prompt
 
 # Set up logger
