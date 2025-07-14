@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Union, Literal, Annotated
 import json
 
-from pydantic import BaseModel, Field, create_model, ValidationError
+from pydantic import Field, create_model, ValidationError
 
 BLOCK_LIBRARY = {
     "lesson_metadata": {
@@ -192,12 +192,23 @@ def _coerce_plan_types(obj: Dict[str, Any]) -> Dict[str, Any]:
     for block in obj.get("content_blocks", []):
         if block.get("block_type") == "process_steps":
             steps = block.get("steps")
-            if steps is not None and not isinstance(steps, list):
+            if steps is None:
+                raise ValueError("process_steps block missing 'steps'")
+            if not isinstance(steps, list):
                 raise ValueError("process_steps.steps must be a list")
-            for step in steps or []:
+            for step in steps:
+                if not isinstance(step, dict):
+                    raise ValueError("each step in process_steps must be an object")
                 sn = step.get("step_number")
-                if sn is not None and not isinstance(sn, str):
+                if sn is None:
+                    raise ValueError("step_number required in process_steps.steps")
+                if not isinstance(sn, str):
                     step["step_number"] = str(sn)
+                desc = step.get("description")
+                if desc is None:
+                    raise ValueError("description required in process_steps.steps")
+                if not isinstance(desc, str):
+                    step["description"] = str(desc)
     return obj
 
 
@@ -217,4 +228,3 @@ def validate_plan(data: str | dict):
             msg = err["msg"]
             details.append(f"{loc}: {msg}")
         raise ValueError("; ".join(details))
-
