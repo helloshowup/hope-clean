@@ -211,7 +211,9 @@ class WorkflowApp(App):
             "use_reference_handbook": bool(abs_handbook_path),
             "reference_handbook_path": abs_handbook_path,
             "selected_model": _load_selected_model(DEFAULT_PLANNING_MODEL),
-            "initial_generation_model": models_cfg["generation_model"],
+            "initial_generation_model": models_cfg.get(
+                "initial_generation_model", models_cfg["generation_model"]
+            ),
             "comparison_model": models_cfg["comparison_model"],
             "review_model": models_cfg["review_model"],
             "planning_model": _load_selected_model(DEFAULT_PLANNING_MODEL),
