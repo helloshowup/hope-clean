@@ -8,6 +8,7 @@ flake8
 isort
 pydantic>=2
 openai
+instructor
 anthropic
 kivy
 pyinstaller
