@@ -215,10 +215,10 @@ def _create_comparison_prompt(generations: List[str],
         logger.warning("Template loader not available, using default template")
 
         template = load_prompt('review/content_comparison_prompt')
-        prompt = template.replace('{target_learner}', target_learner)
-        prompt = prompt.replace('{educational_context}', educational_context)
-        prompt = prompt.replace('{template_context}', template_context)
-        prompt = prompt.replace('{formatted_generations}', formatted_generations)
+        prompt = template.replace('{{target_learner}}', target_learner)
+        prompt = prompt.replace('{{educational_context}}', educational_context)
+        prompt = prompt.replace('{{template_context}}', template_context)
+        prompt = prompt.replace('{{formatted_generations}}', formatted_generations)
 
         logger.info(f"Created comparison prompt from file ({len(prompt)} characters)")
         return prompt
@@ -235,24 +235,28 @@ def _extract_comparison_results(result: str) -> Tuple[str, str]:
     """
     logger.info("Extracting comparison results")
     
-    # Extract best version
-    best_version_match = re.search(r'<best_version>(.*?)</best_version>', 
-                                  result, re.DOTALL)
-    
-    # Extract explanation
-    explanation_match = re.search(r'<explanation>(.*?)</explanation>', 
-                                 result, re.DOTALL)
-    
-    if best_version_match:
-        best_version = best_version_match.group(1).strip()
-    else:
-        logger.warning("Best version tags not found in comparison result")
-        best_version = result
-    
-    if explanation_match:
-        explanation = explanation_match.group(1).strip()
-    else:
-        logger.warning("Explanation tags not found in comparison result")
-        explanation = "No explanation provided."
-    
-    return best_version, explanation
+    pattern = re.compile(
+        r'^\s*<best_version>(.*?)</best_version>\s*<explanation>(.*?)</explanation>\s*$',
+        re.DOTALL,
+    )
+    match = pattern.fullmatch(result)
+
+    if match:
+        best_version = match.group(1).strip()
+        explanation = match.group(2).strip()
+        return best_version, explanation
+
+    errors = []
+    if not re.search(r'<best_version>.*?</best_version>', result, re.DOTALL):
+        errors.append("Expected <best_version> not found.")
+    if not re.search(r'<explanation>.*?</explanation>', result, re.DOTALL):
+        errors.append("Expected <explanation> not found.")
+
+    cleaned = re.sub(r'<best_version>.*?</best_version>', '', result, flags=re.DOTALL)
+    cleaned = re.sub(r'<explanation>.*?</explanation>', '', cleaned, flags=re.DOTALL)
+    if cleaned.strip():
+        errors.append("Extraneous text detected outside expected tags.")
+
+    error_msg = " ".join(errors) if errors else "Unexpected format in comparison result."
+    logger.error(error_msg)
+    raise ValueError(error_msg)

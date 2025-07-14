@@ -2,22 +2,22 @@ You are tasked with analyzing three generations of content created from the same
 
 1. Review the target learner information:
 <target_learner>
-{target_learner}
+{{target_learner}}
 </target_learner>
 
 2. Understand the context:
 <context>
-{educational_context}
+{{educational_context}}
 </context>
 
 3. Familiarize yourself with the template structure:
 <template>
-{template_context}
+{{template_context}}
 </template>
 
 4. Examine the three generations of content:
 <generations>
-{formatted_generations}
+{{formatted_generations}}
 </generations>
 
 5. Analyze the generations:
@@ -51,5 +51,7 @@ Your complete response should be structured as follows:
 <explanation>
 [Insert your brief explanation here]
 </explanation>
+
+IMPORTANT: Do not include any text outside the <best_version> and <explanation> tags. Any extraneous output will cause parsing errors.
 
 Remember to focus on creating content that is most suitable for the target learner while adhering to the given template and context.
