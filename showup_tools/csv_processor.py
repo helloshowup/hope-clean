@@ -47,6 +47,14 @@ def read_csv(csv_path: str) -> List[Dict[str, str]]:
         required_columns = [
             "Module", "Lesson", "Step number", "Step title", "Template Type"
         ]
+
+        # Learner profile column variants
+        learner_profile_columns = ["Learner Profile", "learner_profile"]
+
+        # Check for learner profile column
+        has_profile = any(col in rows[0] for col in learner_profile_columns)
+        if not has_profile:
+            required_columns.append("Learner Profile")
         
         # Check for rationale column with or without question mark
         rationale_columns = ["What is the rationale for this step", "What is the rationale for this step?"]
@@ -75,6 +83,9 @@ def read_csv(csv_path: str) -> List[Dict[str, str]]:
                 # Normalize rationale column
                 if key in rationale_columns:
                     normalized_row["What is the rationale for this step"] = value
+                # Normalize learner profile column variants
+                elif key in learner_profile_columns:
+                    normalized_row["Learner Profile"] = value
                 else:
                     normalized_row[key] = value
             normalized_rows.append(normalized_row)
@@ -106,6 +117,11 @@ def extract_variables(row: Dict[str, str], course_name: str, learner_profile: st
     # Extract rationale and content outline as separate variables
     rationale = row.get("What is the rationale for this step", "").strip()
     content_outline = row.get("Content Outline", "").strip()
+
+    # Use learner profile from the row if available
+    row_profile = row.get("Learner Profile", row.get("learner_profile", "")).strip()
+    if row_profile:
+        learner_profile = row_profile
     
     # Create a default objective if neither is available
     if not rationale and not content_outline:

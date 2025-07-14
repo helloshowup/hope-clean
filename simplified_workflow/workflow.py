@@ -976,12 +976,13 @@ async def main(csv_path: str,
                 
                 try:
                     # Process the row for this phase
+                    row_specific_profile = row_data_item.get("variables", {}).get("target_learner", learner_profile)
                     row_data_item = await process_row_for_phase(
                         row_data_item,
                         phase,
                         csv_rows,
                         output_dir,
-                        learner_profile,
+                        row_specific_profile,
                         instance_id,
                         ui_settings,
                         progress_queue,
