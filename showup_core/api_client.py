@@ -23,6 +23,7 @@ from .model_config import (
     DEFAULT_MODEL,
     DEFAULT_CONTEXT_MODEL,
     DEFAULT_PLANNING_MODEL,
+    get_model_provider,
 )
 
 try:
@@ -208,12 +209,27 @@ class ApiClient:
         # Select appropriate model
         model = self.model_selector.select_model(task_type, complexity)
         
-        # Use the selected model's API
-        if "claude" in model.lower():
+        # Use the selected model's API based on provider
+        provider = get_model_provider(model)
+
+        if provider == "claude":
             return await generate_with_claude(prompt, max_tokens, temperature, model, use_cache)
+        elif provider == "openai":
+            import openai
+            api_key = self.api_key or os.getenv("OPENAI_API_KEY")
+            client = openai.OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
+            return extract_response_content(response, client_type="openai")
         else:
-            # Fallback to Claude if OpenAI integration not implemented yet
-            self.logger.warning(f"Selected model {model} not fully supported, falling back to Claude")
+            # Fallback to Claude if model provider is unknown
+            self.logger.warning(
+                f"Selected model {model} not fully supported, falling back to Claude"
+            )
             return await generate_with_claude(prompt, max_tokens, temperature, DEFAULT_MODEL, use_cache)
 
 
