@@ -2,24 +2,22 @@ import os
 import logging
 from typing import Tuple
 from showup_core.api_client import generate_with_claude
+from showup_core.utils import load_prompt
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = os.path.join(os.path.dirname(__file__), 'prompts', 'lo_kt_generation_prompt.txt')
 
 async def generate_lo_and_kt_from_content(content: str, model: str = 'claude-3-haiku-20240307', max_tokens: int = 800) -> Tuple[str, str]:
     """Generate learning objectives and key takeaways from lesson content."""
-    try:
-        with open(PROMPT_PATH, 'r', encoding='utf-8') as f:
-            prompt_template = f.read()
-    except FileNotFoundError as e:
-        logger.error(f'Prompt file not found: {PROMPT_PATH}')
-        raise
+    prompt_template = load_prompt('generation/lo_kt_generation_prompt')
+    if not prompt_template:
+        logger.error('Prompt file not found')
+        raise FileNotFoundError('lo_kt_generation_prompt missing')
 
     prompt = prompt_template.replace('{{content}}', content)
     response = await generate_with_claude(
         prompt=prompt,
-        system_prompt='You are a veteran curriculum designer generating concise learning objectives and key takeaways.',
+        system_prompt=load_prompt('system/lo_kt_system_message'),
         max_tokens=max_tokens,
         temperature=0.3,
         model=model,

@@ -13,6 +13,7 @@ from typing import Dict, List, Any, Optional, Tuple
 # Import from core modules
 from showup_core.api_client import generate_with_claude
 from .constants import EXCEL_CLARIFICATION
+from showup_core.utils import load_prompt
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.ai_detector")
@@ -165,13 +166,7 @@ async def edit_content(content: str, detected_patterns: Dict[str, Any], target_l
         prompt = _create_editing_prompt(content, detected_patterns, target_learner)
         
         # Create a system prompt
-        system_prompt = (
-            "You are an expert editor specializing in making AI-generated content "
-            "more human-like and natural. You excel at identifying patterns typical "
-            "of AI writing and transforming them into authentic, engaging content "
-            "that resonates with specific target audiences."
-            f"\n\n{EXCEL_CLARIFICATION}"
-        )
+        system_prompt = load_prompt('system/ai_editor_system_message') + f"\n\n{EXCEL_CLARIFICATION}"
         
         # Call Claude API
         # Get token limit from ui_settings if available, otherwise use default
@@ -268,59 +263,14 @@ def _create_editing_prompt(content: str, detected_patterns: Dict[str, Any], targ
         logger.info(f"Created editing prompt from template loader ({len(prompt)} characters)")
         return prompt
     except ImportError:
-        logger.warning("Template loader not available, using hardcoded template")
-        
-        # Create the prompt
-        prompt = f"""
-You are tasked with editing a piece of writing that has been detected as AI-generated to make it more human-like and suitable for a specific target learner. Your goal is to analyze the text, identify AI-like characteristics, and make appropriate edits using the Claude edit tool.
+        logger.warning("Template loader not available, using default template")
 
-Here is the detected AI-written text:
+        template = load_prompt('review/ai_detection_editing')
+        prompt = template.replace("{content}", content)
+        prompt = prompt.replace("{patterns_info}", patterns_info)
+        prompt = prompt.replace("{target_learner}", target_learner)
 
-<detected_ai_text>
-{content}
-</detected_ai_text>
-
-The following AI patterns were detected:
-{patterns_info}
-
-The target learner for this text is:
-
-<target_learner>
-{target_learner}
-</target_learner>
-
-To complete this task, follow these steps:
-
-1. Analyze the text:
-   - Look for patterns typical of AI-generated content, such as overly formal language, repetitive structures, or lack of personal voice.
-   - Identify any content that may not be suitable or engaging for the target learner.
-
-2. Plan your edits:
-   - Consider how to make the language more natural and conversational.
-   - Think about ways to adapt the content to better suit the target learner's needs and interests.
-   - Plan to vary sentence structures and vocabulary to create a more human-like flow.
-
-3. Make edits using the Claude edit tool:
-   - Use the edit tool to make changes that will make the text more human-like and appropriate for the target learner.
-   - Focus on:
-     a. Simplifying complex sentences if needed for the target learner
-     b. Adding personal anecdotes or examples where appropriate
-     c. Varying sentence length and structure
-     d. Incorporating more natural transitions between ideas
-     e. Adjusting vocabulary to match the target learner's level
-     f. Adding rhetorical questions or conversational elements if suitable
-
-4. Review and refine:
-   - After making your initial edits, review the text again to ensure it reads naturally and meets the needs of the target learner.
-   - Make any final adjustments to improve flow, coherence, and suitability.
-
-5. Provide the edited version:
-   - Present the final edited version of the text, ensuring it is more human-like and appropriate for the target learner.
-
-Please output your edited version of the text within <edited_text> tags. Before the edited text, briefly explain the main changes you made and why they are appropriate for the target learner, enclosing this explanation in <explanation> tags.
-"""
-        
-        logger.info(f"Created hardcoded editing prompt ({len(prompt)} characters)")
+        logger.info(f"Created editing prompt from file ({len(prompt)} characters)")
         return prompt
 
 def _extract_editing_results(result: str) -> Tuple[str, str]:

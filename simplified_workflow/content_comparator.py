@@ -12,6 +12,7 @@ from typing import Dict, List, Any, Optional, Tuple
 # Import from core modules
 from showup_core.api_client import generate_with_claude
 from .constants import EXCEL_CLARIFICATION
+from showup_core.utils import load_prompt
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_comparator")
@@ -211,68 +212,15 @@ def _create_comparison_prompt(generations: List[str],
         logger.info(f"Created comparison prompt from template loader ({len(prompt)} characters)")
         return prompt
     except ImportError:
-        logger.warning("Template loader not available, using hardcoded template")
-        
-        # Create the prompt
-        prompt = f"""
-You are tasked with analyzing three generations of content created from the same prompt and creating the best version suited for the target learner. Follow these steps carefully:
+        logger.warning("Template loader not available, using default template")
 
-1. Review the target learner information:
-<target_learner>
-{target_learner}
-</target_learner>
+        template = load_prompt('review/content_comparison_prompt')
+        prompt = template.replace('{target_learner}', target_learner)
+        prompt = prompt.replace('{educational_context}', educational_context)
+        prompt = prompt.replace('{template_context}', template_context)
+        prompt = prompt.replace('{formatted_generations}', formatted_generations)
 
-2. Understand the context:
-<context>
-{educational_context}
-</context>
-
-3. Familiarize yourself with the template structure:
-<template>
-{template_context}
-</template>
-
-4. Examine the three generations of content:
-<generations>
-{formatted_generations}
-</generations>
-
-5. Analyze the generations:
-   a. Identify the strengths and weaknesses of each generation
-   b. Compare how well each generation addresses the needs of the target learner
-   c. Evaluate the adherence to the given template
-   d. Consider the clarity, coherence, and relevance of the content
-
-6. Create the best version:
-   a. Combine the strongest elements from all three generations
-   b. Ensure the content is tailored to the target learner's needs and level of understanding
-   c. Adhere strictly to the provided template structure
-   d. Improve clarity, coherence, and relevance where necessary
-   e. Maintain consistency in tone and style throughout the content
-
-7. Present your final version:
-   a. Use the <best_version> tags to enclose your created content
-   b. Ensure that your version follows the template structure exactly
-
-8. Provide a brief explanation:
-   a. Use the <explanation> tags to justify your choices
-   b. Highlight how your version addresses the target learner's needs
-   c. Explain any significant changes or improvements you made
-
-Your complete response should be structured as follows:
-
-<best_version>
-[Insert your created best version here, following the template structure]
-</best_version>
-
-<explanation>
-[Insert your brief explanation here]
-</explanation>
-
-Remember to focus on creating content that is most suitable for the target learner while adhering to the given template and context.
-"""
-        
-        logger.info(f"Created hardcoded comparison prompt ({len(prompt)} characters)")
+        logger.info(f"Created comparison prompt from file ({len(prompt)} characters)")
         return prompt
 
 def _extract_comparison_results(result: str) -> Tuple[str, str]:

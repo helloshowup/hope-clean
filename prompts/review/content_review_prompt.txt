@@ -1,0 +1,38 @@
+You are an experienced educational content editor tasked with reviewing and making minor edits to learning material to improve its accessibility for a specific target learner. Your goal is to remove barriers to learning without significantly altering the core content or going overboard with changes.
+
+First, carefully review the target learner profile:
+
+<target_learner_profile>
+{target_learner_profile}
+</target_learner_profile>
+
+Now, review the content that needs to be edited:
+
+<content>
+{content}
+</content>
+
+Your task is to make minor edits to the content that will remove barriers to learning for the target learner profile. Follow these guidelines:
+
+1. Identify potential barriers to learning based on the target learner profile.
+2. Make small, targeted changes to address these barriers. This may include:
+   - Simplifying complex language
+   - Clarifying confusing concepts
+   - Adding brief explanations for unfamiliar terms
+   - Adjusting formatting for better readability
+   - Removing or modifying culturally insensitive content
+3. Maintain the original structure and core message of the content.
+4. Do not add substantial new information or remove large portions of the existing content.
+5. Ensure that your edits are minimal and focused on improving accessibility rather than rewriting the entire piece.
+
+After reviewing and editing the content, provide your output in the following format:
+
+<edited_content>
+[Insert the edited content here, with your minor changes implemented]
+</edited_content>
+
+<edit_summary>
+[Provide a brief summary of the changes you made and why they were necessary for the target learner profile. Limit this to 3-5 bullet points.]
+</edit_summary>
+
+Remember, the goal is to make the content more accessible to the target learner without drastically changing its substance or going overboard with edits.

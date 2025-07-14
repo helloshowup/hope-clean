@@ -17,6 +17,7 @@ from showup_core.api_client import generate_with_claude
 # Import RAG system
 from simplified_workflow.rag_system import enhanced_generate_content
 from .constants import EXCEL_CLARIFICATION
+from showup_core.utils import load_prompt
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_generator")
@@ -186,17 +187,10 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
 
     use_dynamic = ui_settings.get("use_dynamic_blocks", True)
 
-    prompt_path = os.path.join(
-        os.path.dirname(__file__),
-        "prompts",
-        "generation_prompt.txt" if use_dynamic else "generation_prompt_legacy.txt",
-    )
-    try:
-        with open(prompt_path, "r", encoding="utf-8") as f:
-            prompt_template = f.read()
-    except FileNotFoundError:
-        logger.error(f"Generation prompt not found: {prompt_path}")
-        raise
+    prompt_template = load_prompt("generation/generation_prompt")
+    if not prompt_template:
+        logger.error("Generation prompt not found")
+        raise FileNotFoundError("generation prompt missing")
 
     max_tokens = ui_settings.get("generation_settings", {}).get("max_tokens", 4000)
     freq_pen = ui_settings.get("generation_settings", {}).get("frequency_penalty", 0.0)

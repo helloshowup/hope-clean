@@ -12,6 +12,7 @@ from typing import Dict, List, Any, Optional, Tuple
 # Import from core modules
 from showup_core.api_client import generate_with_claude
 from .constants import EXCEL_CLARIFICATION
+from showup_core.utils import load_prompt
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_reviewer")
@@ -149,51 +150,13 @@ def _create_review_prompt(content: str, target_learner_profile: str) -> str:
         logger.info(f"Created review prompt from template loader ({len(prompt)} characters)")
         return prompt
     except ImportError:
-        logger.warning("Template loader not available, using hardcoded template")
-        
-        # Create the prompt
-        prompt = f"""
-You are an experienced educational content editor tasked with reviewing and making minor edits to learning material to improve its accessibility for a specific target learner. Your goal is to remove barriers to learning without significantly altering the core content or going overboard with changes.
+        logger.warning("Template loader not available, using default template")
 
-First, carefully review the target learner profile:
+        template = load_prompt('review/content_review_prompt')
+        prompt = template.replace('{content}', content)
+        prompt = prompt.replace('{target_learner_profile}', target_learner_profile)
 
-<target_learner_profile>
-{target_learner_profile}
-</target_learner_profile>
-
-Now, review the content that needs to be edited:
-
-<content>
-{content}
-</content>
-
-Your task is to make minor edits to the content that will remove barriers to learning for the target learner profile. Follow these guidelines:
-
-1. Identify potential barriers to learning based on the target learner profile.
-2. Make small, targeted changes to address these barriers. This may include:
-   - Simplifying complex language
-   - Clarifying confusing concepts
-   - Adding brief explanations for unfamiliar terms
-   - Adjusting formatting for better readability
-   - Removing or modifying culturally insensitive content
-3. Maintain the original structure and core message of the content.
-4. Do not add substantial new information or remove large portions of the existing content.
-5. Ensure that your edits are minimal and focused on improving accessibility rather than rewriting the entire piece.
-
-After reviewing and editing the content, provide your output in the following format:
-
-<edited_content>
-[Insert the edited content here, with your minor changes implemented]
-</edited_content>
-
-<edit_summary>
-[Provide a brief summary of the changes you made and why they were necessary for the target learner profile. Limit this to 3-5 bullet points.]
-</edit_summary>
-
-Remember, the goal is to make the content more accessible to the target learner without drastically changing its substance or going overboard with edits.
-"""
-        
-        logger.info(f"Created hardcoded review prompt ({len(prompt)} characters)")
+        logger.info(f"Created review prompt from file ({len(prompt)} characters)")
         return prompt
 
 def _extract_review_results(result: str) -> Tuple[str, str]:

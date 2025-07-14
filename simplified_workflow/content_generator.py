@@ -16,6 +16,7 @@ from showup_core.api_client import generate_with_claude
 # Import RAG system
 from simplified_workflow.rag_system import enhanced_generate_content
 from .constants import EXCEL_CLARIFICATION
+from showup_core.utils import load_prompt
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_generator")
@@ -337,29 +338,7 @@ def load_content_generation_template() -> str:
     
     # Fallback template if file loading fails
     logger.warning("Using fallback hardcoded template")
-    template = """
-    You are a professional physical education curriculum developer creating NEW original educational content for a physical education course.
-        
-    YOUR TASK:
-    Create a COMPLETE, ORIGINAL LESSON about {{topic}} for {{target_learner}} in {{course_name}}.
-    This lesson should teach {{objective}} through practical, engaging activities and clear explanations.
-    
-    CONTENT OUTLINE TO COVER:
-    {{content_outline}}
-    
-    CRITICAL INSTRUCTIONS:
-    1. Generate COMPLETELY NEW, original educational content (do not ask for text to edit)
-    2. Write as a complete, ready-to-use lesson (not template placeholders)
-    3. Include clear explanations, examples, and activities relevant to physical education
-    4. Use age-appropriate language for {{target_learner}}
-    5. Make content practical and actionable for physical education classes
-    6. Do not include placeholder text or template instructions in your final output
-    7. Format with proper markdown headings, lists, and structure
-    8. Focus on creating substantive, instructionally sound content
-    
-    Your response should be 600-800 words in length. Create high-quality educational content that could be used immediately in a physical education classroom.
-    Do not reference this prompt or include meta-commentary - just provide the finished lesson content.
-    """
-    
+    template = load_prompt('generation/fallback_lesson_template')
+
     logger.info(f"Using default content generation template ({len(template)} characters)")
     return template
