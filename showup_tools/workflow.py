@@ -38,7 +38,13 @@ from simplified_workflow.rag_system.textbook_vector_db import get_vector_db
 from simplified_workflow.rag_system.ingest_textbook import extract_text_from_file
 import hashlib
 # Batch processing functionality removed as per requirement
-from .output_manager import save_as_markdown, create_output_directory, save_generation_summary, save_workflow_log
+from .output_manager import (
+    save_as_markdown,
+    create_output_directory,
+    save_generation_summary,
+    save_workflow_log,
+    save_initial_plan,
+)
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow")
@@ -336,6 +342,7 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
         step_info = f"Module {row.get('Module', '')}, Lesson {row.get('Lesson', '')}, Step {row.get('Step number', '')}"
         
         # Phase-specific directories
+        plan_dir = os.path.join(output_dir, "plan_results")
         generation_dir = os.path.join(output_dir, "generation_results")
         comparison_dir = os.path.join(output_dir, "comparison_results")
         review_dir = os.path.join(output_dir, "review_results")
@@ -363,6 +370,18 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                 result["completion_timestamp"] = datetime.datetime.now().isoformat()
             else:
                 add_log_entry("Planning", "completed", "Plan generated")
+                try:
+                    metadata = {
+                        "module": row.get("Module", ""),
+                        "lesson": row.get("Lesson", ""),
+                        "step_number": row.get("Step number", ""),
+                        "step_title": row.get("Step title", ""),
+                        "step_info": step_info,
+                    }
+                    plan_path = save_initial_plan(plan_dir, row_data_item["initial_plan"], metadata)
+                    row_data_item["initial_plan_path"] = plan_path
+                except Exception as save_e:
+                    logger.error(f"Error saving initial plan: {str(save_e)}")
 
         elif phase == "refine":
             add_log_entry("Refinement", "started", "Refining plan")
@@ -847,17 +866,19 @@ async def main(csv_path: str,
         summary["output_dir"] = output_dir
         
         # Create phase-specific directories for intermediate results
+        plan_dir = os.path.join(output_dir, "plan_results")
         generation_dir = os.path.join(output_dir, "generation_results")
         comparison_dir = os.path.join(output_dir, "comparison_results")
         review_dir = os.path.join(output_dir, "review_results")
         final_dir = os.path.join(output_dir, "final_content")
         
         # Create all phase directories
-        for phase_dir in [generation_dir, comparison_dir, review_dir, final_dir]:
+        for phase_dir in [plan_dir, generation_dir, comparison_dir, review_dir, final_dir]:
             os.makedirs(phase_dir, exist_ok=True)
             logger.info(f"Created phase directory: {phase_dir}")
         
         # Update summary with phase directories - CRITICAL FOR UI
+        summary["plan_dir"] = plan_dir
         summary["generation_dir"] = generation_dir
         summary["comparison_dir"] = comparison_dir
         summary["review_dir"] = review_dir
@@ -1125,6 +1146,8 @@ async def main(csv_path: str,
         # Note: Removed emoji flag to prevent Unicode encoding errors
         
         # Ensure the directory paths are in the summary for the UI
+        if "plan_dir" not in summary:
+            summary["plan_dir"] = plan_dir
         if "generation_dir" not in summary:
             summary["generation_dir"] = generation_dir
         if "comparison_dir" not in summary:
@@ -1159,6 +1182,8 @@ async def main(csv_path: str,
         # Ensure directory paths are in the summary even in case of error
         if "output_dir" in summary:
             output_dir = summary["output_dir"]
+            if "plan_dir" not in summary:
+                summary["plan_dir"] = os.path.join(output_dir, "plan_results")
             if "generation_dir" not in summary:
                 summary["generation_dir"] = os.path.join(output_dir, "generation_results")
             if "comparison_dir" not in summary:
@@ -1170,6 +1195,8 @@ async def main(csv_path: str,
         else:
             # If output_dir is not available, still provide the directory paths
             # This ensures the UI always has these values, even in case of early errors
+            if "plan_dir" not in summary:
+                summary["plan_dir"] = "plan_results"
             if "generation_dir" not in summary:
                 summary["generation_dir"] = "generation_results"
             if "comparison_dir" not in summary:
@@ -1218,6 +1245,7 @@ def run_workflow(csv_path: str, course_name: str, learner_profile: str,
                 "error": f"Workflow returned unexpected result type: {type(result).__name__}",
                 "output_dir": "unknown",
                 "processed_rows": [],
+                "plan_dir": "unknown",
                 "generation_dir": "unknown",
                 "comparison_dir": "unknown",
                 "review_dir": "unknown",
@@ -1225,7 +1253,7 @@ def run_workflow(csv_path: str, course_name: str, learner_profile: str,
             }
         
         # Ensure result contains all required directory paths for UI
-        required_keys = ["generation_dir", "comparison_dir", "review_dir", "final_dir"]
+        required_keys = ["plan_dir", "generation_dir", "comparison_dir", "review_dir", "final_dir"]
         for key in required_keys:
             if key not in result and "output_dir" in result:
                 # Add missing keys with default paths if output_dir is available
@@ -1245,6 +1273,7 @@ def run_workflow(csv_path: str, course_name: str, learner_profile: str,
             "error": f"Workflow execution failed: {str(e)}",
             "output_dir": "unknown",
             "processed_rows": [],
+            "plan_dir": "unknown",
             "generation_dir": "unknown",
             "comparison_dir": "unknown",
             "review_dir": "unknown",
