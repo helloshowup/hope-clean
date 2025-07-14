@@ -14,7 +14,7 @@ from tkinter import filedialog
 from kivy.uix.progressbar import ProgressBar
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
-from showup_core.model_config import DEFAULT_PLANNING_MODEL
+from showup_core.model_config import DEFAULT_PLANNING_MODEL, load_model_config
 from showup_core.config import create_argument_parser
 
 import asyncio
@@ -229,11 +229,15 @@ class WorkflowApp(App):
                     self.status_message = f"[color=ff8c00]Warning: Handbook file not found at {abs_handbook_path}. Proceeding without handbook.[/color]"
                     abs_handbook_path = ""
 
+        models_cfg = load_model_config()
+
         ui_settings = {
             "use_reference_handbook": bool(abs_handbook_path),
             "reference_handbook_path": abs_handbook_path,
             "selected_model": DEFAULT_PLANNING_MODEL,
-            "initial_generation_model": "claude-3-haiku-20240307",
+            "initial_generation_model": models_cfg["generation_model"],
+            "comparison_model": models_cfg["comparison_model"],
+            "review_model": models_cfg["review_model"],
             "planning_model": DEFAULT_PLANNING_MODEL,
             "refinement_model": DEFAULT_PLANNING_MODEL,
             "planning_max_tokens": 8000,

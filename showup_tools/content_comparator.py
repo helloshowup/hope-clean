@@ -76,11 +76,7 @@ async def compare_and_combine(generations: List[str],
             # Call Claude API directly (batch processing has been removed from the workflow)
             # Use token limit from UI settings if provided, otherwise use 8000 as default
             token_limit = ui_settings.get('token_limit', 8000) if ui_settings else 8000
-            model = (
-                ui_settings.get('model', 'claude-3-haiku-20240307')
-                if ui_settings
-                else 'claude-3-haiku-20240307'
-            )
+            model = ui_settings['model']
             
             logger.info(f"Using token limit from UI settings: {token_limit}")
             

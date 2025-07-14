@@ -1,0 +1,6 @@
+{
+  "generation_model": "claude-3-sonnet-20240620",
+  "comparison_model": "claude-3-sonnet-20240620",
+  "review_model": "claude-3-sonnet-20240620",
+  "lo_kt_model": "claude-3-sonnet-20240620"
+}

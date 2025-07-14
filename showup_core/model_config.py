@@ -1,6 +1,17 @@
-"""
-Model configuration module for AI API models.
-"""
+"""Model configuration module for AI API models."""
+
+import json
+import pathlib
+
+_CACHE = None
+
+def load_model_config():
+    """Load model configuration from JSON file (cached)."""
+    global _CACHE
+    if _CACHE is None:
+        path = pathlib.Path(__file__).parent.parent / "config" / "model_settings.json"
+        _CACHE = json.loads(path.read_text())
+    return _CACHE
 
 # Available Claude models
 CLAUDE_MODELS = [

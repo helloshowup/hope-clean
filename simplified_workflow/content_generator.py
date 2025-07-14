@@ -52,7 +52,7 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
     # Get model from settings - prioritize initial_generation_model if available
     model = settings.get(
         "initial_generation_model",
-        settings.get("selected_model", "claude-3-haiku-20240307"),
+        settings["selected_model"],
     )
 
     # Get template-specific settings if available
@@ -208,7 +208,7 @@ async def generate_three_versions(variables: Dict[str, str], template: str) -> L
     # Get the initial generation model from UI settings
     model = ui_settings.get(
         "initial_generation_model",
-        ui_settings.get("selected_model", "claude-3-haiku-20240307"),
+        ui_settings["selected_model"],
     )
     logger.info(f"Using initial generation model: {model} for three versions generation")
     
