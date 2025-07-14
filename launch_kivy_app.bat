@@ -54,7 +54,7 @@ set "REVIEW_PROMPT=prompts/review/content_review_prompt.txt"
 
 ECHO Launching Kivy application...
 REM Added '--' to separate Kivy arguments from application arguments
-python main.py -- --csv_file data/test_input.csv --course_name "Introduction to Academic Grit" --log_level DEBUG
+python main.py -- --csv_file data/test_input.csv --log_level DEBUG
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Kivy application exited with errors.
     pause
