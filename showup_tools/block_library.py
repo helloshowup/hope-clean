@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, create_model, ValidationError
+from .models import PlanModel
 
 BLOCK_LIBRARY = {
     "lesson_metadata": {
@@ -160,15 +161,15 @@ def build_pydantic_models():
     return models, PlanModel
 
 
-BLOCK_MODELS, PLAN_MODEL = build_pydantic_models()
+BLOCK_MODELS, _ = build_pydantic_models()
 
 
 def validate_plan(data: str | dict):
     """Validate a plan JSON string or object."""
     try:
         if isinstance(data, str):
-            return PLAN_MODEL.model_validate_json(data)
-        return PLAN_MODEL.model_validate(data)
+            return PlanModel.model_validate_json(data)
+        return PlanModel.model_validate(data)
     except ValidationError as e:
         raise ValueError(str(e))
 
