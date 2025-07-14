@@ -153,8 +153,8 @@ def _create_review_prompt(content: str, target_learner_profile: str) -> str:
         logger.warning("Template loader not available, using default template")
 
         template = load_prompt('review/content_review_prompt')
-        prompt = template.replace('{content}', content)
-        prompt = prompt.replace('{target_learner_profile}', target_learner_profile)
+        prompt = template.replace('{{content}}', content)
+        prompt = prompt.replace('{{target_learner_profile}}', target_learner_profile)
 
         logger.info(f"Created review prompt from file ({len(prompt)} characters)")
         return prompt
@@ -171,24 +171,28 @@ def _extract_review_results(result: str) -> Tuple[str, str]:
     """
     logger.info("Extracting review results")
     
-    # Extract edited content
-    edited_content_match = re.search(r'<edited_content>(.*?)</edited_content>', 
-                                    result, re.DOTALL)
-    
-    # Extract edit summary
-    edit_summary_match = re.search(r'<edit_summary>(.*?)</edit_summary>', 
-                                  result, re.DOTALL)
-    
-    if edited_content_match:
-        edited_content = edited_content_match.group(1).strip()
-    else:
-        logger.warning("Edited content tags not found in review result")
-        edited_content = result
-    
-    if edit_summary_match:
-        edit_summary = edit_summary_match.group(1).strip()
-    else:
-        logger.warning("Edit summary tags not found in review result")
-        edit_summary = "No edit summary provided."
-    
-    return edited_content, edit_summary
+    pattern = re.compile(
+        r'^\s*<edited_content>(.*?)</edited_content>\s*<edit_summary>(.*?)</edit_summary>\s*$',
+        re.DOTALL,
+    )
+    match = pattern.fullmatch(result)
+
+    if match:
+        edited_content = match.group(1).strip()
+        edit_summary = match.group(2).strip()
+        return edited_content, edit_summary
+
+    errors = []
+    if not re.search(r'<edited_content>.*?</edited_content>', result, re.DOTALL):
+        errors.append("Expected <edited_content> not found.")
+    if not re.search(r'<edit_summary>.*?</edit_summary>', result, re.DOTALL):
+        errors.append("Expected <edit_summary> not found.")
+
+    cleaned = re.sub(r'<edited_content>.*?</edited_content>', '', result, flags=re.DOTALL)
+    cleaned = re.sub(r'<edit_summary>.*?</edit_summary>', '', cleaned, flags=re.DOTALL)
+    if cleaned.strip():
+        errors.append("Extraneous text detected outside expected tags.")
+
+    error_msg = " ".join(errors) if errors else "Unexpected format in review result."
+    logger.error(error_msg)
+    raise ValueError(error_msg)
