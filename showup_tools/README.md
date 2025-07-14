@@ -68,3 +68,10 @@ pytest
 - Support for learner profiles and student handbooks
 - Configurable output settings
 - Logging and error handling
+- Optional template directory setting for custom content templates
+
+### Template Directory
+
+You can choose a folder containing your own markdown templates. In the UI this
+is saved as the `template_directory` setting. If omitted, the app loads the
+default template from the repository's `templates/` folder.

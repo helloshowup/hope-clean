@@ -283,12 +283,19 @@ def extract_educational_content(content: str) -> str:
         logger.warning("Educational content tags not found, returning original content")
         return content
 
-def load_content_generation_template() -> str:
-    """
-    Load the content generation template.
-    
+from pathlib import Path
+
+def load_content_generation_template(ui_settings: Optional[Dict[str, Any]] = None) -> str:
+    """Load the content generation template.
+
+    Args:
+        ui_settings: Optional settings dict. If it contains a
+            ``template_directory`` key, templates will be loaded from this
+            directory. Otherwise the default ``templates`` folder in the
+            repository root is used.
+
     Returns:
-        Template string for content generation
+        Template string for content generation.
     """
     # IMPORTANT NOTES: 
     # 1. All content generation will now use high-school-lesson-template structure regardless of
@@ -298,9 +305,16 @@ def load_content_generation_template() -> str:
     # 3. The system maintains a fallback mechanism below to prevent workflow failures
     #    if templates are missing
     
-    # Path to templates directory specified by user
-    template_dir = r"C:\Users\User\Desktop\ShowupSquaredV4 (2)\ShowupSquaredV4\ShowupSquaredV4\showup_tools\simplified_app\templates"
-    template_path = os.path.join(template_dir, "high-school-lesson-template.md")
+    if ui_settings is None:
+        ui_settings = {}
+
+    template_dir_setting = ui_settings.get("template_directory")
+    if template_dir_setting:
+        template_dir = Path(template_dir_setting)
+    else:
+        template_dir = Path(__file__).resolve().parents[1] / "templates"
+
+    template_path = template_dir / "high-school-lesson-template.md"
     
     logger.info(f"Loading content generation template from {template_path}")
     
@@ -314,8 +328,8 @@ def load_content_generation_template() -> str:
     
     # Try to load the template from file
     try:
-        if os.path.exists(template_path):
-            with open(template_path, 'r', encoding='utf-8') as file:
+        if template_path.exists():
+            with template_path.open('r', encoding='utf-8') as file:
                 template = file.read()
                 logger.info("Successfully loaded template from file")
                 return template

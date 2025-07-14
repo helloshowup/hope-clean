@@ -912,7 +912,7 @@ async def main(csv_path: str,
                 
                 # 3. Load template
                 add_log_entry("Load Template", "started", "Loading content generation template")
-                template = load_content_generation_template()
+                template = load_content_generation_template(ui_settings)
                 add_log_entry("Load Template", "completed", "Template loaded successfully")
                 
                 # Store data for this row
