@@ -157,7 +157,7 @@ class WorkflowApp(App):
             "initial_generation_model": "claude-3-haiku-20240307",
             "planning_model": "claude-3-haiku-20240307",
             "refinement_model": "claude-3-haiku-20240307",
-            "planning_max_tokens": 1000,
+            "planning_max_tokens": 8000,
             "refinement_max_tokens": 1000,
             "planning_temperature": 0.3,
             "refinement_temperature": 0.3,

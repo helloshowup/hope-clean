@@ -58,31 +58,40 @@ async def run_planning_stage(
     model_id = config.get('model_id', 'claude-3-haiku-20240307')
     provider = get_model_provider(model_id)
 
-    try:
-        if provider == 'openai':
-            import openai
-            client = openai.OpenAI(api_key=config.get('openai_api_key'))
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=config.get('max_tokens', 1000),
-                temperature=config.get('temperature', 0.3)
-            )
-            ai_response = response.choices[0].message.content
-        else:
-            ai_response = await generate_with_claude(
-                prompt,
-                max_tokens=config.get('max_tokens', 1000),
-                temperature=config.get('temperature', 0.3),
-                model=model_id,
-                task_type='planning'
-            )
+    max_attempts = config.get("max_attempts", 3)
+    last_error = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            if provider == 'openai':
+                import openai
+                client = openai.OpenAI(api_key=config.get('openai_api_key'))
+                response = client.chat.completions.create(
+                    model=model_id,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=config.get('max_tokens', 8000),
+                    temperature=config.get('temperature', 0.3)
+                )
+                ai_response = response.choices[0].message.content
+            else:
+                ai_response = await generate_with_claude(
+                    prompt,
+                    max_tokens=config.get('max_tokens', 8000),
+                    temperature=config.get('temperature', 0.3),
+                    model=model_id,
+                    task_type='planning'
+                )
 
-        new_item["initial_plan"] = validate_plan(ai_response).model_dump(exclude_none=True)
-        new_item["status"] = "PLAN_GENERATED"
-    except Exception as e:
-        logger.error(f"Planning stage failed: {e}")
+            new_item["initial_plan"] = validate_plan(ai_response).model_dump(exclude_none=True)
+            new_item["status"] = "PLAN_GENERATED"
+            break
+        except Exception as e:
+            last_error = e
+            logger.error(f"Planning attempt {attempt} failed: {e}")
+            if attempt < max_attempts:
+                await asyncio.sleep(1)
+
+    if new_item.get("status") != "PLAN_GENERATED":
         new_item["status"] = "PLAN_FAILED"
-        new_item["error"] = str(e)
+        new_item["error"] = str(last_error) if last_error else "unknown error"
 
     return new_item
