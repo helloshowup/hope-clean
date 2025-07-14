@@ -51,10 +51,16 @@ def read_csv(csv_path: str) -> List[Dict[str, str]]:
         # Learner profile column variants
         learner_profile_columns = ["Learner Profile", "learner_profile"]
 
+        # Word count column variants
+        word_count_columns = ["Target_Word_Count", "Target Word Count", "word_count"]
+
         # Check for learner profile column
         has_profile = any(col in rows[0] for col in learner_profile_columns)
         if not has_profile:
             required_columns.append("Learner Profile")
+
+        # Check for word count column (optional)
+        has_word_count = any(col in rows[0] for col in word_count_columns)
         
         # Check for rationale column with or without question mark
         rationale_columns = ["What is the rationale for this step", "What is the rationale for this step?"]
@@ -86,6 +92,9 @@ def read_csv(csv_path: str) -> List[Dict[str, str]]:
                 # Normalize learner profile column variants
                 elif key in learner_profile_columns:
                     normalized_row["Learner Profile"] = value
+                # Normalize word count column variants
+                elif key in word_count_columns:
+                    normalized_row["word_count"] = value
                 else:
                     normalized_row[key] = value
             normalized_rows.append(normalized_row)
@@ -131,6 +140,8 @@ def extract_variables(row: Dict[str, str], course_name: str, learner_profile: st
         objective = f"Learn about {row.get('Step title', 'this topic')}"
     
     # Create variables dictionary
+    word_count = row.get("word_count", "").strip()
+
     variables = {
         "topic": course_name,
         "objective": objective,
@@ -142,7 +153,8 @@ def extract_variables(row: Dict[str, str], course_name: str, learner_profile: st
         "lesson": row.get("Lesson", ""),
         "step_number": row.get("Step number", ""),
         "step_title": row.get("Step title", ""),
-        "template_type": row.get("Template Type", "")
+        "template_type": row.get("Template Type", ""),
+        "word_count": word_count,
     }
     
     # Replace any non-breaking hyphens (‑) with regular hyphens to avoid encoding issues in console output
