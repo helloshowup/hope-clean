@@ -260,6 +260,12 @@ async def extract_student_handbook_information(content_outline: str, handbook_pa
                 textbook_id=textbook_id,
                 top_k=5
             )
+
+            # Convert results to plain strings if dictionaries were returned
+            relevant_chunks = [
+                chunk["content"] if isinstance(chunk, dict) else str(chunk)
+                for chunk in relevant_chunks
+            ]
             
             # Guard against silent RAG failure
             if not relevant_chunks:
