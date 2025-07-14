@@ -52,7 +52,12 @@ def read_csv(csv_path: str) -> List[Dict[str, str]]:
         learner_profile_columns = ["Learner Profile", "learner_profile"]
 
         # Word count column variants
-        word_count_columns = ["Target_Word_Count", "Target Word Count", "word_count"]
+        word_count_columns = [
+            "Target_Word_Count",
+            "Target Word Count",
+            "word_count",
+            "Word Count",  # recognize common title-cased column name
+        ]
 
         # Check for learner profile column
         has_profile = any(col in rows[0] for col in learner_profile_columns)
