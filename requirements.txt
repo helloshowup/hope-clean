@@ -5,7 +5,7 @@ claude-api
 python-dotenv
 black
 flake8
-isort
+assort
 pydantic>=2
 openai
 instructor
@@ -18,4 +18,5 @@ faiss-cpu
 pypdf2
 pdfminer.six
 langchain-community
-pydantic 
+pydantic
+openai
