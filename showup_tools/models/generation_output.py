@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Literal, Dict, Any, Optional, Union
+from typing import List, Literal, Dict, Any, Optional, Union, Annotated
 from pydantic import BaseModel, Field
 
 class SentimentAnalysis(BaseModel):
@@ -193,20 +193,23 @@ class ImagePlaceholder(BaseModel):
     placement_suggestion: Optional[str] = None
 
 
-AnyBlock = Union[
-    LessonMetadata,
-    LearningObjectives,
-    Introduction,
-    SectionHeading,
-    ExplanatoryText,
-    ListBlock,
-    ExampleAnalysis,
-    ProcessSteps,
-    ReflectionPrompt,
-    KeyTakeaways,
-    DiagramPlaceholder,
-    FlowchartPlaceholder,
-    ImagePlaceholder,
+AnyBlock = Annotated[
+    Union[
+        LessonMetadata,
+        LearningObjectives,
+        Introduction,
+        SectionHeading,
+        ExplanatoryText,
+        ListBlock,
+        ExampleAnalysis,
+        ProcessSteps,
+        ReflectionPrompt,
+        KeyTakeaways,
+        DiagramPlaceholder,
+        FlowchartPlaceholder,
+        ImagePlaceholder,
+    ],
+    Field(discriminator='block_type')
 ]
 
 
@@ -216,4 +219,4 @@ class PlanModel(BaseModel):
     content_title: str
     target_audience: str
     estimated_word_count: int
-    content_blocks: List[AnyBlock] = Field(..., discriminator='block_type')
+    content_blocks: List[AnyBlock]
