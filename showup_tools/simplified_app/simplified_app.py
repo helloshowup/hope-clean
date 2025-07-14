@@ -107,7 +107,6 @@ class SimplifiedContentGeneratorApp:
         self.handbook_path = None
         self.settings_path = settings_path
         self.output_dir_var = tk.StringVar(value=output_dir)
-        self.course_name = tk.StringVar(value='Photography Fundamentals')
         self.learner_profile = ''
         self.ui_settings = {}
         self.template_settings = {}
@@ -205,15 +204,6 @@ class SimplifiedContentGeneratorApp:
             ).pack(side=tk.LEFT, padx=5)
         ttk.Button(settings_frame, text='Browse...', command=self.
             _browse_settings).pack(side=tk.LEFT, padx=5)
-        course_frame = ttk.LabelFrame(main_frame, text='Course Information',
-            style='BG.TLabelframe')
-        course_frame.pack(fill=tk.X, pady=10, padx=5)
-        course_name_frame = ttk.Frame(course_frame, style='BG.TFrame')
-        course_name_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(course_name_frame, text='Course Name:', style='BG.TLabel'
-            ).pack(side=tk.LEFT, padx=5)
-        ttk.Entry(course_name_frame, textvariable=self.course_name, width=50
-            ).pack(side=tk.LEFT, padx=5)
         module_frame = ttk.LabelFrame(main_frame, text='Module Selection',
             style='BG.TLabelframe')
         module_frame.pack(fill=tk.X, pady=10, padx=5)
@@ -767,11 +757,6 @@ class SimplifiedContentGeneratorApp:
             messagebox.showwarning('Missing Input',
                 'Please select a learner profile file')
             return
-        course_name = self.course_name.get()
-        if not course_name:
-            messagebox.showwarning('Missing Input',
-                'Please enter a course name')
-            return
         selected_model_display = self.model_var.get()
         selected_model = self.model_display_to_id.get(selected_model_display,
             '')
@@ -798,11 +783,11 @@ class SimplifiedContentGeneratorApp:
             return
         if selected_modules:
             confirm_message = (
-                f"Generate content for course '{course_name}' using CSV file '{os.path.basename(self.csv_file_path)}' for selected modules: {', '.join(selected_modules)}?"
+                f"Generate content using CSV file '{os.path.basename(self.csv_file_path)}' for selected modules: {', '.join(selected_modules)}?"
                 )
         else:
             confirm_message = (
-                f"Generate content for course '{course_name}' using CSV file '{os.path.basename(self.csv_file_path)}' for ALL modules?"
+                f"Generate content using CSV file '{os.path.basename(self.csv_file_path)}' for ALL modules?"
                 )
         if not messagebox.askyesno('Confirm Generation', confirm_message):
             return
@@ -896,7 +881,7 @@ class SimplifiedContentGeneratorApp:
             try:
                 workflow_result = run_workflow(
                     csv_path=csv_path_to_use,
-                    course_name=self.course_name.get(),
+                    course_name='',
                     learner_profile=self.learner_profile,
                     ui_settings=updated_settings,
                     selected_modules=selected_modules,
@@ -1067,7 +1052,6 @@ class SimplifiedContentGeneratorApp:
             return
         self.results_text.delete(1.0, tk.END)
         summary = 'Generation Summary:\n'
-        summary += f"Course: {result.get('course_name', 'unknown')}\n"
         summary += (
             f"CSV File: {os.path.basename(result.get('csv_path', 'unknown'))}\n"
             )
