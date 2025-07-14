@@ -1,14 +1,20 @@
 """
-Claude Text Editor Integration
+AI-assisted Text Editor Integration
 
-This module provides integration with Claude's text editor tool capability,
-allowing AI-assisted document editing.
+This module provides functions to edit documents using the model specified in
+``user_settings.json``. It originally used the Claude text editor tool but now
+supports both Claude and OpenAI models.
 """
 
 import os
+import json
 import logging
 import shutil
+from pathlib import Path
 from datetime import datetime
+import asyncio
+
+from .model_config import DEFAULT_MODEL
 def create_timestamped_backup(file_path: str, backup_dir: str | None = None) -> str:
     """Create a timestamped backup of *file_path*."""
     backup_dir = backup_dir or os.path.dirname(file_path)
@@ -20,6 +26,17 @@ def create_timestamped_backup(file_path: str, backup_dir: str | None = None) -> 
 
 # Set up logging
 logger = logging.getLogger('claude_editor')
+
+def _load_selected_model() -> str:
+    """Load the user-selected model from the root user_settings.json."""
+    settings_file = Path(__file__).resolve().parents[1] / "user_settings.json"
+    try:
+        with open(settings_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("selected_model", DEFAULT_MODEL)
+    except Exception as e:
+        logger.warning(f"Could not load user settings: {e}")
+        return DEFAULT_MODEL
 
 class ClaudeEditor:
     """A class that implements the Claude Text Editor tool functionality."""
@@ -215,7 +232,7 @@ def enhance_document(file_path, template_path=None, custom_prompt=None, learner_
     """
     try:
         # Import here to avoid circular imports
-        from .api_client import generate_with_claude
+        from .api_client import generate_with_ai
         
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -278,14 +295,19 @@ def enhance_document(file_path, template_path=None, custom_prompt=None, learner_
             {learner_profile}
             """
         
-        # Call Claude API
-        enhanced_content = generate_with_claude(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            model="claude-3-7-sonnet-20250219",
-            max_tokens=4000,
-            temperature=0.2,
-            task_type="document_enhancement"
+        # Determine which model to use
+        model_id = _load_selected_model()
+
+        # Call AI API respecting the selected model
+        enhanced_content = asyncio.run(
+            generate_with_ai(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                model=model_id,
+                max_tokens=4000,
+                temperature=0.2,
+                task_type="document_enhancement",
+            )
         )
         
         logger.info(f"Enhanced document: {file_path}")
