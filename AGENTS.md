@@ -26,7 +26,6 @@ Your mission is to maintain and improve the "ShowupSquared Simplified Content Ge
 ## **4\. Guiding Principles & Rules of Engagement**
 
 * **No Workarounds**: You will not implement temporary patches or "cheap" fixes. Address the root cause of the problem directly.  
-* **Test-Driven Changes**: Before making any significant change to the application's logic, you must first write a simple, standalone test script that isolates the functionality you are about to change. This test should initially fail, then pass once your changes are correctly implemented. This is non-negotiable.  
 * **Clarity and Verification**: All changes must be clear and easy to understand. After implementing a change, you must run the verification test you created to prove it works as expected.  
 * **One Task at a Time**: Focus solely on the specific task assigned to you. Do not refactor unrelated parts of the code unless it is absolutely necessary to complete the primary task.
 
