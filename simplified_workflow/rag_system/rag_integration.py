@@ -14,6 +14,8 @@ import asyncio
 import hashlib
 import logging
 from typing import Dict, Any, Optional
+from pathlib import Path
+from showup_core.core.path_utils import get_project_root
 
 # Import our RAG components
 from .token_counter import count_tokens
@@ -22,6 +24,12 @@ from .textbook_vector_db import get_vector_db
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Default handbook location, configurable via environment variable
+DEFAULT_HANDBOOK_PATH = os.getenv(
+    "SHOWUP_HANDBOOK_PATH",
+    str(Path(get_project_root()) / "data" / "handbook.md")
+)
 
 
 async def generate_with_claude_rag(prompt: str, 
@@ -260,7 +268,7 @@ async def main():
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     
-    handbook_path = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\showup-tools\\simplified_app\\EHS Student Catalog_Handbook from Canva.md"
+    handbook_path = DEFAULT_HANDBOOK_PATH
     
     if not os.path.exists(handbook_path):
         logger.error(f"Handbook not found: {handbook_path}")

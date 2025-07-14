@@ -17,6 +17,7 @@ from showup_core.api_client import generate_with_ai
 from simplified_workflow.rag_system import enhanced_generate_content
 from .constants import EXCEL_CLARIFICATION
 from showup_core.utils import load_prompt
+from showup_core.core.path_utils import get_template_base_dir
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_generator")
@@ -310,8 +311,8 @@ def load_content_generation_template() -> str:
     # 3. The system maintains a fallback mechanism below to prevent workflow failures
     #    if templates are missing
     
-    # Path to templates directory specified by user
-    template_dir = r"C:\Users\User\Desktop\ShowupSquaredV4 (2)\ShowupSquaredV4\ShowupSquaredV4\showup_tools\simplified_app\templates"
+    # Resolve the template directory from configuration or repository root
+    template_dir = str(get_template_base_dir())
     template_path = os.path.join(template_dir, "high-school-lesson-template.md")
     
     logger.info(f"Loading content generation template from {template_path}")
