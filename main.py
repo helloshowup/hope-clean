@@ -14,6 +14,7 @@ from tkinter import filedialog
 from kivy.uix.progressbar import ProgressBar
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
+from showup_core.model_config import DEFAULT_PLANNING_MODEL
 
 import asyncio
 import threading
@@ -155,7 +156,7 @@ class WorkflowApp(App):
             "reference_handbook_path": abs_handbook_path,
             "selected_model": "claude-3-haiku-20240307",
             "initial_generation_model": "claude-3-haiku-20240307",
-            "planning_model": "claude-3-haiku-20240307",
+            "planning_model": DEFAULT_PLANNING_MODEL,
             "refinement_model": "claude-3-haiku-20240307",
             "planning_max_tokens": 8000,
             "refinement_max_tokens": 1000,

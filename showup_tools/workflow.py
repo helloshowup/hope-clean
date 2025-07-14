@@ -30,6 +30,7 @@ from simplified_workflow.markdown_utils import insert_sections_in_markdown
 from .constants import EXCEL_CLARIFICATION
 
 from showup_core.api_client import generate_with_claude
+from showup_core.model_config import DEFAULT_PLANNING_MODEL
 # Import RAG system components
 from simplified_workflow.rag_system.token_counter import count_tokens
 from simplified_workflow.rag_system.cache_manager import cache
@@ -340,7 +341,8 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             add_log_entry("Planning", "started", "Generating initial plan")
             plan_cfg = {
                 "model_id": ui_settings.get(
-                    "planning_model", ui_settings.get("selected_model", "claude-3-haiku-20240307")
+                    "planning_model",
+                    ui_settings.get("selected_model", DEFAULT_PLANNING_MODEL),
                 ),
                 "max_tokens": ui_settings.get("planning_max_tokens", 8000),
                 "temperature": ui_settings.get("planning_temperature", 0.3),
