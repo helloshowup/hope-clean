@@ -21,10 +21,7 @@ async def run_planning_stage(
 
     new_item = row_data_item.copy()
 
-    prompt_path = config.get(
-        "planning_prompt_path",
-        PLANNING_PROMPT_PATH,
-    )
+    prompt_path = config.get("planning_prompt_path") or PLANNING_PROMPT_PATH
 
     try:
         with open(prompt_path, "r", encoding="utf-8") as f:
