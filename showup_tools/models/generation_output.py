@@ -139,13 +139,20 @@ class ExampleAnalysis(BaseModel):
     explanation_points: List[str]
 
 
+class Step(BaseModel):
+    """Single step within a ``process_steps`` block."""
+
+    step_number: str
+    description: str
+
+
 class ProcessSteps(BaseModel):
     """Steps describing a process."""
 
     block_type: Literal['process_steps']
     process_name: str
     introductory_text: Optional[str] = None
-    steps: List[Dict[str, str]]
+    steps: List[Step]
 
 
 class ReflectionPrompt(BaseModel):
