@@ -58,7 +58,7 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
 8. **process\_steps**:  
    * `block_type`: "process\_steps" (string, REQUIRED)  
    * `process_name`: "string (REQUIRED)" \- The name of the process being described.  
-   * `steps`: "array of objects (REQUIRED)" \- Each object should have `step_number: int` and `description: string`.  
+   * `steps`: "array of objects (REQUIRED)" \- Each object should have `step_number: string` and `description: string`.
    * `introductory_text`: "string (Optional)" \- Optional introductory text for the process.  
 9. **reflection\_prompt**:  
    * `block_type`: "reflection\_prompt" (string, REQUIRED)  
@@ -97,8 +97,9 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
 * Include the top-level fields `content_title`, `target_audience`, and `estimated_word_count`.
 * For each item in the `content_blocks` array, choose one `block_type` and provide *all* its `REQUIRED` attributes.
 * **Crucially, ensure that the `"block_type"` field is present within *each* block object in the `content_blocks` array.**  
-* Populate the content summaries and descriptions thoughtfully, based on the provided lesson context.  
-* Prioritize pedagogical flow and logical progression of content.  
+* Populate the content summaries and descriptions thoughtfully, based on the provided lesson context.
+* Prioritize pedagogical flow and logical progression of content.
+* For `process_steps` blocks, ensure each `step_number` is returned as a string (e.g., "1", "2").
 * Remember that `learning_objectives` and `key_takeaways` are typically omitted from the *initial plan* unless explicitly requested otherwise for a specific scenario, as they are generated in a later stage.
 * Respond only with valid JSON; use double quotes for keys and strings and avoid trailing commas or extra text.
 
