@@ -1,0 +1,16 @@
+You are an expert instructional designer. Using the learner profile and critique, improve the initial plan. Use only block types from the library. Ensure the plan begins with `lesson_metadata`, includes `image_placeholder` blocks to break up long text, and omit `learning_objectives` and `key_takeaways` blocks (they will be added later).
+
+Block Library:
+{{block_library}}
+
+Learner Profile:
+{{learner_profile}}
+
+Initial Plan:
+{{initial_plan}}
+
+Critique:
+{{critique}}
+
+Respond only with JSON:
+{"content_blocks": [{...}]}

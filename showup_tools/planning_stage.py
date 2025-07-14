@@ -9,12 +9,11 @@ from showup_core.model_config import (
     get_model_provider,
     DEFAULT_PLANNING_MODEL,
 )
+from showup_core.utils import load_prompt
 from .block_library import get_block_type_definitions, validate_plan
 
 logger = logging.getLogger(__name__)
 
-PROMPTS_DIR = os.path.join(os.path.dirname(__file__), "prompts")
-PLANNING_PROMPT_PATH = os.path.join(PROMPTS_DIR, "planning_prompt.txt")
 
 async def run_planning_stage(
     row_data_item: Dict[str, Any], config: Dict[str, Any]
@@ -24,15 +23,13 @@ async def run_planning_stage(
 
     new_item = row_data_item.copy()
 
-    prompt_path = config.get("planning_prompt_path") or PLANNING_PROMPT_PATH
-
-    try:
-        with open(prompt_path, "r", encoding="utf-8") as f:
-            prompt_template = f.read()
-    except FileNotFoundError:
-        logger.error(f"Planning prompt not found: {prompt_path}")
+    prompt_template = load_prompt(
+        config.get("planning_prompt_path", "planning/main_lesson_planner")
+    )
+    if not prompt_template:
+        logger.error("Planning prompt not found")
         new_item["status"] = "PLAN_FAILED"
-        new_item["error"] = f"Prompt not found: {prompt_path}"
+        new_item["error"] = "Prompt not found"
         return new_item
 
     content_outline = new_item.get("Content Outline") or new_item.get(

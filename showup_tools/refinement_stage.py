@@ -5,13 +5,11 @@ from typing import Dict, Any
 
 from showup_core.api_client import generate_with_claude
 from showup_core.model_config import get_model_provider
+from showup_core.utils import load_prompt
 from .block_library import get_block_type_definitions, validate_plan
 
 logger = logging.getLogger(__name__)
 
-PROMPTS_DIR = os.path.join(os.path.dirname(__file__), 'prompts')
-CRITIQUE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_critique_prompt.txt")
-REFINE_PROMPT_PATH = os.path.join(PROMPTS_DIR, "plan_refine_prompt.txt")
 
 async def run_refinement_stage(
     row_data_item: Dict[str, Any], config: Dict[str, Any]
@@ -21,24 +19,16 @@ async def run_refinement_stage(
 
     new_item = row_data_item.copy()
 
-    critique_path = config.get(
-        "critique_prompt_path",
-        CRITIQUE_PROMPT_PATH,
+    critique_template = load_prompt(
+        config.get("critique_prompt_path", "planning/plan_critique_prompt")
     )
-    refine_path = config.get(
-        "refine_prompt_path",
-        REFINE_PROMPT_PATH,
+    refine_template = load_prompt(
+        config.get("refine_prompt_path", "planning/plan_refine_prompt")
     )
-
-    try:
-        with open(critique_path, "r", encoding="utf-8") as f:
-            critique_template = f.read()
-        with open(refine_path, "r", encoding="utf-8") as f:
-            refine_template = f.read()
-    except FileNotFoundError as e:
-        logger.error(f"Refinement prompt not found: {e}")
+    if not critique_template or not refine_template:
+        logger.error("Refinement prompts not found")
         new_item["status"] = "PLAN_FAILED"
-        new_item["error"] = f"Prompt not found: {e}"
+        new_item["error"] = "Prompt not found"
         return new_item
 
     learner_profile = new_item.get("Learner Profile") or new_item.get(

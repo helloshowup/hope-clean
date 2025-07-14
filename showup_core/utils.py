@@ -7,6 +7,7 @@ in other more specific modules.
 
 import importlib
 import logging
+import os
 from typing import Any, List
 
 import claude_api
@@ -62,3 +63,29 @@ def safe_convert_to_int(value: Any, default: int = 1, context: str = "value") ->
     except (ValueError, TypeError):
         logger.warning(f"Couldn't convert {context} '{value}' to a number, using {default} instead")
         return default
+
+
+def get_project_root() -> str:
+    """Returns the absolute path to the project root."""
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def load_prompt(prompt_name: str) -> str:
+    """Load a prompt from the /prompts directory.
+
+    Args:
+        prompt_name: Path to the prompt file relative to the /prompts directory
+                      (e.g., 'planning/lesson_plan').
+
+    Returns:
+        The content of the prompt file as a string. Returns an empty string if
+        the file cannot be found.
+    """
+    root_dir = get_project_root()
+    prompt_path = os.path.join(root_dir, 'prompts', f"{prompt_name}.txt")
+    try:
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"Error: Prompt file not found at {prompt_path}")
+        return ""
