@@ -12,5 +12,13 @@ Initial Plan:
 Critique:
 {{critique}}
 
-Respond only with JSON:
-{"content_blocks": [{...}]}
+Respond only with JSON. The output must be a complete `PlanModel` object
+including the required top-level fields `content_title`, `target_audience`, and
+`estimated_word_count`.
+Example structure:
+{
+  "content_title": "...",
+  "target_audience": "...",
+  "estimated_word_count": 1200,
+  "content_blocks": [{...}]
+}
