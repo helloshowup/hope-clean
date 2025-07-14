@@ -246,11 +246,14 @@ AnyBlock = Annotated[
 
 
 class PlanModel(StrictBaseModel):
-    """Represents the entire lesson plan structure."""
+    """Deprecated static schema for a lesson plan.
 
-    # Deprecated: The active PlanModel is dynamically built from
-    # ``showup_tools.block_library.BLOCK_LIBRARY``. This static class
-    # remains for type hints only and may drift from the prompts.
+    Runtime validation relies on the dynamically generated
+    :class:`showup_tools.block_library.PlanModel` built from
+    ``BLOCK_LIBRARY``. This class remains only for IDE type hints and
+    may drift from the actual prompt schema.
+    """
+
     content_title: str
     target_audience: str
     estimated_word_count: int
