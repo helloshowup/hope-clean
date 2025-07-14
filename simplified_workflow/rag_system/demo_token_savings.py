@@ -12,6 +12,8 @@ import os
 import asyncio
 import hashlib
 import logging
+from pathlib import Path
+from showup_core.core.path_utils import get_project_root
 
 # Configure logging
 logging.basicConfig(
@@ -19,6 +21,12 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Default handbook location for the demonstration
+DEFAULT_HANDBOOK_PATH = os.getenv(
+    "SHOWUP_HANDBOOK_PATH",
+    str(Path(get_project_root()) / "data" / "handbook.md")
+)
 
 # Import our RAG components (with relative imports for standalone script)
 from .token_counter import count_tokens
@@ -137,7 +145,7 @@ async def demo_specific_queries(handbook_path):
 
 async def main():
     """Main demo function"""
-    handbook_path = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\showup-tools\\simplified_app\\EHS Student Catalog_Handbook from Canva.md"
+    handbook_path = DEFAULT_HANDBOOK_PATH
     
     if not os.path.exists(handbook_path):
         logger.error(f"Handbook not found: {handbook_path}")
