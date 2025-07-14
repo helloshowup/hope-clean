@@ -29,7 +29,6 @@ Example of the correct root structure:
 {
   "content_title": "<carry over or updated>",
   "target_audience": "<carry over or updated>",
-  "estimated_word_count": 1200,
   "content_blocks": [
     {"block_type": "lesson_metadata", "title": "...", "module_id": "..."}
   ]

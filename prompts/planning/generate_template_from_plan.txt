@@ -1,4 +1,4 @@
-You are a template builder AI. Convert the provided JSON lesson plan into a Markdown template using Jinja2 style placeholders. The markdown file will be used to generate educational material. 
+You are a template builder AI. Convert the provided JSON lesson plan into a Markdown template using Jinja2 style placeholders. The markdown file will be used to generate educational material. Do not change the allocated word count.
 
 Plan JSON:
 {{final_plan}}
