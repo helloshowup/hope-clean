@@ -16,9 +16,9 @@ Below is a step-by-step plan to isolate and stabilize the Kivy application (Show
 
 * **Expected Outcome:** The code compiles and tests pass without references to `showup_editor_ui`. The application’s functionality remains unaffected (since this UI was unused in the simplified workflow).
 
-## **Task 2: Remove Archived Scripts 📦**
+## **Task 2: Remove Archived Scripts 📦 (Completed)**
 
-**Objective:** Delete the `archive/` directory and its contents, which contain deprecated or backup scripts that are no longer in use.
+**Objective:** Delete the `archive/` directory and its contents, which contain deprecated or backup scripts that are no longer in use. This step has been completed.
 
 * **Remove Directory:** Delete the entire `archive/` folder from the repository.
 
