@@ -8,7 +8,7 @@ This repository implements an **AI-driven content generation pipeline** for educ
 
 * *Environment Setup:* The batch script ensures Python is available, creates/activates a virtual environment, and installs required packages before launching the app[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/launch_kivy_app.bat#L16-L24)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/launch_kivy_app.bat#L34-L42).
 
-* *Kivy App UI:* The GUI (driven by `main.py`) provides fields to input a content CSV, toggle handbook usage, specify output locations, and preview a learner profile[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L18-L26)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/main.py#L136-L144). It also shows a status label, progress bar, and output preview area to monitor the workflow stages.
+* *Kivy App UI:* The GUI (driven by `main.py`) provides fields to choose a content CSV and optional handbook file, then displays status messages, a progress bar, and an output preview area to monitor workflow stages.
 
 * *Launching Pipeline:* Clicking the **Start Workflow** button now runs the full pipeline using `simplified_workflow.run_workflow`. The progress bar and status messages reflect real execution results.
 

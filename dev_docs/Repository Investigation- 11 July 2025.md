@@ -92,8 +92,6 @@
 **Inputs:**
 
 * \[cite\_start\]`csv_path`: Path to the curriculum CSV file. \[cite: 135\]  
-* \[cite\_start\]`course_name`: Name of the course. \[cite: 136\]  
-* \[cite\_start\]`learner_profile`: Description of the target audience. \[cite: 137\]  
 * \[cite\_start\]`ui_settings`: A dictionary with configuration options. \[cite: 138\]  
 * \[cite\_start\]`selected_modules`: An optional list of modules to process. \[cite: 140\]  
 * \[cite\_start\]`instance_id`: An identifier for the run. \[cite: 142\]  
