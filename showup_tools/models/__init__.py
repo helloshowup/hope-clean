@@ -21,8 +21,8 @@ from .generation_output import (
     ImagePlaceholder,
     AudioPlaceholder,
     VideoPlaceholder,
-    PlanModel,
 )
+from ..block_library import PlanModel
 
 __all__ = [
     'SentimentAnalysis',

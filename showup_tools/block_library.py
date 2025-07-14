@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Literal
+import json
 
 from pydantic import BaseModel, create_model, ValidationError
-from .models import PlanModel
 
 BLOCK_LIBRARY = {
     "lesson_metadata": {
@@ -134,8 +134,9 @@ def _parse_type(type_str: str):
 
     # handle union like 'numbered' | 'bulleted'
     if "|" in type_str and "'" in type_str:
-        # treat simple union of string literals as plain str
-        py_type = str
+        # parse union of string literals into Literal
+        options = [part.strip().strip("'") for part in type_str.split("|")]
+        py_type = Literal[tuple(options)]  # type: ignore[arg-type]
     elif type_str.startswith("List[") and type_str.endswith("]"):
         inner = _parse_type(type_str[len("List["):-1])
         py_type = List[inner]  # type: ignore[arg-type]
@@ -168,21 +169,45 @@ def build_pydantic_models():
     BlockUnion = Union[tuple(models.values())]
     PlanModel = create_model(
         "PlanModel",
+        content_title=(str, ...),
+        target_audience=(str, ...),
+        estimated_word_count=(int, ...),
         content_blocks=(List[BlockUnion], ...),
     )
 
     return models, PlanModel
 
 
-BLOCK_MODELS, _ = build_pydantic_models()
+BLOCK_MODELS, PlanModel = build_pydantic_models()
+
+
+def _coerce_plan_types(obj: Dict[str, Any]) -> Dict[str, Any]:
+    """Coerce common type mismatches before validation."""
+    if "estimated_word_count" in obj and isinstance(obj["estimated_word_count"], str):
+        if obj["estimated_word_count"].isdigit():
+            obj["estimated_word_count"] = int(obj["estimated_word_count"])
+    for block in obj.get("content_blocks", []):
+        if block.get("block_type") == "process_steps":
+            for step in block.get("steps", []):
+                if isinstance(step.get("step_number"), int):
+                    step["step_number"] = str(step["step_number"])
+    return obj
 
 
 def validate_plan(data: str | dict):
     """Validate a plan JSON string or object."""
     try:
         if isinstance(data, str):
-            return PlanModel.model_validate_json(data)
-        return PlanModel.model_validate(data)
+            obj = json.loads(data)
+        else:
+            obj = data
+        obj = _coerce_plan_types(obj)
+        return PlanModel.model_validate(obj)
     except ValidationError as e:
-        raise ValueError(str(e))
+        details = []
+        for err in e.errors():
+            loc = ".".join(str(p) for p in err["loc"])
+            msg = err["msg"]
+            details.append(f"{loc}: {msg}")
+        raise ValueError("; ".join(details))
 

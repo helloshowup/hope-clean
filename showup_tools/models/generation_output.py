@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 from typing import List, Literal, Dict, Any, Optional, Union, Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
-class SentimentAnalysis(BaseModel):
+
+class StrictBaseModel(BaseModel):
+    """Base model that forbids extra fields."""
+
+    model_config = ConfigDict(extra="forbid")
+
+class SentimentAnalysis(StrictBaseModel):
     """Detailed sentiment analysis of text."""
 
     overall_sentiment: Literal["Positive", "Negative", "Neutral"] = Field(
@@ -13,7 +19,7 @@ class SentimentAnalysis(BaseModel):
         ..., description="A sentiment score from -1.0 (very negative) to 1.0 (very positive)."
     )
 
-class DetectedAIPattern(BaseModel):
+class DetectedAIPattern(StrictBaseModel):
     """Represents a detected AI pattern category and its matches."""
 
     category: str = Field(
@@ -23,13 +29,13 @@ class DetectedAIPattern(BaseModel):
         default_factory=list, description="List of specific text snippets that matched the pattern."
     )
 
-class DetectedAIPhrase(BaseModel):
+class DetectedAIPhrase(StrictBaseModel):
     """Represents a specific AI phrase detected in the content."""
 
     phrase: str = Field(..., description="The specific AI phrase detected.")
     count: int = Field(..., description="Number of times this phrase was detected.")
 
-class TextSegmentAnalysis(BaseModel):
+class TextSegmentAnalysis(StrictBaseModel):
     """Consolidated analysis results for a text segment."""
 
     sentiment: SentimentAnalysis = Field(..., description="Sentiment analysis for this segment.")
@@ -42,7 +48,7 @@ class TextSegmentAnalysis(BaseModel):
         description="AI pattern categories detected in this segment, referencing 'ai_patterns.json'.",
     )
 
-class GeneratedContentBlock(BaseModel):
+class GeneratedContentBlock(StrictBaseModel):
     """Represents a single dynamic content block within the generated output."""
 
     block_id: str = Field(..., description="A unique identifier for this content block.")
@@ -58,7 +64,7 @@ class GeneratedContentBlock(BaseModel):
         description="Additional metadata specific to this block (e.g., source, generation parameters).",
     )
 
-class DynamicContentGenerationResult(BaseModel):
+class DynamicContentGenerationResult(StrictBaseModel):
     """Structured output from the dynamic block template generation phase."""
 
     document_id: str = Field(..., description="Unique identifier for the entire generated document.")
@@ -77,7 +83,7 @@ class DynamicContentGenerationResult(BaseModel):
     )
 
 
-class LessonMetadata(BaseModel):
+class LessonMetadata(StrictBaseModel):
     """Metadata about the lesson."""
 
     block_type: Literal['lesson_metadata']
@@ -87,14 +93,14 @@ class LessonMetadata(BaseModel):
     purpose: Optional[str] = None
 
 
-class LearningObjectives(BaseModel):
+class LearningObjectives(StrictBaseModel):
     """Learning objectives for the lesson."""
 
     block_type: Literal['learning_objectives']
     objectives: List[str]
 
 
-class Introduction(BaseModel):
+class Introduction(StrictBaseModel):
     """Introduction content summary."""
 
     block_type: Literal['introduction']
@@ -102,7 +108,7 @@ class Introduction(BaseModel):
     hook_suggestion: Optional[str] = None
 
 
-class SectionHeading(BaseModel):
+class SectionHeading(StrictBaseModel):
     """Heading for a section."""
 
     block_type: Literal['section_heading']
@@ -110,7 +116,7 @@ class SectionHeading(BaseModel):
     title: str
 
 
-class ExplanatoryText(BaseModel):
+class ExplanatoryText(StrictBaseModel):
     """Explanatory text covering a topic."""
 
     block_type: Literal['explanatory_text']
@@ -119,7 +125,7 @@ class ExplanatoryText(BaseModel):
     tone_suggestion: Optional[str] = None
 
 
-class ListBlock(BaseModel):
+class ListBlock(StrictBaseModel):
     """A numbered or bulleted list."""
 
     block_type: Literal['list_block']
@@ -128,7 +134,7 @@ class ListBlock(BaseModel):
     items_summary: List[str]
 
 
-class ExampleAnalysis(BaseModel):
+class ExampleAnalysis(StrictBaseModel):
     """Analysis of an example or scenario."""
 
     block_type: Literal['example_analysis']
@@ -139,14 +145,14 @@ class ExampleAnalysis(BaseModel):
     explanation_points: List[str]
 
 
-class Step(BaseModel):
+class Step(StrictBaseModel):
     """Single step within a ``process_steps`` block."""
 
     step_number: str
     description: str
 
 
-class ProcessSteps(BaseModel):
+class ProcessSteps(StrictBaseModel):
     """Steps describing a process."""
 
     block_type: Literal['process_steps']
@@ -155,7 +161,7 @@ class ProcessSteps(BaseModel):
     steps: List[Step]
 
 
-class ReflectionPrompt(BaseModel):
+class ReflectionPrompt(StrictBaseModel):
     """Questions prompting reflection."""
 
     block_type: Literal['reflection_prompt']
@@ -164,14 +170,14 @@ class ReflectionPrompt(BaseModel):
     context_setting: Optional[str] = None
 
 
-class KeyTakeaways(BaseModel):
+class KeyTakeaways(StrictBaseModel):
     """Key takeaways from the lesson."""
 
     block_type: Literal['key_takeaways']
     points: List[str]
 
 
-class DiagramPlaceholder(BaseModel):
+class DiagramPlaceholder(StrictBaseModel):
     """Placeholder for a diagram."""
 
     block_type: Literal['diagram_placeholder']
@@ -179,7 +185,7 @@ class DiagramPlaceholder(BaseModel):
     description: str
 
 
-class FlowchartPlaceholder(BaseModel):
+class FlowchartPlaceholder(StrictBaseModel):
     """Placeholder for a flowchart."""
 
     block_type: Literal['flowchart_placeholder']
@@ -187,7 +193,7 @@ class FlowchartPlaceholder(BaseModel):
     description: str
 
 
-class ImagePlaceholder(BaseModel):
+class ImagePlaceholder(StrictBaseModel):
     """Placeholder for an image."""
 
     block_type: Literal['image_placeholder']
@@ -195,7 +201,7 @@ class ImagePlaceholder(BaseModel):
     caption: Optional[str] = None
 
 
-class AudioPlaceholder(BaseModel):
+class AudioPlaceholder(StrictBaseModel):
     """Placeholder for an audio file."""
 
     block_type: Literal['audio_placeholder']
@@ -206,7 +212,7 @@ class AudioPlaceholder(BaseModel):
     placement_suggestion: Optional[str] = None
 
 
-class VideoPlaceholder(BaseModel):
+class VideoPlaceholder(StrictBaseModel):
     """Placeholder for a video file."""
 
     block_type: Literal['video_placeholder']
@@ -239,9 +245,12 @@ AnyBlock = Annotated[
 ]
 
 
-class PlanModel(BaseModel):
+class PlanModel(StrictBaseModel):
     """Represents the entire lesson plan structure."""
 
+    # Deprecated: The active PlanModel is dynamically built from
+    # ``showup_tools.block_library.BLOCK_LIBRARY``. This static class
+    # remains for type hints only and may drift from the prompts.
     content_title: str
     target_audience: str
     estimated_word_count: int

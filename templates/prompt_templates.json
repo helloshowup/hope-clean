@@ -8,9 +8,9 @@
     },
     "refinement_stage": {
       "id": "critic_v1",
-      "description": "Critiques an initial plan against a learner profile and produces a revised, improved plan.",
-      "_comment": "This prompt requires the following placeholders: {initial_plan_json}, {learner_profile}",
-      "template": "You are an expert instructional designer and curriculum specialist, reviewing a video script plan. Your task is to critique the following plan and then provide a revised, improved version that is more engaging and effective for the target audience.\n\n### EVALUATION CRITERIA ###\n1. **Engagement:** Is the language, pacing, and content interesting and relatable for the target audience?\n2. **Clarity:** Are complex concepts explained in a simple, easy-to-understand manner?\n3. **Completeness:** Does the plan cover all essential aspects of the topic logically?\n\n### LEARNER PROFILE ###\n{learner_profile}\n\n### PLAN TO REVIEW ###\n{initial_plan_json}\n\n### YOUR TASK ###\nProvide your response as a single, valid JSON object. The object must have two keys:\n1. `critique`: A string containing your detailed feedback on the original plan, referencing the evaluation criteria.\n2. `revised_plan`: The full, improved plan in the original JSON format, incorporating your suggested changes."
+      "description": "Critiques an initial plan and then generates a revised plan in a two-step process.",
+      "_comment": "This stage uses two prompts: plan_critique_prompt (plain text critique) and plan_refine_prompt (root-level PlanModel JSON).",
+      "template": "The critique prompt instructs the AI to provide plain text feedback only. The refine prompt then asks for the full revised plan as a single JSON object with top-level fields `content_title`, `target_audience`, `estimated_word_count`, and `content_blocks` without any wrapping key."
     },
     "generation_stage": {
       "id": "generator_from_plan_v1",
