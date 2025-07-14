@@ -193,6 +193,28 @@ class ImagePlaceholder(BaseModel):
     placement_suggestion: Optional[str] = None
 
 
+class AudioPlaceholder(BaseModel):
+    """Placeholder for an audio file."""
+
+    block_type: Literal['audio_placeholder']
+    concept_to_illustrate: str
+    description: str
+    audio_duration_seconds: int
+    caption: Optional[str] = None
+    placement_suggestion: Optional[str] = None
+
+
+class VideoPlaceholder(BaseModel):
+    """Placeholder for a video file."""
+
+    block_type: Literal['video_placeholder']
+    concept_to_illustrate: str
+    description: str
+    video_duration_seconds: int
+    caption: Optional[str] = None
+    placement_suggestion: Optional[str] = None
+
+
 AnyBlock = Annotated[
     Union[
         LessonMetadata,
@@ -208,6 +230,8 @@ AnyBlock = Annotated[
         DiagramPlaceholder,
         FlowchartPlaceholder,
         ImagePlaceholder,
+        AudioPlaceholder,
+        VideoPlaceholder,
     ],
     Field(discriminator='block_type')
 ]
