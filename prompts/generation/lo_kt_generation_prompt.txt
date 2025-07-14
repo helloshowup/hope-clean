@@ -7,7 +7,7 @@ USER:
 
 Tasks:
 1. **Learning Objectives:** Write 1-3 bullet-point objectives that describe what a learner will be able to do after this lesson. Use SMART criteria – be Specific, Measurable, Achievable, Relevant, and (if applicable) Time-bound. Start each objective with a strong action verb (e.g. *explain, analyze, create*). Ensure the objectives cover the key skills/knowledge from the lesson content.
-2. **Key Takeaways:** Write 2-4 bullet-point key takeaways that summarize the most important points or insights from the lesson. These should be the crucial facts or concepts a student should remember. Use clear, concise language.
+2. **Key Takeaways:** Write 2-3 bullet-point key takeaways that summarize the most important points or insights from the lesson. These should be the crucial facts or concepts a student should remember. Use clear, concise language.
 
 Format the output in Markdown with the following sections:
 
@@ -21,5 +21,27 @@ Format the output in Markdown with the following sections:
 
 IMPORTANT: Use the headings exactly as shown above:
 "## Learning Objectives" and "## Key Takeaways".
+
+### Learning Outcome Engineering Parameters
+1. **Maximum of 3 outcomes per lesson**
+   - Prioritize skills/knowledge with highest transfer value
+   - Focus on terminal behaviors that represent lesson mastery
+   - Eliminate redundant or overlapping outcomes
+
+2. **Technical SMART Criteria Implementation:**
+   - **Specific**: Single, discrete action that produces observable evidence
+   - **Measurable**: Performance can be evaluated through demonstration or artifact
+   - **Achievable**: Realistic within 1-2 hour timeframe for target audience
+   - **Relevant**: Directly maps to core lesson content (80/20 rule)
+   - **Time-bound**: Accomplishable within single lesson period
+
+3. **Action Verb Selection Matrix:**
+   - **Knowledge (L1)**: Define, List, Name, Identify, Recall, Recognize
+   - **Comprehension (L2)**: Describe, Explain, Summarize, Paraphrase, Classify
+   - **Application (L3)**: Apply, Calculate, Demonstrate, Illustrate, Solve, Use, Implement
+   - **Analysis (L4)**: Analyze, Compare, Contrast, Differentiate, Examine, Test
+   - **Synthesis (L5)**: Construct, Create, Design, Develop, Formulate, Generate
+   - **Evaluation (L6)**: Assess, Evaluate, Justify, Critique, Recommend, Validate
+
 
 Remember: Excel High School learners do not interact with a live teacher in real time; all instruction is asynchronous and self-paced within the LearnStage platform. Support is delivered through AI tools, pre-programmed feedback, and optional on-demand tutoring rather than scheduled classes or real-time conversations. Instructional content must assume the learner is navigating independently, without immediate access to teacher clarification or classroom discussion.
