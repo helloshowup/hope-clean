@@ -892,6 +892,20 @@ async def main(csv_path: str,
                 add_log_entry("Load Template", "started", "Loading content generation template")
                 template = load_content_generation_template()
                 add_log_entry("Load Template", "completed", "Template loaded successfully")
+
+                # Save the loaded template for reference
+                try:
+                    template_dir = os.path.join(output_dir, "templates")
+                    os.makedirs(template_dir, exist_ok=True)
+                    template_filename = f"{step_info.replace(',', '').replace(' ', '_')}_template.md"
+                    template_path = os.path.join(template_dir, template_filename)
+                    with open(template_path, 'w', encoding='utf-8') as tpl_file:
+                        tpl_file.write(template)
+                    result["template_path"] = template_path
+                    add_log_entry("Save Template", "completed", f"Saved template to {template_path}")
+                except Exception as tpl_error:
+                    logger.error(f"Error saving template for {step_info}: {str(tpl_error)}")
+                    add_log_entry("Save Template", "error", str(tpl_error))
                 
                 # Store data for this row
                 row_data.append({
