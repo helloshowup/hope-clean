@@ -1,7 +1,5 @@
-import os
 import logging
 import asyncio
-import json
 from typing import Dict, Any
 
 from showup_core.api_client import generate_with_claude, _load_selected_model
@@ -10,7 +8,42 @@ from showup_core.model_config import (
     DEFAULT_PLANNING_MODEL,
 )
 from showup_core.utils import load_prompt
-from .block_library import get_block_type_definitions, validate_plan
+from .block_library import (
+    get_block_type_definitions,
+    validate_plan,
+    PlanModel,
+)
+from .openai_dynamic_generation import get_instructor_client
+
+
+async def repair_plan_json_with_llm(
+    broken_text: str,
+    api_key: str,
+    model: str = "gpt-4o-mini",
+) -> PlanModel | None:
+    """Attempt to repair invalid plan JSON using the LLM itself."""
+    logger.info("Attempting to repair plan JSON with LLM")
+    client = get_instructor_client(api_key)
+    try:
+        return await client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "The following text is malformed JSON that was supposed to conform to the PlanModel schema. "
+                        "Fix the JSON so it strictly conforms to the schema. Do not add any conversational text, just the corrected JSON."
+                    ),
+                },
+                {"role": "user", "content": broken_text},
+            ],
+            temperature=0.0,
+            response_model=PlanModel,
+        )
+    except Exception as exc:
+        logger.error(f"Repair attempt for plan JSON failed: {exc}")
+        return None
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,20 +84,21 @@ async def run_planning_stage(
         .replace("{{block_library}}", block_defs)
     )
 
-    model_id = config.get('model_id', _load_selected_model(DEFAULT_PLANNING_MODEL))
+    model_id = config.get("model_id", _load_selected_model(DEFAULT_PLANNING_MODEL))
     provider = get_model_provider(model_id)
 
     max_attempts = config.get("max_attempts", 3)
     last_error = None
     for attempt in range(1, max_attempts + 1):
+        ai_response = None
         try:
-            if provider == 'openai':
+            if provider == "openai":
                 import openai
                 from showup_core.api_client import get_openai_model_max_tokens
 
-                client = openai.OpenAI(api_key=config.get('openai_api_key'))
+                client = openai.OpenAI(api_key=config.get("openai_api_key"))
 
-                max_tokens = config.get('max_tokens', 8000)
+                max_tokens = config.get("max_tokens", 8000)
                 limit = get_openai_model_max_tokens(model_id)
                 if max_tokens > limit:
                     logger.debug(
@@ -76,24 +110,36 @@ async def run_planning_stage(
                     model=model_id,
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=max_tokens,
-                    temperature=config.get('temperature', 0.3)
+                    temperature=config.get("temperature", 0.3),
                 )
                 ai_response = response.choices[0].message.content
             else:
                 ai_response = await generate_with_claude(
                     prompt,
-                    max_tokens=config.get('max_tokens', 8000),
-                    temperature=config.get('temperature', 0.3),
+                    max_tokens=config.get("max_tokens", 8000),
+                    temperature=config.get("temperature", 0.3),
                     model=model_id,
-                    task_type='planning'
+                    task_type="planning",
                 )
 
-            new_item["initial_plan"] = validate_plan(ai_response).model_dump(exclude_none=True)
+            new_item["initial_plan"] = validate_plan(ai_response).model_dump(
+                exclude_none=True
+            )
             new_item["status"] = "PLAN_GENERATED"
             break
         except Exception as e:
             last_error = e
             logger.error(f"Planning attempt {attempt} failed: {e}")
+            if provider == "openai" and ai_response:
+                repaired = await repair_plan_json_with_llm(
+                    broken_text=ai_response,
+                    api_key=config.get("openai_api_key"),
+                    model=model_id,
+                )
+                if repaired:
+                    new_item["initial_plan"] = repaired.model_dump(exclude_none=True)
+                    new_item["status"] = "PLAN_GENERATED"
+                    break
             if attempt < max_attempts:
                 await asyncio.sleep(1)
 
