@@ -1,5 +1,6 @@
 import os
 import logging
+import re
 from typing import Tuple
 from showup_core.api_client import generate_with_claude
 from showup_core.utils import load_prompt
@@ -26,12 +27,18 @@ async def generate_lo_and_kt_from_content(content: str, model: str = 'claude-3-h
     return parse_lo_and_kt(response)
 
 def parse_lo_and_kt(text: str) -> Tuple[str, str]:
-    lo_marker = '## Learning Objectives'
-    kt_marker = '## Key Takeaways'
-    lo_start = text.find(lo_marker)
-    kt_start = text.find(kt_marker)
-    if lo_start == -1 or kt_start == -1:
-        raise ValueError('Could not parse learning sections')
-    lo_section = text[lo_start:kt_start].strip()
-    kt_section = text[kt_start:].strip()
+    """Parse learning objectives and key takeaways from AI response."""
+    pattern = re.compile(
+        r"##\s*Learning Objectives\s*(.*?)\s*##\s*Key Takeaways\s*(.*)",
+        re.IGNORECASE | re.DOTALL,
+    )
+    match = pattern.search(text)
+    if not match:
+        logger.debug("Raw LO/KT response that failed to parse:\n%s", text)
+        raise ValueError("Could not parse learning sections")
+
+    lo_content = match.group(1).strip()
+    kt_content = match.group(2).strip()
+    lo_section = "## Learning Objectives\n" + lo_content
+    kt_section = "## Key Takeaways\n" + kt_content
     return lo_section, kt_section
