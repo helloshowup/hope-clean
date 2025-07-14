@@ -1,0 +1,22 @@
+{
+  "prompt_templates": {
+    "planning_stage": {
+      "id": "planner_v1",
+      "description": "Generates a detailed JSON plan from a high-level content outline. Uses the Hybrid 'CREATE' method.",
+      "_comment": "This prompt requires the following placeholders: {content_outline}",
+      "template": "### CHARACTER ###\nYou are an experienced strategic planning consultant and instructional designer, known for creating concise, impactful, and logically structured plans for educational videos. You specialize in breaking down complex scientific topics for a young audience.\n\n### REQUEST ###\nI need a detailed plan for an educational video based on the content outline I provide below. The plan should guide the entire video production process, from narration to visual design. It must be structured into logical scenes, each with clear talking points, suggestions for visual aids, and an estimated duration.\n\n### CONTENT OUTLINE ###\n{content_outline}\n\n### TELL (OUTPUT FORMAT) ###\nCreate the plan as a single, valid JSON object. Do not include any text outside of the JSON object. The root of the object should contain 'video_title', 'target_audience', 'learning_objective', and a 'scenes' array. Each object in the 'scenes' array must contain 'scene_number', 'scene_title', 'estimated_duration_seconds', an array of 'talking_points', and an array of 'visual_cues'."
+    },
+    "refinement_stage": {
+      "id": "critic_v1",
+      "description": "Critiques an initial plan against a learner profile and produces a revised, improved plan.",
+      "_comment": "This prompt requires the following placeholders: {initial_plan_json}, {learner_profile}",
+      "template": "You are an expert instructional designer and curriculum specialist, reviewing a video script plan. Your task is to critique the following plan and then provide a revised, improved version that is more engaging and effective for the target audience.\n\n### EVALUATION CRITERIA ###\n1. **Engagement:** Is the language, pacing, and content interesting and relatable for the target audience?\n2. **Clarity:** Are complex concepts explained in a simple, easy-to-understand manner?\n3. **Completeness:** Does the plan cover all essential aspects of the topic logically?\n\n### LEARNER PROFILE ###\n{learner_profile}\n\n### PLAN TO REVIEW ###\n{initial_plan_json}\n\n### YOUR TASK ###\nProvide your response as a single, valid JSON object. The object must have two keys:\n1. `critique`: A string containing your detailed feedback on the original plan, referencing the evaluation criteria.\n2. `revised_plan`: The full, improved plan in the original JSON format, incorporating your suggested changes."
+    },
+    "generation_stage": {
+      "id": "generator_from_plan_v1",
+      "description": "Generates the full content script based on a detailed JSON plan.",
+      "_comment": "This prompt requires the following placeholders: {final_plan_json}, {learner_profile}, {previously_generated_context}",
+      "template": "### CHARACTER ###\nYou are a professional scriptwriter for educational content. Your task is to write a complete, engaging, and clear script for a video, based *only* on the detailed plan provided below. Follow the plan meticulously.\n\n### LEARNER PROFILE (for tone and style) ###\n{learner_profile}\n\n### PREVIOUSLY GENERATED CONTENT (for context, do not repeat) ###\n{previously_generated_context}\n\n### DETAILED PLAN TO EXECUTE ###\n{final_plan_json}\n\n### YOUR TASK ###\nWrite the full narrator's script for the video. The script should directly follow the talking points and visual cues for each scene outlined in the plan. Ensure the tone is appropriate for the target audience. Do not add new sections or deviate from the provided plan. The output should be the script text only."
+    }
+  }
+}
