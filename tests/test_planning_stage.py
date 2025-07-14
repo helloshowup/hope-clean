@@ -11,6 +11,7 @@ if 'openai' not in sys.modules:
     sys.modules['openai'] = MagicMock()
 
 from showup_tools.planning_stage import run_planning_stage
+from showup_tools.planning_stage import PLANNING_PROMPT_PATH
 
 class TestPlanningStage(unittest.TestCase):
     def test_planning_with_claude(self):
@@ -104,6 +105,27 @@ class TestPlanningStage(unittest.TestCase):
             result = asyncio.run(run_planning_stage(row, config))
         self.assertEqual(result['status'], 'PLAN_GENERATED')
         self.assertEqual(result['initial_plan'], plan)
+
+    def test_default_prompt_path_used_when_config_none(self):
+        row = {
+            "content_outline": "Outline",
+            "learner_profile": "Profile",
+            "rationale": "Because",
+            "word_count": 123,
+        }
+        config = {"planning_prompt_path": None}
+        plan = {
+            "content_blocks": [
+                {"block_type": "lesson_metadata", "title": "t", "module_id": "m"}
+            ]
+        }
+        m = mock_open(read_data="Prompt {{block_library}}")
+        with patch('builtins.open', m) as mocked_open:
+            with patch('showup_tools.planning_stage.generate_with_claude') as mock_claude:
+                mock_claude.return_value = json.dumps(plan)
+                result = asyncio.run(run_planning_stage(row, config))
+        self.assertEqual(result["status"], "PLAN_GENERATED")
+        mocked_open.assert_called_with(PLANNING_PROMPT_PATH, "r", encoding="utf-8")
 
 if __name__ == '__main__':
     unittest.main()
