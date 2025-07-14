@@ -17,3 +17,4 @@ faiss-cpu
 pypdf2
 pdfminer.six
 langchain-community
+pydantic 
