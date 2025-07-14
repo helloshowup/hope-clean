@@ -97,14 +97,14 @@ OPENAI_MODELS = [
         "description": "OpenAI's most powerful model for complex tasks",
     },
     {
-        "id": "openai/o3-2025-04-16",
-        "display_name": "OpenAI O3",
-        "description": "Next generation OpenAI model",
+        "id": "gpt-4o-2024-05-13",
+        "display_name": "GPT-4o (2024-05-13)",
+        "description": "OpenAI GPT-4o release from May 2024",
     },
     {
-        "id": "openai/o3-mini-2025-01-31",
-        "display_name": "OpenAI O3 Mini",
-        "description": "Smaller O3 variant",
+        "id": "gpt-4o",
+        "display_name": "GPT-4o",
+        "description": "OpenAI's optimized model",
     },
 ]
 
