@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Literal, Dict, Any, Optional
+from typing import List, Literal, Dict, Any, Optional, Union
 from pydantic import BaseModel, Field
 
 class SentimentAnalysis(BaseModel):
@@ -75,3 +75,145 @@ class DynamicContentGenerationResult(BaseModel):
     generation_metadata: Dict[str, Any] = Field(
         default_factory=dict, description="Metadata about the entire generation process."
     )
+
+
+class LessonMetadata(BaseModel):
+    """Metadata about the lesson."""
+
+    block_type: Literal['lesson_metadata']
+    title: str
+    module_id: str
+    subtitle: Optional[str] = None
+    purpose: Optional[str] = None
+
+
+class LearningObjectives(BaseModel):
+    """Learning objectives for the lesson."""
+
+    block_type: Literal['learning_objectives']
+    objectives: List[str]
+
+
+class Introduction(BaseModel):
+    """Introduction content summary."""
+
+    block_type: Literal['introduction']
+    content_summary: str
+    hook_suggestion: Optional[str] = None
+
+
+class SectionHeading(BaseModel):
+    """Heading for a section."""
+
+    block_type: Literal['section_heading']
+    level: int
+    title: str
+
+
+class ExplanatoryText(BaseModel):
+    """Explanatory text covering a topic."""
+
+    block_type: Literal['explanatory_text']
+    topic: str
+    key_points: List[str]
+    tone_suggestion: Optional[str] = None
+
+
+class ListBlock(BaseModel):
+    """A numbered or bulleted list."""
+
+    block_type: Literal['list_block']
+    list_type: str
+    heading: Optional[str] = None
+    items_summary: List[str]
+
+
+class ExampleAnalysis(BaseModel):
+    """Analysis of an example or scenario."""
+
+    block_type: Literal['example_analysis']
+    example_title: str
+    initial_statement: str
+    analysis_criteria: List[str]
+    improved_version_summary: str
+    explanation_points: List[str]
+
+
+class ProcessSteps(BaseModel):
+    """Steps describing a process."""
+
+    block_type: Literal['process_steps']
+    process_name: str
+    introductory_text: Optional[str] = None
+    steps: List[Dict[str, str]]
+
+
+class ReflectionPrompt(BaseModel):
+    """Questions prompting reflection."""
+
+    block_type: Literal['reflection_prompt']
+    prompt_heading: str
+    questions: List[str]
+    context_setting: Optional[str] = None
+
+
+class KeyTakeaways(BaseModel):
+    """Key takeaways from the lesson."""
+
+    block_type: Literal['key_takeaways']
+    points: List[str]
+
+
+class DiagramPlaceholder(BaseModel):
+    """Placeholder for a diagram."""
+
+    block_type: Literal['diagram_placeholder']
+    concept_to_illustrate: str
+    description: str
+    caption: Optional[str] = None
+    placement_suggestion: Optional[str] = None
+
+
+class FlowchartPlaceholder(BaseModel):
+    """Placeholder for a flowchart."""
+
+    block_type: Literal['flowchart_placeholder']
+    process_name: str
+    description: str
+    caption: Optional[str] = None
+    placement_suggestion: Optional[str] = None
+
+
+class ImagePlaceholder(BaseModel):
+    """Placeholder for an image."""
+
+    block_type: Literal['image_placeholder']
+    description: str
+    caption: Optional[str] = None
+    placement_suggestion: Optional[str] = None
+
+
+AnyBlock = Union[
+    LessonMetadata,
+    LearningObjectives,
+    Introduction,
+    SectionHeading,
+    ExplanatoryText,
+    ListBlock,
+    ExampleAnalysis,
+    ProcessSteps,
+    ReflectionPrompt,
+    KeyTakeaways,
+    DiagramPlaceholder,
+    FlowchartPlaceholder,
+    ImagePlaceholder,
+]
+
+
+class PlanModel(BaseModel):
+    """Represents the entire lesson plan structure."""
+
+    content_title: str
+    target_audience: str
+    estimated_word_count: int
+    content_blocks: List[AnyBlock] = Field(..., discriminator='block_type')
