@@ -191,9 +191,13 @@ def _coerce_plan_types(obj: Dict[str, Any]) -> Dict[str, Any]:
             obj["estimated_word_count"] = int(obj["estimated_word_count"])
     for block in obj.get("content_blocks", []):
         if block.get("block_type") == "process_steps":
-            for step in block.get("steps", []):
-                if isinstance(step.get("step_number"), int):
-                    step["step_number"] = str(step["step_number"])
+            steps = block.get("steps")
+            if steps is not None and not isinstance(steps, list):
+                raise ValueError("process_steps.steps must be a list")
+            for step in steps or []:
+                sn = step.get("step_number")
+                if sn is not None and not isinstance(sn, str):
+                    step["step_number"] = str(sn)
     return obj
 
 
