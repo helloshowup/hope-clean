@@ -180,13 +180,15 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
         else:
             raise RuntimeError(f"Error during asynchronous operation: {error_msg}")
 
-async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_settings: Optional[Dict[str, Any]] = None) -> List[str]:
-    """Generate three content versions from a finalized plan."""
+async def generate_three_versions_from_plan(
+    final_plan: Dict[str, Any], template: str, ui_settings: Optional[Dict[str, Any]] = None
+) -> List[str]:
+    """Generate three content versions from a finalized plan using a Markdown template."""
 
     if ui_settings is None:
         ui_settings = {}
 
-    use_dynamic = ui_settings.get("use_dynamic_blocks", True)
+    use_dynamic = ui_settings.get("use_dynamic_blocks", True) and not template
     system_prompt = load_prompt("system/ai_editor_system_message")
 
     prompt_template = load_prompt("generation/generation_prompt")
@@ -231,6 +233,9 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
             return "\n\n".join(parts)
     else:
         prompt = prompt_template.replace("{{final_plan}}", json.dumps(final_plan, ensure_ascii=False))
+        prompt = prompt.replace("{{block}}", "").replace("{{instruction}}", "")
+        if template:
+            prompt += "\n\nUse this Markdown template to structure the lesson:\n" + template
 
         async def generate_version(temp: float) -> str:
             version_prompt = prompt + ("\n\nNOTE: Provide a distinctly different take for the next version." if temp != 0.3 else "")

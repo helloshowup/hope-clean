@@ -336,7 +336,21 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             # Generate three versions - use initial generation model
             add_log_entry("Generate Content", "started", "Generating three content versions")
             variables = row_data_item["variables"]
-            template = row_data_item["template"]
+            template = row_data_item.get("markdown_template") or row_data_item["template"]
+
+            # Save the template being used for debugging purposes
+            try:
+                template_dir = os.path.join(output_dir, "templates")
+                os.makedirs(template_dir, exist_ok=True)
+                template_filename = f"{step_info.replace(',', '').replace(' ', '_')}_template.md"
+                template_path = os.path.join(template_dir, template_filename)
+                with open(template_path, "w", encoding="utf-8") as tpl_file:
+                    tpl_file.write(template)
+                result["template_path"] = template_path
+                add_log_entry("Save Template", "completed", f"Saved template to {template_path}")
+            except Exception as tpl_error:
+                logger.error(f"Error saving template for {step_info}: {str(tpl_error)}")
+                add_log_entry("Save Template", "error", str(tpl_error))
             
             # Check if reference handbook extraction is enabled
             use_reference_handbook = ui_settings.get(
@@ -913,6 +927,7 @@ async def main(csv_path: str,
                     "row": row,
                     "variables": variables,
                     "template": template,
+                    "markdown_template": template,
                     "context": context,
                     "result": result,
                     "add_log_entry": add_log_entry,

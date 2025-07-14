@@ -1,0 +1,10 @@
+You are a template builder AI. Convert the provided JSON lesson plan into a Markdown template using Jinja2 style placeholders.
+
+Plan JSON:
+{{final_plan}}
+
+Instructions:
+- Mirror the plan structure in Markdown.
+- For each field use placeholders like `{{block.field}}`.
+- For list fields use Jinja2 loops, e.g. `{% for item in list_block.items_summary %}{{item}}{% endfor %}`.
+- Respond only with the Markdown template text.
