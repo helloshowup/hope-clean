@@ -157,6 +157,42 @@ def save_generation_summary(output_dir: str, summary: Dict[str, Any]) -> str:
         logger.error(error_msg)
         return ""
 
+def save_initial_plan(plan_dir: str, plan: Dict[str, Any], metadata: Dict[str, Any]) -> str:
+    """Save initial plan JSON to disk.
+
+    Args:
+        plan_dir: Directory where plan files are stored
+        plan: Validated plan dictionary
+        metadata: Dict containing step_info metadata
+
+    Returns:
+        Path to the saved file or empty string on failure
+    """
+    import json
+
+    logger.info("Saving initial plan")
+
+    try:
+        os.makedirs(plan_dir, exist_ok=True)
+        file_name = f"{metadata.get('step_info', 'plan').replace(',', '').replace(' ', '_')}.json"
+        plan_path = os.path.join(plan_dir, file_name)
+
+        with open(plan_path, 'w', encoding='utf-8') as f:
+            json.dump({
+                "module": metadata.get("module", ""),
+                "lesson": metadata.get("lesson", ""),
+                "step_number": metadata.get("step_number", ""),
+                "step_title": metadata.get("step_title", ""),
+                "initial_plan": plan
+            }, f, indent=2)
+
+        logger.info(f"Successfully saved initial plan to {plan_path}")
+        return plan_path
+
+    except Exception as e:
+        logger.error(f"Error saving initial plan: {str(e)}")
+        return ""
+
 def save_workflow_log(output_dir: str, log_entries: list) -> str:
     """
     Save workflow log as markdown file.
