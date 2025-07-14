@@ -80,16 +80,20 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
     * `block_type`: "image\_placeholder" (string, REQUIRED)  
     * `description`: "string (REQUIRED)" \- A detailed description of the image content and its relevance.  
     * `caption`: "string (Optional)" \- An optional caption for the image.  
-14. **audio_placeholder**:  
-    * `block_type`: "audio_placeholder" (string, REQUIRED)  
-    * `topic`: "string (REQUIRED)" \- The topic of the audio content.
+14. **audio_placeholder**:
+    * `block_type`: "audio_placeholder" (string, REQUIRED)
+    * `concept_to_illustrate`: "string (REQUIRED)" \- The concept or topic the audio clip should convey.
     * `description`: "string (REQUIRED)" \- A detailed description of the audio content.
-    * `suggested_duration_seconds`: "integer (Optional)" \- Suggested duration in seconds.  
-15. **video_placeholder**:  
-    * `block_type`: "video_placeholder" (string, REQUIRED)  
-    * `topic`: "string (REQUIRED)" \- The topic of the video content.
+    * `audio_duration_seconds`: "integer (REQUIRED)" \- Expected length of the audio clip in seconds.
+    * `caption`: "string (Optional)" \- An optional caption for the audio.
+    * `placement_suggestion`: "string (Optional)" \- Optional guidance on where the audio should appear.
+15. **video_placeholder**:
+    * `block_type`: "video_placeholder" (string, REQUIRED)
+    * `concept_to_illustrate`: "string (REQUIRED)" \- The concept or topic the video should illustrate.
     * `description`: "string (REQUIRED)" \- A detailed description of the video content.
-    * `suggested_duration_seconds`: "integer (Optional)" \- Suggested duration in seconds.
+    * `video_duration_seconds`: "integer (REQUIRED)" \- Expected length of the video in seconds.
+    * `caption`: "string (Optional)" \- An optional caption for the video.
+    * `placement_suggestion`: "string (Optional)" \- Optional guidance on where the video should appear.
 
 **Instructions for the AI:**
 
@@ -100,6 +104,7 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
 * Populate the content summaries and descriptions thoughtfully, based on the provided lesson context.
 * Prioritize pedagogical flow and logical progression of content.
 * For `process_steps` blocks, ensure each `step_number` is returned as a string (e.g., "1", "2").
+* For `audio_placeholder` and `video_placeholder` blocks, include `concept_to_illustrate`, `description`, and the appropriate duration field (`audio_duration_seconds` or `video_duration_seconds`). `caption` and `placement_suggestion` remain optional.
 * Remember that `learning_objectives` and `key_takeaways` are typically omitted from the *initial plan* unless explicitly requested otherwise for a specific scenario, as they are generated in a later stage.
 * Respond only with valid JSON; use double quotes for keys and strings and avoid trailing commas or extra text.
 
