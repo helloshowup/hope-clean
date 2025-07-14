@@ -384,13 +384,15 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
                 result["completion_timestamp"] = datetime.datetime.now().isoformat()
             else:
                 add_log_entry("Refinement", "completed", "Plan refined")
+                if row_data_item.get("markdown_template"):
+                    row_data_item["template"] = row_data_item["markdown_template"]
 
         elif phase == "generate":
             # Content Generation Phase
             # Generate three versions - use initial generation model
             add_log_entry("Generate Content", "started", "Generating three content versions")
             variables = row_data_item["variables"]
-            template = row_data_item["template"]
+            template = row_data_item.get("markdown_template") or row_data_item["template"]
             
             # Check if reference handbook extraction is enabled
             use_reference_handbook = ui_settings.get(
@@ -471,7 +473,11 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
 
                 final_plan = row_data_item.get("final_plan", {})
 
-                generations = await generate_three_versions_from_plan(final_plan, generation_settings)
+                generations = await generate_three_versions_from_plan(
+                    final_plan,
+                    template,
+                    generation_settings,
+                )
                 add_log_entry("Generate Content", "completed", f"Generated {len(generations)} content versions")
                 row_data_item["generated_versions"] = generations
                 row_data_item["status"] = "GENERATION_COMPLETE"
@@ -927,6 +933,7 @@ async def main(csv_path: str,
                     "row": row,
                     "variables": variables,
                     "template": template,
+                    "markdown_template": template,
                     "context": context,
                     "result": result,
                     "add_log_entry": add_log_entry,

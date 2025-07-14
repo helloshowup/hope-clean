@@ -7,6 +7,7 @@ from showup_core.api_client import generate_with_claude
 from showup_core.model_config import get_model_provider
 from showup_core.utils import load_prompt
 from .block_library import get_block_type_definitions, validate_plan
+from simplified_workflow.template_builder import generate_markdown_template
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,14 @@ async def run_refinement_stage(
             )
 
         new_item["final_plan"] = validate_plan(revised_plan_text).model_dump(exclude_none=True)
+
+        try:
+            template = await generate_markdown_template(new_item["final_plan"], config)
+            new_item["markdown_template"] = template
+        except Exception as templ_err:
+            logger.error(f"Template generation failed: {templ_err}")
+            new_item["markdown_template"] = ""
+
         new_item["status"] = "PLAN_FINALIZED"
     except Exception as e:
         logger.error(f"Refinement stage failed: {e}")
