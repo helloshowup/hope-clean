@@ -29,7 +29,7 @@ from simplified_workflow.learning_sections import generate_lo_and_kt_from_conten
 from simplified_workflow.markdown_utils import insert_sections_in_markdown
 from .constants import EXCEL_CLARIFICATION
 
-from showup_core.api_client import generate_with_claude
+from showup_core.api_client import generate_with_claude, _load_selected_model
 from showup_core.model_config import DEFAULT_PLANNING_MODEL
 # Import RAG system components
 from simplified_workflow.rag_system.token_counter import count_tokens
@@ -355,7 +355,9 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             plan_cfg = {
                 "model_id": ui_settings.get(
                     "planning_model",
-                    ui_settings.get("selected_model", DEFAULT_PLANNING_MODEL),
+                    ui_settings.get(
+                        "selected_model", _load_selected_model(DEFAULT_PLANNING_MODEL)
+                    ),
                 ),
                 "max_tokens": ui_settings.get("planning_max_tokens", 8000),
                 "temperature": ui_settings.get("planning_temperature", 0.3),
@@ -387,7 +389,10 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             add_log_entry("Refinement", "started", "Refining plan")
             refine_cfg = {
                 "model_id": ui_settings.get(
-                    "refinement_model", ui_settings.get("selected_model", DEFAULT_PLANNING_MODEL)
+                    "refinement_model",
+                    ui_settings.get(
+                        "selected_model", _load_selected_model(DEFAULT_PLANNING_MODEL)
+                    ),
                 ),
                 "max_tokens": ui_settings.get("refinement_max_tokens", 8000),
                 "temperature": ui_settings.get("refinement_temperature", 0.3),

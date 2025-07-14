@@ -4,7 +4,7 @@ import asyncio
 import json
 from typing import Dict, Any
 
-from showup_core.api_client import generate_with_claude
+from showup_core.api_client import generate_with_claude, _load_selected_model
 from showup_core.model_config import (
     get_model_provider,
     DEFAULT_PLANNING_MODEL,
@@ -51,7 +51,7 @@ async def run_planning_stage(
         .replace("{{block_library}}", block_defs)
     )
 
-    model_id = config.get('model_id', DEFAULT_PLANNING_MODEL)
+    model_id = config.get('model_id', _load_selected_model(DEFAULT_PLANNING_MODEL))
     provider = get_model_provider(model_id)
 
     max_attempts = config.get("max_attempts", 3)
