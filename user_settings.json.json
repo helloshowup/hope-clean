@@ -1,6 +1,0 @@
-{
-  "selected_model": "openai/o3-2025-04-16",
-  "initial_generation_model": "openai/o3-mini-2025-01-31",
-  "generation_settings": {},
-  "use_dynamic_blocks": true
-}
