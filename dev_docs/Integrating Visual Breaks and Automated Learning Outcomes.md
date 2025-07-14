@@ -52,9 +52,9 @@ Combining these, an **optimal prompt** to the AI could look like:
 ```
 SYSTEM: You are a veteran curriculum designer. You will read a lesson and extract its learning goals and summary points.
 
-USER: 
-""" 
-<Lesson Content in Markdown> 
+USER:
+"""
+{{content}}
 """
 
 Tasks:

@@ -2,7 +2,7 @@ SYSTEM: You are a veteran curriculum designer. You will read a lesson and extrac
 
 USER:
 """
-<Lesson Content in Markdown>
+{{content}}
 """
 
 Tasks:
