@@ -191,18 +191,17 @@ class WorkflowApp(App):
         workflow_thread.start()
 
     def run_workflow_in_thread(self, csv_path, course_name, learner_profile, ui_settings, output_dir):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        """Run the workflow synchronously inside a background thread."""
         try:
-            workflow_summary = loop.run_until_complete(
-                run_workflow(
-                    csv_path=csv_path,
-                    course_name=course_name,
-                    learner_profile=learner_profile,
-                    ui_settings=ui_settings,
-                    output_dir=output_dir,
-                    progress_queue=self.progress_queue
-                )
+            # run_workflow manages its own asyncio event loop internally, so we
+            # can call it directly here without creating another loop.
+            workflow_summary = run_workflow(
+                csv_path=csv_path,
+                course_name=course_name,
+                learner_profile=learner_profile,
+                ui_settings=ui_settings,
+                output_dir=output_dir,
+                progress_queue=self.progress_queue,
             )
             self.progress_queue.put({"final_summary": workflow_summary})
         except Exception as e:
@@ -210,8 +209,6 @@ class WorkflowApp(App):
             detailed_error = traceback.format_exc()
             kivy_logger.error(f"{error_message}\n{detailed_error}")
             self.progress_queue.put({"error": error_message})
-        finally:
-            loop.close()
 
     def check_progress_queue(self, dt):
         while not self.progress_queue.empty():
