@@ -1,10 +1,10 @@
-import os
 import json
 import logging
 from typing import Dict, Any
 
 from showup_core.utils import load_prompt
 from .block_library import get_block_type_definitions, validate_plan
+from .planning_stage import repair_plan_json_with_llm
 from simplified_workflow.template_builder import generate_markdown_template
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,19 @@ async def run_refinement_stage(
         )
         revised_plan_text = response2.choices[0].message.content
 
-        new_item["final_plan"] = validate_plan(revised_plan_text).model_dump(exclude_none=True)
+        try:
+            new_item["final_plan"] = validate_plan(revised_plan_text).model_dump(exclude_none=True)
+        except Exception as val_err:
+            logger.error(f"Refined plan validation failed: {val_err}")
+            repaired = await repair_plan_json_with_llm(
+                broken_text=revised_plan_text,
+                api_key=config.get("openai_api_key"),
+                model=model_id,
+            )
+            if repaired:
+                new_item["final_plan"] = repaired.model_dump(exclude_none=True)
+            else:
+                raise
 
         try:
             template = await generate_markdown_template(new_item["final_plan"], config)
