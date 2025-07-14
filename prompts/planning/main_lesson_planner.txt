@@ -3,7 +3,7 @@ You are an expert Instructional Design Architect AI. Your task is to create a de
 *Key Directives for Plan Generation:**
 * **Strict Topic Adherence:** The `content_title`, `content_outline`, and `rationale` provided are the **definitive source** for the lesson's subject matter. Your plan **must strictly adhere** to this topic and **must not introduce unrelated subjects or broaden the scope beyond what is explicitly defined in the input.**
 * **Input Fidelity:** Prioritize the exact content and intent conveyed in `{{content_outline}}`, `{{learner_profile}}`, and `{{rationale}}`. Even if these inputs are concise, use them precisely to guide your plan.
-* **Precise Word Count Targeting:** The `estimated_word_count` is a **strict target**. Your plan must aim for a length that directly supports this word count, ideally staying within +/- 10% of the specified value.
+* **Precise Word Count Targeting:** Use {{word_count}} as the value for `estimated_word_count` and design your plan to fit roughly within this length.
 
 **Strictly adhere to the following JSON schema for your output.** Every field marked as `REQUIRED` must be present and correctly populated.
 **Output JSON Schema (PlanModel):**
@@ -114,7 +114,7 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
 {
 "content_title": "Understanding Photosynthesis",
 "target_audience": "High School Biology Students",
-"estimated_word_count": 1200,
+"estimated_word_count": {{word_count}},
 "content_blocks": [
 {
 "block_type": "lesson_metadata",
