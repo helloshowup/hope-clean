@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+# Update pip to avoid old-package issues
+python -m pip install -q --upgrade pip
+
+# Install only the lightweight dependencies required for tests
+python -m pip install -q pandas claude-api python-dotenv
+
+# Provide empty stubs for heavy optional packages so imports succeed quickly
+python - <<'EOF'
+import types, sys
+sys.modules.setdefault('torch', types.ModuleType('torch'))
+sys.modules.setdefault('sentence_transformers', types.ModuleType('sentence_transformers'))
+EOF

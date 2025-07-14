@@ -22,7 +22,9 @@ dependencies = [
     "scikit-learn",
     "sentence-transformers",
     "setuptools",
-    "tqdm"
+    "tqdm",
+    "pydantic",  # Added for strict schema definition
+    "instructor" # Added for schema enforcement with OpenAI client
 ]
 
 [project.optional-dependencies]
@@ -30,7 +32,15 @@ dev = [
     "black",
     "flake8",
     "isort",
+    "pytest" # Added for running tests during development
 ]
 
 [tool.setuptools]
 packages = {find = {where = ["."], include = ["showup_core*", "showup_tools*", "simplified_workflow*", "showup_editor_ui*"], exclude = ["tests", "dev_docs"]}}
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+log_cli_level = "INFO"
+# Configuration for pytest can be added here if needed to integrate with your AI Coder's test skipping
+# For example, to ignore test files temporarily, though AGENTS.md is recommended for AI guidance:
+# addopts = "--ignore=tests"
