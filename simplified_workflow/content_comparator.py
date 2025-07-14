@@ -13,6 +13,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from showup_core.api_client import generate_with_claude
 from .constants import EXCEL_CLARIFICATION
 from showup_core.utils import load_prompt
+from showup_core.model_config import DEFAULT_MODEL
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.content_comparator")
@@ -77,9 +78,9 @@ async def compare_and_combine(generations: List[str],
             # Use token limit from UI settings if provided, otherwise use 8000 as default
             token_limit = ui_settings.get('token_limit', 8000) if ui_settings else 8000
             model = (
-                ui_settings.get('model', 'claude-3-haiku-20240307')
+                ui_settings.get('model', DEFAULT_MODEL)
                 if ui_settings
-                else 'claude-3-haiku-20240307'
+                else DEFAULT_MODEL
             )
             
             logger.info(f"Using token limit from UI settings: {token_limit}")
