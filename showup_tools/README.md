@@ -75,3 +75,9 @@ pytest
 You can choose a folder containing your own markdown templates. In the UI this
 is saved as the `template_directory` setting. If omitted, the app loads the
 default template from the repository's `templates/` folder.
+
+### CSV Columns
+
+Include a column named **`Target_Word_Count`** (or simply `word_count`) in your
+CSV to specify the target word count for each lesson. If omitted, the default
+word count from the settings file is used.
