@@ -10,7 +10,7 @@ import asyncio
 from typing import Dict, List, Any, Optional, Tuple
 
 # Import from core modules
-from showup_core.api_client import generate_with_claude
+from showup_core.api_client import generate_with_ai
 from .constants import EXCEL_CLARIFICATION
 from showup_core.utils import load_prompt
 
@@ -67,7 +67,7 @@ async def review_content(content: str, target_learner_profile: str, instance_id:
             
             logger.info(f"Using token limit from UI settings: {token_limit}")
             
-            result = await generate_with_claude(
+            result = await generate_with_ai(
                 prompt=prompt,
                 system_prompt=system_prompt,
                 max_tokens=token_limit,
