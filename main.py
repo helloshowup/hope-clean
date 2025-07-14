@@ -15,6 +15,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
 from showup_core.model_config import DEFAULT_PLANNING_MODEL, load_model_config
+from showup_core.api_client import _load_selected_model
 from showup_core.config import create_argument_parser
 
 import asyncio
@@ -209,12 +210,12 @@ class WorkflowApp(App):
         ui_settings = {
             "use_reference_handbook": bool(abs_handbook_path),
             "reference_handbook_path": abs_handbook_path,
-            "selected_model": DEFAULT_PLANNING_MODEL,
+            "selected_model": _load_selected_model(DEFAULT_PLANNING_MODEL),
             "initial_generation_model": models_cfg["generation_model"],
             "comparison_model": models_cfg["comparison_model"],
             "review_model": models_cfg["review_model"],
-            "planning_model": DEFAULT_PLANNING_MODEL,
-            "refinement_model": DEFAULT_PLANNING_MODEL,
+            "planning_model": _load_selected_model(DEFAULT_PLANNING_MODEL),
+            "refinement_model": _load_selected_model(DEFAULT_PLANNING_MODEL),
             "planning_max_tokens": 8000,
             "refinement_max_tokens": 8000,
             "planning_temperature": 0.3,
