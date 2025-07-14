@@ -98,22 +98,6 @@ In the last stage, the system adds any remaining elements and performs quality c
 
 Once finalization is done, the pipeline moves on to the next row in the CSV (if any) or concludes if all content pieces are processed. The Kivy UI would then display a “Workflow Complete\!” message, and the generated content can be reviewed by opening the output files.
 
-## **Additional Tool: ShowUp Editor UI (Claude Panel)**
-
-In addition to the main Kivy application, the repository contains a **separate editor interface** under the `showup_editor_ui/` directory. This “Claude Panel” Editor UI is a Tkinter-based program intended for more interactive content creation and editing. It provides a multi-tab GUI (with prompt configuration, content generation, lesson enrichment, etc.) that allows users to manually guide the AI in generating or refining content in a step-by-step fashion[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/content_generator.py#L75-L84)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/content_generator.py#L113-L121). Key capabilities of the Editor UI include:
-
-* Selecting AI models for different tasks (context generation vs content editing) from a dropdown[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/content_generator.py#L76-L84).
-
-* Manually editing or providing additional instructions before generation (through a text area for custom prompt tweaks)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/content_generator.py#L98-L106).
-
-* Viewing the AI’s “thinking process” (intermediate reasoning or draft output) in real-time as it generates content[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/content_generator.py#L128-L135).
-
-* An **Enrich Lesson panel** for enhancing content (likely using the `enrich_lesson.py` and related modules, which can integrate things like adding examples, context, etc. using Claude).
-
-* A **Markdown editor** for making final tweaks to the content and saving it.
-
-Currently, this Editor UI is **not yet integrated** with the main Kivy workflow. It exists as a standalone tool (primarily for development and testing) and can be launched on its own for a more controlled content editing session. For instance, the test file `showup_editor_ui/claude_panel/test_instantiation.py` demonstrates creating a Tkinter window and instantiating the panel components independently[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/test_instantiation.py#L38-L46)[GitHub](https://github.com/helloshowup/hope-clean/blob/4fccb1237fdb87e687769a0337dcec36ddc92ed0/showup_editor_ui/claude_panel/test_instantiation.py#L52-L59). Future development may incorporate this interface into the main application or use it to allow human-in-the-loop adjustments to AI-generated content. New developers should be aware that this code exists and provides additional functionality (especially around *manual prompt refinement and content editing with Claude*) that complements the automated pipeline.
-
 ## **Ongoing Development and Planned Enhancements**
 
 This project is under active development. Several features are recent additions or still in progress. As you onboard, keep in mind the following planned enhancements and stubs:
