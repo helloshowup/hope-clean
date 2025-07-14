@@ -42,6 +42,19 @@ except ImportError:
 
 logger = logging.getLogger("api_client")
 
+
+def _load_selected_model(default: str = DEFAULT_MODEL) -> str:
+    """Return the model selected in the root user_settings.json."""
+    settings_file = get_project_root() / "user_settings.json"
+    if settings_file.exists():
+        try:
+            with open(settings_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data.get("selected_model", default)
+        except Exception as e:  # pragma: no cover - best effort
+            logger.warning(f"Failed to load user settings: {e}")
+    return default
+
 class SmartModelSelector:
     """
     Intelligently selects AI models based on task requirements.
@@ -333,32 +346,101 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
     start_time = time.time()
     from_cache = False
 
-    # Log the start of the AI request
-    # Determine default model if not provided
+    # Determine default model if not provided and figure out provider
     if not model:
-        if task_type and (
-            "context" in task_type
-            or "summary" in task_type
-            or "planning" in task_type
-        ):
-            model = DEFAULT_PLANNING_MODEL
-        else:
-            model = DEFAULT_MODEL
+        model = _load_selected_model()
 
+    provider = get_model_provider(model)
     AILogEnhancer.log_ai_request(ai_logger, model, task_type, None, use_cache)
-    
-    # Get API key from environment or config
+
+    if provider == "openai":
+        try:
+            import openai
+
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                from config.api_keys import OPENAI_API_KEY
+
+                api_key = OPENAI_API_KEY
+            client = openai.OpenAI(api_key=api_key)
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+            )
+            content = extract_response_content(response, client_type="openai")
+            end_time = time.time()
+            AILogEnhancer.log_ai_response(
+                ai_logger,
+                model,
+                "SUCCESS",
+                end_time - start_time,
+                False,
+                None,
+                None,
+            )
+            AILogEnhancer.save_interaction_to_file(
+                prompt=prompt,
+                response=content,
+                model=model,
+                function_name=calling_function,
+                task_type=task_type,
+                temperature=temperature,
+                calling_context=calling_context,
+                system_prompt=system_prompt,
+            )
+            save_api_logs_to_files(
+                prompt=prompt,
+                response=content,
+                module_number=module_number,
+                lesson_number=lesson_number,
+                step_number=step_number,
+                function_type=task_type,
+            )
+            return content
+        except Exception as e:
+            error_msg = f"Error generating content with OpenAI API: {e}"
+            logger.error(error_msg)
+            end_time = time.time()
+            AILogEnhancer.log_ai_response(
+                ai_logger,
+                model,
+                "FAILED",
+                end_time - start_time,
+                False,
+                None,
+                None,
+            )
+            AILogEnhancer.save_interaction_to_file(
+                prompt=prompt,
+                response=error_msg,
+                model=model,
+                function_name=calling_function,
+                task_type=task_type,
+                temperature=temperature,
+                calling_context=calling_context,
+                system_prompt=system_prompt,
+            )
+            return error_msg
+
+    # Default to Claude provider
+
     api_key = None
-    
-    # Try to get from environment variables
+
     try:
         import os
         from dotenv import load_dotenv
-        
-        # Try to load from the ShowupSquared directory .env file
+
         dotenv_path = os.path.join(str(get_project_root()), '.env')
         load_dotenv(dotenv_path)
-        
+
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if api_key:
             logger.info("Using Claude API key from environment variables")
@@ -366,8 +448,7 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
         logger.warning("Could not import dotenv, falling back to config")
     except Exception as e:
         logger.warning(f"Error loading from .env: {str(e)}")
-    
-    # If not found in environment, try config file
+
     if not api_key:
         try:
             from config.api_keys import ANTHROPIC_API_KEY
@@ -376,13 +457,11 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
                 logger.info("Using Claude API key from config file")
         except ImportError:
             logger.error("Could not import ANTHROPIC_API_KEY from config.api_keys")
-    
-    # Check if we have an API key
+
     if not api_key:
         error_msg = "No Claude API key found in environment or config"
         logger.error(error_msg)
-        
-        # Log the failed API request
+
         end_time = time.time()
         AILogEnhancer.log_ai_response(
             ai_logger,
@@ -391,10 +470,11 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
             end_time - start_time,
             False,
             None,
-            None
+            None,
         )
-        # Save the failed interaction to a file
-        error_response = "Error: ANTHROPIC_API_KEY not configured. Please add it to .env or config/api_keys.py"
+        error_response = (
+            "Error: ANTHROPIC_API_KEY not configured. Please add it to .env or config/api_keys.py"
+        )
         AILogEnhancer.save_interaction_to_file(
             prompt=prompt,
             response=error_response,
@@ -403,15 +483,11 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
             task_type=task_type,
             temperature=temperature,
             calling_context=calling_context,
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
         )
-        
-        return error_response
-        
-    # Direct API call implementation, no batch processing
 
-    # Re-enabled caching for cost efficiency
-    # Check if we should use the cache
+        return error_response
+
     use_cache_flag = True
     if not use_cache:
         logger.info("Caching explicitly disabled for this request")
