@@ -1,11 +1,13 @@
-You are generating lesson content block by block.
-The entire lesson should be roughly {{word_count}} words in total.
+You are generating lesson content. The assembled lesson should be roughly {{word_count}} words in total.
 Use Markdown formatting when appropriate.
+
+If generating a single block, you will receive the block JSON in {{block}} and a short {{instruction}} describing how to expand it.
+If generating the entire lesson, you will receive the complete plan JSON in {{final_plan}}. Follow it closely.
+
+Important: Wrap **all** of your output inside `<educational_content>` tags and do not include any commentary outside the tags.
 
 Block details:
 {{block}}
 
 Instruction:
 {{instruction}}
-
-Write only the content for this block.
