@@ -40,11 +40,8 @@ async def run_planning_stage(
     rationale = new_item.get("What is the rationale for this step") or new_item.get(
         "rationale", ""
     )
-    word_count = str(
-        new_item.get("word_count")
-        or config.get("word_count")
-        or ""
-    )
+    # Strictly rely on the CSV value; don't fall back to defaults
+    word_count = str(new_item.get("word_count", ""))
     block_defs = get_block_type_definitions()
     prompt = (
         prompt_template.replace("{{content_outline}}", content_outline)
