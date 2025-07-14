@@ -20,16 +20,6 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="Path to the CSV file containing lesson data",
     )
     parser.add_argument(
-        "--course_name",
-        default="Introduction to Academic Grit",
-        help="Name of the course",
-    )
-    parser.add_argument(
-        "--learner_profile",
-        default="A high school student preparing for college.",
-        help="Description of the target learner",
-    )
-    parser.add_argument(
         "--log_level",
         default="INFO",
         help="Logging level (e.g. INFO or DEBUG)",

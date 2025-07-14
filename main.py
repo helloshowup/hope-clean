@@ -40,6 +40,7 @@ kivy_logger.setLevel(logging.INFO)
 _parser = create_argument_parser()
 CLI_ARGS, _ = _parser.parse_known_args()
 
+
 class WorkflowApp(App):
     status_message = StringProperty("Ready to start workflow.")
     progress_value = NumericProperty(0)
@@ -100,33 +101,7 @@ class WorkflowApp(App):
         handbook_browse_button.bind(on_release=lambda btn: self.show_file_chooser(self.handbook_path_input, 'handbook'))
         input_grid.add_widget(handbook_browse_button)
 
-        input_grid.add_widget(Label(text="Course Name:", halign='left', size_hint_x=1,
-                                    color=(1, 1, 1, 1)))
-        self.course_name_input = TextInput(
-            text=CLI_ARGS.course_name,
-            multiline=False,
-            size_hint_x=1,
-            background_normal='',
-            background_active='',
-            background_color=(0.95, 0.95, 0.95, 1),
-            foreground_color=(0, 0, 0, 1),
-            cursor_color=(0, 0, 0, 1),
-        )
-        input_grid.add_widget(self.course_name_input)
 
-        input_grid.add_widget(Label(text="Learner Profile:", halign='left', size_hint_x=1,
-                                    color=(1, 1, 1, 1)))
-        self.learner_profile_input = TextInput(
-            text=CLI_ARGS.learner_profile,
-            multiline=True,
-            size_hint_x=1,
-            background_normal='',
-            background_active='',
-            background_color=(0.95, 0.95, 0.95, 1),
-            foreground_color=(0, 0, 0, 1),
-            cursor_color=(0, 0, 0, 1),
-        )
-        input_grid.add_widget(self.learner_profile_input)
 
         main_layout.add_widget(input_grid)
 
@@ -209,8 +184,8 @@ class WorkflowApp(App):
 
         csv_path = self.csv_path_input.text
         handbook_path = self.handbook_path_input.text
-        course_name = self.course_name_input.text
-        learner_profile = self.learner_profile_input.text
+        course_name = ""
+        learner_profile = ""
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         abs_csv_path = os.path.join(current_dir, csv_path)
@@ -269,20 +244,20 @@ class WorkflowApp(App):
 
         workflow_thread = threading.Thread(
             target=self.run_workflow_in_thread,
-            args=(abs_csv_path, course_name, learner_profile, ui_settings, run_output_dir)
+            args=(abs_csv_path, ui_settings, run_output_dir)
         )
         workflow_thread.daemon = True
         workflow_thread.start()
 
-    def run_workflow_in_thread(self, csv_path, course_name, learner_profile, ui_settings, output_dir):
+    def run_workflow_in_thread(self, csv_path, ui_settings, output_dir):
         """Run the workflow synchronously inside a background thread."""
         try:
             # run_workflow manages its own asyncio event loop internally, so we
             # can call it directly here without creating another loop.
             workflow_summary = run_workflow(
                 csv_path=csv_path,
-                course_name=course_name,
-                learner_profile=learner_profile,
+                course_name="",
+                learner_profile="",
                 ui_settings=ui_settings,
                 output_dir=output_dir,
                 progress_queue=self.progress_queue,
