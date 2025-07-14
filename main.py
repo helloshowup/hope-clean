@@ -15,6 +15,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.clock import Clock
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
 from showup_core.model_config import DEFAULT_PLANNING_MODEL
+from showup_core.config import create_argument_parser
 
 import asyncio
 import threading
@@ -35,6 +36,10 @@ except ImportError as e:
 kivy_logger = logging.getLogger('kivy')
 kivy_logger.setLevel(logging.INFO)
 
+# Parse command line arguments for defaults
+_parser = create_argument_parser()
+CLI_ARGS, _ = _parser.parse_known_args()
+
 class WorkflowApp(App):
     status_message = StringProperty("Ready to start workflow.")
     progress_value = NumericProperty(0)
@@ -48,7 +53,7 @@ class WorkflowApp(App):
         input_grid = BoxLayout(orientation='vertical', size_hint_y=None, height=300, spacing=5)
 
         input_grid.add_widget(Label(text="CSV File Path:", halign='left', size_hint_x=1))
-        self.csv_path_input = TextInput(text="data/sample_input.csv", multiline=False, size_hint_x=1)
+        self.csv_path_input = TextInput(text=CLI_ARGS.csv_file, multiline=False, size_hint_x=1)
         input_grid.add_widget(self.csv_path_input)
         csv_browse_button = Button(text="Browse CSV", size_hint_y=None, height=40)
         csv_browse_button.bind(on_release=lambda btn: self.show_file_chooser(self.csv_path_input, 'csv'))
@@ -62,11 +67,11 @@ class WorkflowApp(App):
         input_grid.add_widget(handbook_browse_button)
 
         input_grid.add_widget(Label(text="Course Name:", halign='left', size_hint_x=1))
-        self.course_name_input = TextInput(text="Introduction to Academic Grit", multiline=False, size_hint_x=1)
+        self.course_name_input = TextInput(text=CLI_ARGS.course_name, multiline=False, size_hint_x=1)
         input_grid.add_widget(self.course_name_input)
 
         input_grid.add_widget(Label(text="Learner Profile:", halign='left', size_hint_x=1))
-        self.learner_profile_input = TextInput(text="A high school student preparing for college.", multiline=True, size_hint_x=1)
+        self.learner_profile_input = TextInput(text=CLI_ARGS.learner_profile, multiline=True, size_hint_x=1)
         input_grid.add_widget(self.learner_profile_input)
 
         main_layout.add_widget(input_grid)
@@ -172,7 +177,8 @@ class WorkflowApp(App):
         os.makedirs(run_output_dir, exist_ok=True)
 
         try:
-            workflow_log_file_path = setup_logging(log_level=logging.DEBUG)
+            log_level = getattr(logging, CLI_ARGS.log_level.upper(), logging.INFO)
+            workflow_log_file_path = setup_logging(log_level=log_level)
         except Exception as e:
             self.status_message = f"[color=ff0000]Error setting up workflow logging: {e}[/color]"
             self.workflow_running = False

@@ -29,6 +29,8 @@ from simplified_workflow.rag_system.cache_manager import cache
 from simplified_workflow.rag_system.textbook_vector_db import get_vector_db
 from simplified_workflow.rag_system.ingest_textbook import extract_text_from_file
 import hashlib
+# Shared parser
+from showup_core.config import create_argument_parser
 # Batch processing functionality removed as per requirement
 from .output_manager import save_as_markdown, create_output_directory, save_generation_summary, save_workflow_log
 
@@ -1209,22 +1211,12 @@ def run_workflow(csv_path: str, course_name: str, learner_profile: str,
         }
 
 if __name__ == "__main__":
-    import argparse
-    
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Run simplified workflow for content generation")
-    parser.add_argument("csv_path", help="Path to the CSV file")
-    parser.add_argument("course_name", help="Name of the course")
-    parser.add_argument("learner_profile", help="Description of the target learner")
-    parser.add_argument("--modules", nargs="+", help="List of modules to process (optional)")
-    parser.add_argument("--phase", choices=["generate", "compare", "review", "finalize"],
-                        help="Optional workflow phase to execute (default: all phases)")
-    
+    parser = create_argument_parser()
     args = parser.parse_args()
     
     # Run the workflow
     asyncio.run(main(
-        args.csv_path,
+        args.csv_file,
         args.course_name,
         args.learner_profile,
         selected_modules=args.modules,
