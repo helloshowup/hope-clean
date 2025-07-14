@@ -82,7 +82,7 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
     * `block_type`: "audio\_placeholder" (string, REQUIRED)  
     * `topic`: "string (REQUIRED)" \- The topic of the audio content.
     * `description`: "string (REQUIRED)" \- A detailed description of the audio content.
-    * `suggested_duration_seconds`: "integer (REQUIRED)" \- Suggested duration of the audio in seconds. (e.g., 30, 60).
+    * `suggested_duration_seconds`: "integer (Optional)" \- Suggested duration of the audio in seconds. (e.g., 30, 60).
     * `caption`: "string (Optional)" \- Suggested accompanying text for the audio player.
     * `placement_suggestion`: "string (Optional)" \- Suggestion for visual placement.
 15. **video_placeholder**:  
