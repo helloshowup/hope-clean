@@ -19,3 +19,6 @@ Format the output in Markdown with the following sections:
 - Takeaway 1...
 - Takeaway 2...
 
+IMPORTANT: Use the headings exactly as shown above:
+"## Learning Objectives" and "## Key Takeaways".
+
