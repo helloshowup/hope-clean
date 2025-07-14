@@ -19,6 +19,11 @@ Guidelines:
 - Do NOT include `learning_objectives` or `key_takeaways` blocks; these will be added automatically later.
 - Other blocks may be repeated as needed to cover the outline.
 
+Output Requirements:
+- Produce a single, complete JSON object that conforms to the `PlanModel` schema.
+- Use double quotes for all keys and string values.
+- Do not include trailing commas or any text outside the JSON object.
+
 Outline:
 {{content_outline}}
 
