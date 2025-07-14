@@ -123,7 +123,7 @@ class ListBlock(BaseModel):
     """A numbered or bulleted list."""
 
     block_type: Literal['list_block']
-    list_type: str
+    list_type: Literal['numbered', 'bulleted']
     heading: Optional[str] = None
     items_summary: List[str]
 
@@ -170,8 +170,6 @@ class DiagramPlaceholder(BaseModel):
     block_type: Literal['diagram_placeholder']
     concept_to_illustrate: str
     description: str
-    caption: Optional[str] = None
-    placement_suggestion: Optional[str] = None
 
 
 class FlowchartPlaceholder(BaseModel):
@@ -180,8 +178,6 @@ class FlowchartPlaceholder(BaseModel):
     block_type: Literal['flowchart_placeholder']
     process_name: str
     description: str
-    caption: Optional[str] = None
-    placement_suggestion: Optional[str] = None
 
 
 class ImagePlaceholder(BaseModel):
@@ -190,16 +186,15 @@ class ImagePlaceholder(BaseModel):
     block_type: Literal['image_placeholder']
     description: str
     caption: Optional[str] = None
-    placement_suggestion: Optional[str] = None
 
 
 class AudioPlaceholder(BaseModel):
     """Placeholder for an audio file."""
 
     block_type: Literal['audio_placeholder']
-    concept_to_illustrate: str
+    topic: str
     description: str
-    audio_duration_seconds: int
+    suggested_duration_seconds: Optional[int] = None
     caption: Optional[str] = None
     placement_suggestion: Optional[str] = None
 
@@ -208,9 +203,9 @@ class VideoPlaceholder(BaseModel):
     """Placeholder for a video file."""
 
     block_type: Literal['video_placeholder']
-    concept_to_illustrate: str
+    topic: str
     description: str
-    video_duration_seconds: int
+    suggested_duration_seconds: int
     caption: Optional[str] = None
     placement_suggestion: Optional[str] = None
 

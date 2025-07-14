@@ -18,6 +18,8 @@ from .generation_output import (
     DiagramPlaceholder,
     FlowchartPlaceholder,
     ImagePlaceholder,
+    AudioPlaceholder,
+    VideoPlaceholder,
     PlanModel,
 )
 
@@ -41,5 +43,7 @@ __all__ = [
     'DiagramPlaceholder',
     'FlowchartPlaceholder',
     'ImagePlaceholder',
+    'AudioPlaceholder',
+    'VideoPlaceholder',
     'PlanModel',
 ]
