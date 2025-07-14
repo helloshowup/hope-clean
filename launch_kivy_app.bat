@@ -43,8 +43,17 @@ IF EXIST requirements.txt (
     ECHO requirements.txt not found. Skipping dependency installation.
 )
 
+REM Set environment variables for the workflow prompts
+set "PYTHONPATH=%CD%"
+set "PLANNING_PROMPT=prompts/planning/main_lesson_planner.txt"
+set "REFINEMENT_PROMPT=prompts/planning/plan_refine_prompt.txt"
+set "GENERATION_PROMPT=prompts/generation/generation_prompt.txt"
+set "COMPARISON_PROMPT=prompts/review/content_comparison_prompt.txt"
+set "REVIEW_PROMPT=prompts/review/content_review_prompt.txt"
+
+
 ECHO Launching Kivy application...
-python main.py
+python main.py --csv_file data/test_input.csv --course_name "Introduction to Academic Grit" --log_level DEBUG
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Kivy application exited with errors.
     pause
