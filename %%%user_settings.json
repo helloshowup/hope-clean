@@ -1,6 +1,6 @@
 {
-  "selected_model": "o3",          // OpenAI’s flagship reasoning model—closest match to Claude-3.7 Sonnet
-  "initial_generation_model": "o3-mini", // Fast, low-cost tier analogous to Claude 3 Haiku
+  "selected_model": "openai/o3-2025-04-16",
+  "initial_generation_model": "openai/o3-mini-2025-01-31",
   "generation_settings": {},
   "use_dynamic_blocks": true
 }
