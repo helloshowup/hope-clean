@@ -79,21 +79,34 @@ BLOCK_LIBRARY = {
         "fields": {
             "concept_to_illustrate": "str",
             "description": "str",
-            "caption": "Optional[str]",
-            "placement_suggestion": "Optional[str]",
         }
     },
     "flowchart_placeholder": {
         "fields": {
             "process_name": "str",
             "description": "str",
-            "caption": "Optional[str]",
-            "placement_suggestion": "Optional[str]",
         }
     },
     "image_placeholder": {
         "fields": {
             "description": "str",
+            "caption": "Optional[str]",
+        }
+    },
+    "audio_placeholder": {
+        "fields": {
+            "topic": "str",
+            "description": "str",
+            "suggested_duration_seconds": "Optional[int]",
+            "caption": "Optional[str]",
+            "placement_suggestion": "Optional[str]",
+        }
+    },
+    "video_placeholder": {
+        "fields": {
+            "topic": "str",
+            "description": "str",
+            "suggested_duration_seconds": "int",
             "caption": "Optional[str]",
             "placement_suggestion": "Optional[str]",
         }
