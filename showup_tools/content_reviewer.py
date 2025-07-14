@@ -63,11 +63,7 @@ async def review_content(content: str, target_learner_profile: str, instance_id:
             # Call Claude API directly (batch processing has been removed from the workflow)
             # Use token limit from UI settings if provided, otherwise fall back to model default
             token_limit = ui_settings.get('token_limit', 4000) if ui_settings else 4000
-            model = (
-                ui_settings.get('model', 'claude-3-haiku-20240307')
-                if ui_settings
-                else 'claude-3-haiku-20240307'
-            )
+            model = ui_settings['model']
             
             logger.info(f"Using token limit from UI settings: {token_limit}")
             
