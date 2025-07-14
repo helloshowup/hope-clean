@@ -3,8 +3,6 @@ import json
 import logging
 from typing import Dict, Any
 
-from showup_core.api_client import generate_with_claude
-from showup_core.model_config import get_model_provider
 from showup_core.utils import load_prompt
 from .block_library import get_block_type_definitions, validate_plan
 from simplified_workflow.template_builder import generate_markdown_template
@@ -43,27 +41,17 @@ async def run_refinement_stage(
     critique_prompt = critique_prompt.replace('{{block_library}}', block_defs)
 
     model_id = config.get('model_id', 'claude-3-haiku-20240307')
-    provider = get_model_provider(model_id)
 
     try:
-        if provider == 'openai':
-            import openai
-            client = openai.OpenAI(api_key=config.get('openai_api_key'))
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=[{"role": "user", "content": critique_prompt}],
-                max_tokens=config.get('max_tokens', 1000),
-                temperature=config.get('temperature', 0.3)
-            )
-            critique = response.choices[0].message.content
-        else:
-            critique = await generate_with_claude(
-                critique_prompt,
-                max_tokens=config.get('max_tokens', 1000),
-                temperature=config.get('temperature', 0.3),
-                model=model_id,
-                task_type='plan_critique'
-            )
+        import openai
+        client = openai.OpenAI(api_key=config.get('openai_api_key'))
+        response = client.chat.completions.create(
+            model=model_id,
+            messages=[{"role": "user", "content": critique_prompt}],
+            max_tokens=config.get('max_tokens', 1000),
+            temperature=config.get('temperature', 0.3)
+        )
+        critique = response.choices[0].message.content
         new_item["plan_critique"] = critique
 
         refine_prompt = refine_template.replace('{{learner_profile}}', learner_profile)
@@ -71,22 +59,13 @@ async def run_refinement_stage(
         refine_prompt = refine_prompt.replace('{{critique}}', critique)
         refine_prompt = refine_prompt.replace('{{block_library}}', block_defs)
 
-        if provider == 'openai':
-            response2 = client.chat.completions.create(
-                model=model_id,
-                messages=[{"role": "user", "content": refine_prompt}],
-                max_tokens=config.get('max_tokens', 1000),
-                temperature=config.get('temperature', 0.3)
-            )
-            revised_plan_text = response2.choices[0].message.content
-        else:
-            revised_plan_text = await generate_with_claude(
-                refine_prompt,
-                max_tokens=config.get('max_tokens', 1000),
-                temperature=config.get('temperature', 0.3),
-                model=model_id,
-                task_type='plan_refine'
-            )
+        response2 = client.chat.completions.create(
+            model=model_id,
+            messages=[{"role": "user", "content": refine_prompt}],
+            max_tokens=config.get('max_tokens', 1000),
+            temperature=config.get('temperature', 0.3)
+        )
+        revised_plan_text = response2.choices[0].message.content
 
         new_item["final_plan"] = validate_plan(revised_plan_text).model_dump(exclude_none=True)
 
