@@ -34,3 +34,4 @@ Example of the correct root structure:
   ]
 }
 ```
+Output MUST be the JSON object only. Do not include markdown, code fences, or explanatory text.
