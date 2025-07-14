@@ -9,6 +9,8 @@ import json
 import logging
 from typing import Dict, List, Any, Optional
 
+from showup_core.utils import load_prompt
+
 # Set up logger
 logger = logging.getLogger("simplified_workflow.template_loader")
 
@@ -246,34 +248,25 @@ def get_content_comparison_template() -> str:
         Content comparison template string
     """
     template_content = get_template_content("content_comparison")
-    
+
     if template_content is not None:
         return template_content
-    
-    # Fall back to hardcoded template
+
+    # Fall back to hardcoded template loaded from the prompts directory
     logger.warning("Falling back to hardcoded content comparison template")
-    
-    # Import here to avoid circular imports
-    from .content_comparator import _create_comparison_prompt
-    
-    # Create a dummy prompt with placeholders
-    dummy_generations = ["{{formatted_generations}}"]
-    dummy_target_learner = "{{target_learner}}"
-    dummy_context = {
-        "TEMPLATE": "{{template_context}}",
-        "CONTEXT": "{{educational_context}}"
-    }
-    
-    # Get the template with placeholders
-    template = _create_comparison_prompt(dummy_generations, dummy_target_learner, dummy_context)
-    
-    # Replace the actual values with placeholders
-    template = template.replace("{{formatted_generations}}", "{{formatted_generations}}")
-    template = template.replace("{{target_learner}}", "{{target_learner}}")
-    template = template.replace("{{template_context}}", "{{template_context}}")
-    template = template.replace("{{educational_context}}", "{{educational_context}}")
-    
-    return template
+
+    try:
+        return load_prompt("review/content_comparison_prompt")
+    except Exception as e:
+        logger.error(f"Error loading fallback comparison template: {e}")
+        # Minimal placeholder template to avoid recursion
+        return (
+            "You are tasked with analyzing content versions and creating the best version.\n"
+            "<target_learner>{{target_learner}}</target_learner>\n"
+            "<context>{{educational_context}}</context>\n"
+            "<template>{{template_context}}</template>\n"
+            "<generations>{{formatted_generations}}</generations>"
+        )
 
 def get_ai_detection_editing_template() -> str:
     """
