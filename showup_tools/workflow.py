@@ -57,10 +57,12 @@ def setup_logging(log_level=logging.DEBUG):
     # Safer UTF-8 encoding that works with both regular streams and redirected ones
     if os.name == "nt":
         # Check if we can use reconfigure (available in Python 3.7+ on regular streams)
-        if hasattr(sys.stdout, 'reconfigure') and not hasattr(sys.stdout, 'original_stream'):
+        reconfig_stdout = getattr(sys.stdout, "reconfigure", None)
+        reconfig_stderr = getattr(sys.stderr, "reconfigure", None)
+        if callable(reconfig_stdout) and callable(reconfig_stderr) and not hasattr(sys.stdout, "original_stream"):
             # Regular stdout, use reconfigure
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+            reconfig_stdout(encoding="utf-8", errors="replace")
+            reconfig_stderr(encoding="utf-8", errors="replace")
         else:
             # We're dealing with a redirected stream (like StdoutRedirector)
             # Don't modify it - the TkInter UI has already set up UTF-8 handling
