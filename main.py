@@ -52,41 +52,114 @@ class WorkflowApp(App):
         main_layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
         input_grid = BoxLayout(orientation='vertical', size_hint_y=None, height=300, spacing=5)
 
-        input_grid.add_widget(Label(text="CSV File Path:", halign='left', size_hint_x=1))
-        self.csv_path_input = TextInput(text=CLI_ARGS.csv_file, multiline=False, size_hint_x=1)
+        input_grid.add_widget(Label(text="CSV File Path:", halign='left', size_hint_x=1,
+                                    color=(1, 1, 1, 1)))
+        self.csv_path_input = TextInput(
+            text=CLI_ARGS.csv_file,
+            multiline=False,
+            size_hint_x=1,
+            background_normal='',
+            background_active='',
+            background_color=(0.95, 0.95, 0.95, 1),
+            foreground_color=(0, 0, 0, 1),
+            cursor_color=(0, 0, 0, 1),
+        )
         input_grid.add_widget(self.csv_path_input)
-        csv_browse_button = Button(text="Browse CSV", size_hint_y=None, height=40)
+        csv_browse_button = Button(
+            text="Browse CSV",
+            size_hint_y=None,
+            height=40,
+            color=(1, 1, 1, 1),
+            background_normal='',
+            background_color=(0.25, 0.65, 0.85, 1),
+        )
         csv_browse_button.bind(on_release=lambda btn: self.show_file_chooser(self.csv_path_input, 'csv'))
         input_grid.add_widget(csv_browse_button)
 
-        input_grid.add_widget(Label(text="Student Handbook (Optional):", halign='left', size_hint_x=1))
-        self.handbook_path_input = TextInput(text="showup-library/Handbooks textbookx Guides for Enrichment/Grit for Academic Success_.md", multiline=False, size_hint_x=1)
+        input_grid.add_widget(Label(text="Student Handbook (Optional):", halign='left', size_hint_x=1,
+                                    color=(1, 1, 1, 1)))
+        self.handbook_path_input = TextInput(
+            text="showup-library/Handbooks textbookx Guides for Enrichment/Grit for Academic Success_.md",
+            multiline=False,
+            size_hint_x=1,
+            background_normal='',
+            background_active='',
+            background_color=(0.95, 0.95, 0.95, 1),
+            foreground_color=(0, 0, 0, 1),
+            cursor_color=(0, 0, 0, 1),
+        )
         input_grid.add_widget(self.handbook_path_input)
-        handbook_browse_button = Button(text="Browse Handbook", size_hint_y=None, height=40)
+        handbook_browse_button = Button(
+            text="Browse Handbook",
+            size_hint_y=None,
+            height=40,
+            color=(1, 1, 1, 1),
+            background_normal='',
+            background_color=(0.25, 0.65, 0.85, 1),
+        )
         handbook_browse_button.bind(on_release=lambda btn: self.show_file_chooser(self.handbook_path_input, 'handbook'))
         input_grid.add_widget(handbook_browse_button)
 
-        input_grid.add_widget(Label(text="Course Name:", halign='left', size_hint_x=1))
-        self.course_name_input = TextInput(text=CLI_ARGS.course_name, multiline=False, size_hint_x=1)
+        input_grid.add_widget(Label(text="Course Name:", halign='left', size_hint_x=1,
+                                    color=(1, 1, 1, 1)))
+        self.course_name_input = TextInput(
+            text=CLI_ARGS.course_name,
+            multiline=False,
+            size_hint_x=1,
+            background_normal='',
+            background_active='',
+            background_color=(0.95, 0.95, 0.95, 1),
+            foreground_color=(0, 0, 0, 1),
+            cursor_color=(0, 0, 0, 1),
+        )
         input_grid.add_widget(self.course_name_input)
 
-        input_grid.add_widget(Label(text="Learner Profile:", halign='left', size_hint_x=1))
-        self.learner_profile_input = TextInput(text=CLI_ARGS.learner_profile, multiline=True, size_hint_x=1)
+        input_grid.add_widget(Label(text="Learner Profile:", halign='left', size_hint_x=1,
+                                    color=(1, 1, 1, 1)))
+        self.learner_profile_input = TextInput(
+            text=CLI_ARGS.learner_profile,
+            multiline=True,
+            size_hint_x=1,
+            background_normal='',
+            background_active='',
+            background_color=(0.95, 0.95, 0.95, 1),
+            foreground_color=(0, 0, 0, 1),
+            cursor_color=(0, 0, 0, 1),
+        )
         input_grid.add_widget(self.learner_profile_input)
 
         main_layout.add_widget(input_grid)
 
-        self.start_button = Button(text="Start Workflow", size_hint_y=None, height=50)
+        self.start_button = Button(
+            text="Start Workflow",
+            size_hint_y=None,
+            height=50,
+            color=(1, 1, 1, 1),
+            background_normal='',
+            background_color=(0.3, 0.8, 0.4, 1),
+        )
         self.start_button.bind(on_release=self.start_workflow)
         main_layout.add_widget(self.start_button)
 
         self.progress_bar = ProgressBar(max=100, value=self.progress_value, size_hint_y=None, height=30)
         main_layout.add_widget(self.progress_bar)
 
-        self.status_label = Label(text=self.status_message, size_hint_y=None, height=40, markup=True)
+        self.status_label = Label(
+            text=self.status_message,
+            size_hint_y=None,
+            height=40,
+            markup=True,
+            color=(1, 1, 1, 1),
+        )
         main_layout.add_widget(self.status_label)
 
-        self.output_label = Label(text=self.output_info, size_hint_y=None, height=100, markup=True)
+        self.output_label = Label(
+            text=self.output_info,
+            size_hint_y=None,
+            height=100,
+            markup=True,
+            color=(1, 1, 1, 1),
+        )
         main_layout.add_widget(self.output_label)
 
         self.bind(status_message=self.status_label.setter('text'))
