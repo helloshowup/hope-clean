@@ -109,6 +109,7 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
 * For `audio_placeholder` and `video_placeholder` blocks, always provide a `topic`, `description`, and `suggested_duration_seconds`.
 * Remember that `learning_objectives` and `key_takeaways` are typically omitted from the *initial plan* unless explicitly requested otherwise for a specific scenario, as they are generated in a later stage.
 * Respond only with valid JSON; use double quotes for keys and strings and avoid trailing commas or extra text.
+* Output MUST be the JSON object only. Do not include markdown, code fences, or explanatory text.
 
 **Example 1`initial_plan` JSON (for illustrative purposes):**
 
