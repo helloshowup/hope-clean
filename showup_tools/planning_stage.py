@@ -55,6 +55,9 @@ async def run_planning_stage(
     logger.info("Running planning stage")
 
     new_item = row_data_item.copy()
+    # Merge in nested dictionaries so prompt variables are accessible
+    new_item.update(row_data_item.get("variables", {}))
+    new_item.update(row_data_item.get("row", {}))
 
     prompt_path = config.get("planning_prompt_path") or "planning/main_lesson_planner"
     try:
