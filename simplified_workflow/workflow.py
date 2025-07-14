@@ -22,7 +22,6 @@ from .content_comparator import compare_and_combine
 from .content_reviewer import review_content
 from .ai_detector import detect_ai_patterns, edit_content
 from .constants import EXCEL_CLARIFICATION
-from showup_core.api_client import generate_with_claude
 # Import RAG system components
 from simplified_workflow.rag_system.token_counter import count_tokens
 from simplified_workflow.rag_system.cache_manager import cache
