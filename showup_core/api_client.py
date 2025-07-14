@@ -697,6 +697,65 @@ def save_api_logs_to_files(prompt: str, response: str, module_number=None, lesso
     logger.info(f"=== COMPLETED SAVING API LOGS: {function_type} ===")
 
 
+async def generate_with_ai(
+    prompt: str,
+    max_tokens: int = 4000,
+    temperature: float = 0.7,
+    model: Optional[str] = None,
+    use_cache: bool = True,
+    task_type: str = "content_generation",
+    system_prompt: str = "",
+    module_number: int = None,
+    lesson_number: int = None,
+    step_number: int = None,
+    frequency_penalty: float = 0.0,
+    presence_penalty: float = 0.0,
+) -> str:
+    provider = get_model_provider(model or DEFAULT_MODEL)
+    if provider == "openai":
+        try:
+            import openai
+
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                from config.api_keys import OPENAI_API_KEY
+
+                api_key = OPENAI_API_KEY
+            client = openai.OpenAI(api_key=api_key)
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+            )
+            from .api_utils import extract_response_content
+
+            return extract_response_content(response, client_type="openai")
+        except Exception as e:
+            logger.error(f"OpenAI generation failed: {e}")
+            return f"Error generating content with OpenAI API: {e}"
+    return await generate_with_claude(
+        prompt=prompt,
+        system_prompt=system_prompt,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        model=model,
+        use_cache=use_cache,
+        task_type=task_type,
+        module_number=module_number,
+        lesson_number=lesson_number,
+        step_number=step_number,
+        frequency_penalty=frequency_penalty,
+        presence_penalty=presence_penalty,
+    )
+
+
 async def generate_with_llm(prompt: str, task_type: str = "content_creation",
                       complexity: str = "standard", max_tokens: int = 4000,
                       temperature: float = 0.7, use_cache: bool = True) -> str:
@@ -726,6 +785,7 @@ __all__ = [
     'ApiClient',
     'get_api_client',
     'generate_with_claude',
+    'generate_with_ai',
     'generate_with_llm',
     'PromptTemplateSystem'
 ]

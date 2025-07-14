@@ -2,7 +2,7 @@ import os
 import logging
 import re
 from typing import Tuple
-from showup_core.api_client import generate_with_claude
+from showup_core.api_client import generate_with_ai
 from showup_core.utils import load_prompt
 from showup_core.model_config import load_model_config
 
@@ -19,7 +19,7 @@ async def generate_lo_and_kt_from_content(content: str, model: str = models_cfg[
         raise FileNotFoundError('lo_kt_generation_prompt missing')
 
     prompt = prompt_template.replace('{{content}}', content)
-    response = await generate_with_claude(
+    response = await generate_with_ai(
         prompt=prompt,
         system_prompt=load_prompt('system/lo_kt_system_message'),
         max_tokens=max_tokens,

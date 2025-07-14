@@ -12,7 +12,7 @@ import asyncio
 from typing import Dict, List, Any, Optional
 
 # Import from core modules
-from showup_core.api_client import generate_with_claude
+from showup_core.api_client import generate_with_ai
 # Import RAG system
 from simplified_workflow.rag_system import enhanced_generate_content
 from .constants import EXCEL_CLARIFICATION
@@ -142,7 +142,7 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
         else:
             # Call Claude API directly if no handbook is provided
             logger.info("Using direct Claude API call (no RAG)")
-            content = await generate_with_claude(
+            content = await generate_with_ai(
                 prompt=prompt,
                 system_prompt=system_prompt,
                 max_tokens=max_tokens,
