@@ -632,7 +632,8 @@ def save_api_logs_to_files(prompt: str, response: str, module_number=None, lesso
     logger.info(f"=== SAVING API LOGS: function_type={function_type}, prompt_length={len(prompt)}, response_length={len(response)} ===")
     
     # Create logs directory if it doesn't exist
-    log_dir = "C:/Users/User/Desktop/ShowupSquaredV4/logs"
+    from .core.path_utils import get_log_base_dir
+    log_dir = str(get_log_base_dir())
     logger.info(f"Saving API logs to directory: {log_dir}")
     
     # Create directory if it doesn't exist

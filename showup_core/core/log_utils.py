@@ -21,6 +21,7 @@ Usage:
 
 import os
 import logging
+from .path_utils import get_log_base_dir
 
 
 def get_log_path(module_name: str) -> str:
@@ -43,7 +44,7 @@ def get_log_path(module_name: str) -> str:
         # Returns: C:/Users/User/Documents/showup-v4/showup-data/logs/batch_processor/batch_processor.log
     """
     # Define the root log directory explicitly
-    log_root = "C:/Users/User/Documents/showup-v4/showup-data/logs"
+    log_root = str(get_log_base_dir())
     
     # Create the complete path
     module_dir = os.path.join(log_root, module_name)
@@ -75,7 +76,7 @@ def get_specialized_log_path(module_name: str, log_name: str) -> str:
         # Returns: C:/Users/User/Documents/showup-v4/showup-data/logs/batch_processor/error_log.log
     """
     # Define the root log directory explicitly
-    log_root = "C:/Users/User/Documents/showup-v4/showup-data/logs"
+    log_root = str(get_log_base_dir())
     
     # Create the complete path
     module_dir = os.path.join(log_root, module_name)

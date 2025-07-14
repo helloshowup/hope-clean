@@ -7,13 +7,15 @@ This module handles loading templates from the JSON file or falling back to hard
 import os
 import json
 import logging
+from pathlib import Path
 from typing import Dict, List, Any, Optional
+from showup_core.core.path_utils import get_template_base_dir
 
 # Set up logger
 logger = logging.getLogger("simplified_workflow.template_loader")
 
 # Path to the templates JSON file
-TEMPLATES_JSON_PATH = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\ShowupSquaredV4\\simplified_workflow_templates.json"
+TEMPLATES_JSON_PATH = str(Path(get_template_base_dir()) / "simplified_workflow_templates.json")
 
 # Cache for loaded templates
 _templates_cache = None
@@ -114,7 +116,7 @@ def get_content_generation_template() -> str:
         Content generation template string
     """
     # Always use the specified high school lesson template file
-    excel_template_path = "C:\\Users\\User\\Desktop\\ShowupSquaredV4 (2)\\ShowupSquaredV4\\ShowupSquaredV4\\showup_tools\\simplified_app\\templates\\high-school-lesson-template.md"
+    excel_template_path = Path(get_template_base_dir()) / "high-school-lesson-template.md"
     logger.info(f"Loading content generation template from: {excel_template_path}")
     
     try:

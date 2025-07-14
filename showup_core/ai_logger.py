@@ -93,7 +93,8 @@ class AILogEnhancer:
             system_prompt: System prompt used for the interaction (optional)
         """
         # Create directory if it doesn't exist
-        log_dir = "C:/Users/User/Desktop/ShowupSquaredV4/data/logs/api_calls_responses"
+        from .core.path_utils import get_log_base_dir
+        log_dir = os.path.join(str(get_log_base_dir()), "api_calls_responses")
         print(f"Saving AI interaction to directory: {log_dir}")
         
         # Create nested directories if they don't exist

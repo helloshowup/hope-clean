@@ -643,7 +643,8 @@ class BatchManager:
             import datetime
             
             # Create logs directory if it doesn't exist
-            log_dir = "C:/Users/User/Desktop/ShowupSquaredV4/logs"
+            from .core.path_utils import get_log_base_dir
+            log_dir = str(get_log_base_dir())
             os.makedirs(log_dir, exist_ok=True)
             
             # Generate timestamp
@@ -701,7 +702,8 @@ class BatchManager:
                 import datetime
                 
                 # Create logs directory if it doesn't exist
-                log_dir = "C:/Users/User/Desktop/ShowupSquaredV4/logs"
+                from .core.path_utils import get_log_base_dir
+                log_dir = str(get_log_base_dir())
                 os.makedirs(log_dir, exist_ok=True)
                 
                 # Generate timestamp
@@ -1036,7 +1038,8 @@ class BatchManager:
                 import datetime
                 
                 # Create logs directory if it doesn't exist
-                log_dir = "C:/Users/User/Desktop/ShowupSquaredV4/logs"
+                from .core.path_utils import get_log_base_dir
+                log_dir = str(get_log_base_dir())
                 os.makedirs(log_dir, exist_ok=True)
                 
                 # Generate timestamp
