@@ -10,7 +10,6 @@ import logging
 import os
 from typing import Any, List
 
-import claude_api
 
 logger = logging.getLogger("utils")
 
@@ -25,7 +24,7 @@ def check_dependencies(required_modules: List[str] = None) -> List[str]:
         List of missing module names
     """
     if required_modules is None:
-        required_modules = ['streamlit', 'anthropic', 'pandas']
+        required_modules = ['streamlit', 'pandas']
         
     missing = []
     logger.info(f"Checking dependencies: {', '.join(required_modules)}")
