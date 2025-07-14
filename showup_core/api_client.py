@@ -300,29 +300,35 @@ def get_api_client(
 
 
 def get_model_max_tokens(model: str) -> int:
-    """
-    Get the maximum allowed output tokens for a specific Claude model.
+    """Return max completion tokens for a Claude model."""
 
-    Args:
-        model: Claude model name
-
-    Returns:
-        Maximum allowed output tokens for the model
-    """
-    # Define maximum token limits for each model
     model_limits = {
-        # Claude 3 models
-        "claude-3-opus-20240229": 4096,  # Claude 3 Opus
-        "claude-3-sonnet-20240229": 4096,  # Claude 3 Sonnet
-        "claude-3-haiku-20240307": 4096,  # Claude 3 Haiku
-        "claude-3-5-sonnet-20240620": 8192,  # Claude 3.5 Sonnet
-        "claude-3-7-sonnet-20250219": 8192,  # Claude 3.7 Sonnet
-        # Default for any unspecified model
+        "claude-3-opus-20240229": 4096,
+        "claude-3-sonnet-20240229": 4096,
+        "claude-3-haiku-20240307": 4096,
+        "claude-3-5-sonnet-20240620": 8192,
+        "claude-3-7-sonnet-20250219": 8192,
         "default": 4000,
     }
 
-    # Return the limit for the specified model, or the default if not found
     return model_limits.get(model, model_limits["default"])
+
+
+def get_openai_model_max_tokens(model: str) -> int:
+    """Return max completion tokens for an OpenAI chat model."""
+
+    model_limits = {
+        "gpt-4o": 4096,
+        "gpt-4": 4096,
+        "gpt-3.5-turbo": 4096,
+        "default": 4096,
+    }
+
+    for key, limit in model_limits.items():
+        if model.startswith(key):
+            return limit
+
+    return model_limits["default"]
 
 
 async def generate_with_claude(

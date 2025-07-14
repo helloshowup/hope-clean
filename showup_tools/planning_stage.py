@@ -60,11 +60,22 @@ async def run_planning_stage(
         try:
             if provider == 'openai':
                 import openai
+                from showup_core.api_client import get_openai_model_max_tokens
+
                 client = openai.OpenAI(api_key=config.get('openai_api_key'))
+
+                max_tokens = config.get('max_tokens', 8000)
+                limit = get_openai_model_max_tokens(model_id)
+                if max_tokens > limit:
+                    logger.debug(
+                        f"Reducing max_tokens from {max_tokens} to {limit} for model {model_id}"
+                    )
+                    max_tokens = limit
+
                 response = client.chat.completions.create(
                     model=model_id,
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=config.get('max_tokens', 8000),
+                    max_tokens=max_tokens,
                     temperature=config.get('temperature', 0.3)
                 )
                 ai_response = response.choices[0].message.content

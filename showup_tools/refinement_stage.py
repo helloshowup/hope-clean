@@ -44,11 +44,21 @@ async def run_refinement_stage(
 
     try:
         import openai
+        from showup_core.api_client import get_openai_model_max_tokens
+
         client = openai.OpenAI(api_key=config.get('openai_api_key'))
+        max_tokens = config.get('max_tokens', 1000)
+        limit = get_openai_model_max_tokens(model_id)
+        if max_tokens > limit:
+            logger.debug(
+                f"Reducing max_tokens from {max_tokens} to {limit} for model {model_id}"
+            )
+            max_tokens = limit
+
         response = client.chat.completions.create(
             model=model_id,
             messages=[{"role": "user", "content": critique_prompt}],
-            max_tokens=config.get('max_tokens', 1000),
+            max_tokens=max_tokens,
             temperature=config.get('temperature', 0.3)
         )
         critique = response.choices[0].message.content
@@ -62,7 +72,7 @@ async def run_refinement_stage(
         response2 = client.chat.completions.create(
             model=model_id,
             messages=[{"role": "user", "content": refine_prompt}],
-            max_tokens=config.get('max_tokens', 1000),
+            max_tokens=max_tokens,
             temperature=config.get('temperature', 0.3)
         )
         revised_plan_text = response2.choices[0].message.content
