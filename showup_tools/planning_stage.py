@@ -57,8 +57,9 @@ async def run_planning_stage(
     new_item = row_data_item.copy()
 
     prompt_path = config.get("planning_prompt_path") or "planning/main_lesson_planner"
-    prompt_template = load_prompt(prompt_path)
-    if not prompt_template:
+    try:
+        prompt_template = load_prompt(prompt_path)
+    except FileNotFoundError:
         logger.error("Planning prompt not found")
         new_item["status"] = "PLAN_FAILED"
         new_item["error"] = "Prompt not found"

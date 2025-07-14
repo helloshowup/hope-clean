@@ -77,8 +77,10 @@ def load_prompt(prompt_name: str) -> str:
                       (e.g., 'planning/lesson_plan').
 
     Returns:
-        The content of the prompt file as a string. Returns an empty string if
-        the file cannot be found.
+        The content of the prompt file as a string.
+
+    Raises:
+        FileNotFoundError: If the prompt file does not exist.
     """
     root_dir = get_project_root()
     prompt_path = os.path.join(root_dir, 'prompts', f"{prompt_name}.txt")
@@ -86,5 +88,5 @@ def load_prompt(prompt_name: str) -> str:
         with open(prompt_path, 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
-        print(f"Error: Prompt file not found at {prompt_path}")
-        return ""
+        logger.error("Prompt file not found at %s", prompt_path)
+        raise

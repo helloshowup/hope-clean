@@ -13,10 +13,11 @@ async def generate_lo_and_kt_from_content(content: str, model: str | None = None
     """Generate learning objectives and key takeaways from lesson content."""
     if model is None:
         model = load_model_config().get("lo_kt_model")
-    prompt_template = load_prompt('generation/lo_kt_generation_prompt')
-    if not prompt_template:
+    try:
+        prompt_template = load_prompt('generation/lo_kt_generation_prompt')
+    except FileNotFoundError:
         logger.error('Prompt file not found')
-        raise FileNotFoundError('lo_kt_generation_prompt missing')
+        raise
 
     prompt = prompt_template.replace('{{content}}', content)
     response = await generate_with_ai(

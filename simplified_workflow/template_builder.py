@@ -22,10 +22,11 @@ async def generate_markdown_template(plan: Dict[str, Any], settings: Dict[str, A
     """
     logger.info("Generating markdown template from plan")
 
-    prompt_template = load_prompt("planning/generate_template_from_plan")
-    if not prompt_template:
+    try:
+        prompt_template = load_prompt("planning/generate_template_from_plan")
+    except FileNotFoundError:
         logger.error("Template generation prompt not found")
-        raise FileNotFoundError("generate_template_from_plan prompt missing")
+        raise
 
     plan_str = json.dumps(plan, ensure_ascii=False)
     prompt = prompt_template.replace("{{final_plan}}", plan_str)
