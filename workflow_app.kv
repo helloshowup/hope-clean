@@ -55,7 +55,7 @@
                 height: '30dp'
                 font_size: '18sp'
                 bold: True
-                color: 0.8, 0.8, 0.8, 1
+                color: 1, 1, 1, 1
 
             TextInput:
                 id: _csv_path_input
@@ -64,9 +64,11 @@
                 readonly: True
                 size_hint_y: None
                 height: '40dp'
-                background_color: 0.3, 0.3, 0.3, 1
-                foreground_color: 0.9, 0.9, 0.9, 1
-                cursor_color: 0.9, 0.9, 0.9, 1
+                background_normal: ''
+                background_active: ''
+                background_color: 0.95, 0.95, 0.95, 1
+                foreground_color: 0, 0, 0, 1
+                cursor_color: 0, 0, 0, 1
                 font_size: '14sp'
                 padding: [10, 10]
                 border: [8,8,8,8]
@@ -78,7 +80,7 @@
                 height: '48dp'
                 on_release: root.show_file_chooser()
                 background_normal: ''
-                background_color: 0.1, 0.5, 0.7, 1
+                background_color: 0.25, 0.65, 0.85, 1
                 color: 1, 1, 1, 1
                 font_size: '16sp'
                 bold: True
@@ -91,7 +93,7 @@
                 height: '48dp'
                 on_release: root.start_workflow()
                 background_normal: ''
-                background_color: 0.2, 0.7, 0.3, 1
+                background_color: 0.3, 0.8, 0.4, 1
                 color: 1, 1, 1, 1
                 font_size: '16sp'
                 bold: True
@@ -103,7 +105,7 @@
                 height: '30dp'
                 font_size: '18sp'
                 bold: True
-                color: 0.8, 0.8, 0.8, 1
+                color: 1, 1, 1, 1
 
             Label:
                 id: _status_label
@@ -111,7 +113,7 @@
                 size_hint_y: None
                 height: '30dp'
                 font_size: '16sp'
-                color: 0.9, 0.9, 0.9, 1
+                color: 1, 1, 1, 1
 
             ProgressBar:
                 id: _progress_bar
@@ -128,7 +130,7 @@
                 height: '30dp'
                 font_size: '18sp'
                 bold: True
-                color: 0.8, 0.8, 0.8, 1
+                color: 1, 1, 1, 1
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -158,9 +160,11 @@
                     hint_text: "Reference Handbook File"
                     multiline: False
                     readonly: True
-                    background_color: 0.3, 0.3, 0.3, 1
-                    foreground_color: 0.9, 0.9, 0.9, 1
-                    cursor_color: 0.9, 0.9, 0.9, 1
+                    background_normal: ''
+                    background_active: ''
+                    background_color: 0.95, 0.95, 0.95, 1
+                    foreground_color: 0, 0, 0, 1
+                    cursor_color: 0, 0, 0, 1
                     font_size: '14sp'
                     padding: [10, 10]
                     border: [8,8,8,8]
@@ -170,7 +174,7 @@
                     size_hint_x: None
                     width: '90dp'
                     background_normal: ''
-                    background_color: 0.1, 0.5, 0.7, 1
+                    background_color: 0.25, 0.65, 0.85, 1
                     color: 1, 1, 1, 1
                     font_size: '14sp'
                     radius: [8,]
@@ -182,7 +186,7 @@
                 height: '30dp'
                 font_size: '18sp'
                 bold: True
-                color: 0.8, 0.8, 0.8, 1
+                color: 1, 1, 1, 1
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -194,9 +198,11 @@
                     hint_text: "Output Directory"
                     multiline: False
                     readonly: True
-                    background_color: 0.3, 0.3, 0.3, 1
-                    foreground_color: 0.9, 0.9, 0.9, 1
-                    cursor_color: 0.9, 0.9, 0.9, 1
+                    background_normal: ''
+                    background_active: ''
+                    background_color: 0.95, 0.95, 0.95, 1
+                    foreground_color: 0, 0, 0, 1
+                    cursor_color: 0, 0, 0, 1
                     font_size: '14sp'
                     padding: [10, 10]
                     border: [8,8,8,8]
@@ -206,7 +212,7 @@
                     size_hint_x: None
                     width: '90dp'
                     background_normal: ''
-                    background_color: 0.1, 0.5, 0.7, 1
+                    background_color: 0.25, 0.65, 0.85, 1
                     color: 1, 1, 1, 1
                     font_size: '14sp'
                     radius: [8,]
@@ -222,9 +228,11 @@
                     hint_text: "Save Generated Content To"
                     multiline: False
                     readonly: True
-                    background_color: 0.3, 0.3, 0.3, 1
-                    foreground_color: 0.9, 0.9, 0.9, 1
-                    cursor_color: 0.9, 0.9, 0.9, 1
+                    background_normal: ''
+                    background_active: ''
+                    background_color: 0.95, 0.95, 0.95, 1
+                    foreground_color: 0, 0, 0, 1
+                    cursor_color: 0, 0, 0, 1
                     font_size: '14sp'
                     padding: [10, 10]
                     border: [8,8,8,8]
@@ -234,7 +242,7 @@
                     size_hint_x: None
                     width: '90dp'
                     background_normal: ''
-                    background_color: 0.1, 0.5, 0.7, 1
+                    background_color: 0.25, 0.65, 0.85, 1
                     color: 1, 1, 1, 1
                     font_size: '14sp'
                     radius: [8,]
@@ -246,7 +254,7 @@
                 height: '30dp'
                 font_size: '18sp'
                 bold: True
-                color: 0.8, 0.8, 0.8, 1
+                color: 1, 1, 1, 1
 
             TextInput:
                 id: _learner_profile_preview
@@ -254,11 +262,13 @@
                 readonly: True
                 size_hint_y: None
                 height: '100dp'
-                background_color: 0.3, 0.3, 0.3, 1
-                foreground_color: 0.9, 0.9, 0.9, 1
+                background_normal: ''
+                background_active: ''
+                background_color: 0.95, 0.95, 0.95, 1
+                foreground_color: 0, 0, 0, 1
                 font_size: '14sp'
                 padding: [10, 10]
-                cursor_color: 0.9, 0.9, 0.9, 1
+                cursor_color: 0, 0, 0, 1
                 border: [8,8,8,8]
                 radius: [5,]
 
@@ -284,7 +294,7 @@
                 height: '30dp'
                 font_size: '18sp'
                 bold: True
-                color: 0.8, 0.8, 0.8, 1
+                color: 1, 1, 1, 1
 
             BoxLayout:
                 size_hint_y: None
