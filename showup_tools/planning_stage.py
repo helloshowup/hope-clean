@@ -68,9 +68,9 @@ async def run_planning_stage(
     content_outline = new_item.get("Content Outline") or new_item.get(
         "content_outline", ""
     )
-    learner_profile = new_item.get("Learner Profile") or new_item.get(
-        "learner_profile", ""
-    )
+    learner_profile = new_item.get("target_learner") or new_item.get(
+        "Learner Profile"
+    ) or new_item.get("learner_profile", "")
     rationale = new_item.get("What is the rationale for this step") or new_item.get(
         "rationale", ""
     )
@@ -80,6 +80,7 @@ async def run_planning_stage(
     prompt = (
         prompt_template.replace("{{content_outline}}", content_outline)
         .replace("{{learner_profile}}", learner_profile)
+        .replace("{{target_learner}}", learner_profile)
         .replace("{{rationale}}", rationale)
         .replace("{{word_count}}", word_count)
         .replace("{{block_library}}", block_defs)
