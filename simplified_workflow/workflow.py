@@ -16,12 +16,12 @@ import concurrent.futures
 
 # Import from other modules
 from .csv_processor import read_csv, extract_variables, get_output_path
-from .context_builder import build_context_from_adjacent_steps, build_context_for_comparison
+from showup_tools.context_builder import build_context_from_adjacent_steps, build_context_for_comparison
 from .content_generator import generate_three_versions, extract_educational_content, load_content_generation_template
 from .content_comparator import compare_and_combine
 from .content_reviewer import review_content
 from .ai_detector import detect_ai_patterns, edit_content
-from .constants import EXCEL_CLARIFICATION
+from showup_tools.constants import EXCEL_CLARIFICATION
 # Import RAG system components
 from simplified_workflow.rag_system.token_counter import count_tokens
 from simplified_workflow.rag_system.cache_manager import cache
