@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union, Literal
+from typing import Any, Dict, List, Optional, Union, Literal, Annotated
 import json
 
-from pydantic import BaseModel, create_model, ValidationError
+from pydantic import BaseModel, Field, create_model, ValidationError
 
 BLOCK_LIBRARY = {
     "lesson_metadata": {
@@ -155,7 +155,7 @@ def build_pydantic_models():
     """Create Pydantic models for each block type and the overall plan."""
     models = {}
     for block_name, info in BLOCK_LIBRARY.items():
-        fields = {"block_type": (str, ...)}
+        fields = {"block_type": (Literal[block_name], block_name)}
         for fname, ftype in info["fields"].items():
             py_type = _parse_type(ftype)
             default = ...
@@ -166,7 +166,10 @@ def build_pydantic_models():
         model = create_model(block_name.title().replace("_", ""), **fields)
         models[block_name] = model
 
-    BlockUnion = Union[tuple(models.values())]
+    BlockUnion = Annotated[
+        Union[tuple(models.values())],
+        Field(discriminator="block_type")
+    ]
     PlanModel = create_model(
         "PlanModel",
         content_title=(str, ...),
