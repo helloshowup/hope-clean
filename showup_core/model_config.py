@@ -2,16 +2,51 @@
 
 import json
 import pathlib
+from .config import get_project_root
+import logging
 
 _CACHE = None
 
 
-def load_model_config():
-    """Load model configuration from JSON file (cached)."""
+def load_user_model_settings() -> dict:
+    """Return model-related settings from the root ``user_settings.json``."""
+    settings_file = get_project_root() / "user_settings.json"
+    if not settings_file.exists():
+        return {}
+
+    try:
+        data = json.loads(settings_file.read_text())
+    except Exception as exc:  # pragma: no cover - best effort
+        logging.getLogger(__name__).warning(
+            "Failed to load user model settings: %s", exc
+        )
+        return {}
+
+    model_keys = {
+        k
+        for k in data.keys()
+        if k.endswith("_model") or k in {"selected_model", "initial_generation_model"}
+    }
+    return {k: data[k] for k in model_keys}
+
+
+def load_model_config() -> dict:
+    """Load base model settings and overlay any user-specific selections."""
     global _CACHE
     if _CACHE is None:
-        path = pathlib.Path(__file__).parent.parent / "config" / "model_settings.json"
-        _CACHE = json.loads(path.read_text())
+        base_path = get_project_root() / "config" / "model_settings.json"
+        try:
+            config = json.loads(base_path.read_text())
+        except Exception as exc:  # pragma: no cover - best effort
+            logging.getLogger(__name__).warning(
+                "Failed to load model_settings.json: %s", exc
+            )
+            config = {}
+
+        user_cfg = load_user_model_settings()
+        config.update(user_cfg)
+        _CACHE = config
+
     return _CACHE
 
 

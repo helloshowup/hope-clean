@@ -6,13 +6,13 @@ from showup_core.api_client import generate_with_ai
 from showup_core.utils import load_prompt
 from showup_core.model_config import load_model_config
 
-models_cfg = load_model_config()
-
 logger = logging.getLogger(__name__)
 
 
-async def generate_lo_and_kt_from_content(content: str, model: str = models_cfg["lo_kt_model"], max_tokens: int = 800) -> Tuple[str, str]:
+async def generate_lo_and_kt_from_content(content: str, model: str | None = None, max_tokens: int = 800) -> Tuple[str, str]:
     """Generate learning objectives and key takeaways from lesson content."""
+    if model is None:
+        model = load_model_config().get("lo_kt_model")
     prompt_template = load_prompt('generation/lo_kt_generation_prompt')
     if not prompt_template:
         logger.error('Prompt file not found')
