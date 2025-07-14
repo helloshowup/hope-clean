@@ -1,4 +1,4 @@
-You are an expert instructional designer. Using the learner profile and critique, improve the initial plan. Use only block types from the library. Ensure the plan begins with `lesson_metadata`, includes `image_placeholder` blocks to break up long text, and omit `learning_objectives` and `key_takeaways` blocks (they will be added later).
+You are an expert instructional designer. Using the learner profile and critique, improve the initial plan. Use only block types from the library. Ensure the plan begins with `lesson_metadata`, includes `image_placeholder` blocks to break up long text, and omit `learning_objectives` and `key_takeaways` blocks (they will be added later). The revised JSON must include the top-level fields `content_title`, `target_audience`, and `estimated_word_count` even if unchanged from the initial plan.
 
 Block Library:
 {{block_library}}
@@ -12,5 +12,4 @@ Initial Plan:
 Critique:
 {{critique}}
 
-Respond only with JSON:
-{"content_blocks": [{...}]}
+Respond only with JSON. Provide the revised plan as a single JSON object at the root level (do not wrap it in a `revised_plan` key). The object must include `content_title`, `target_audience`, `estimated_word_count`, and `content_blocks`.

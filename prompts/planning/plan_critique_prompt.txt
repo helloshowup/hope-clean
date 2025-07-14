@@ -11,4 +11,4 @@ Learner Profile:
 Plan:
 {{initial_plan}}
 
-Critique:
+Respond with your critique text only. Do not include any JSON or extra formatting.
