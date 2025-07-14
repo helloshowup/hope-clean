@@ -80,15 +80,15 @@ For each object within the `content_blocks` array, choose ONE `block_type` from 
     * `block_type`: "image\_placeholder" (string, REQUIRED)  
     * `description`: "string (REQUIRED)" \- A detailed description of the image content and its relevance.  
     * `caption`: "string (Optional)" \- An optional caption for the image.  
-14. **audio\_placeholder**:  
-    * `block_type`: "audio\_placeholder" (string, REQUIRED)  
-    * `topic`: "string (REQUIRED)" \- The topic of the audio content.  
-    * `description`: "string (REQUIRED)" \- A detailed description of the audio content.  
+14. **audio_placeholder**:  
+    * `block_type`: "audio_placeholder" (string, REQUIRED)  
+    * `topic`: "string (REQUIRED)" \- The topic of the audio content.
+    * `description`: "string (REQUIRED)" \- A detailed description of the audio content.
     * `suggested_duration_seconds`: "integer (Optional)" \- Suggested duration in seconds.  
-15. **video\_placeholder**:  
-    * `block_type`: "video\_placeholder" (string, REQUIRED)  
-    * `topic`: "string (REQUIRED)" \- The topic of the video content.  
-    * `description`: "string (REQUIRED)" \- A detailed description of the video content.  
+15. **video_placeholder**:  
+    * `block_type`: "video_placeholder" (string, REQUIRED)  
+    * `topic`: "string (REQUIRED)" \- The topic of the video content.
+    * `description`: "string (REQUIRED)" \- A detailed description of the video content.
     * `suggested_duration_seconds`: "integer (Optional)" \- Suggested duration in seconds.
 
 **Instructions for the AI:**
