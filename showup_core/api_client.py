@@ -19,7 +19,11 @@ from pathlib import Path
 def get_project_root() -> Path:
     """Return the project root directory."""
     return Path(__file__).resolve().parents[1]
-from .model_config import DEFAULT_MODEL, DEFAULT_CONTEXT_MODEL
+from .model_config import (
+    DEFAULT_MODEL,
+    DEFAULT_CONTEXT_MODEL,
+    DEFAULT_PLANNING_MODEL,
+)
 
 try:
     from .api_utils import (
@@ -316,8 +320,12 @@ async def generate_with_claude(prompt: str, max_tokens: int = 4000, temperature:
     # Log the start of the AI request
     # Determine default model if not provided
     if not model:
-        if task_type and ("context" in task_type or "summary" in task_type):
-            model = DEFAULT_CONTEXT_MODEL
+        if task_type and (
+            "context" in task_type
+            or "summary" in task_type
+            or "planning" in task_type
+        ):
+            model = DEFAULT_PLANNING_MODEL
         else:
             model = DEFAULT_MODEL
 
