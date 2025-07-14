@@ -1,7 +1,9 @@
 # **AI Coder Agent Instructions**
 
 # AGENT BEHAVIOR GUIDELINES
+### Schema Definition Policy
 
+For all content block structures used by the AI agents (especially during the planning stage), the schema defined within the corresponding prompt `.txt` files (e.g., `prompts/planning/main_lesson_planner.txt`) serves as the definitive source of truth. All Pydantic models in the codebase (e.g., `showup_tools/models/generation_output.py`) that validate AI-generated output must precisely reflect these prompt-defined schemas.
 ## Testing Phase
 During the "verify" or "finalization" step, DO NOT execute any tests. Skip all test commands (e.g., `pytest`, `npm test`).
 The current task requires focusing on code generation/modification only, without test validation.
