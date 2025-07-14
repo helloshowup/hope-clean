@@ -362,9 +362,9 @@ async def process_row_for_phase(row_data_item: Dict[str, Any], phase: str, csv_r
             add_log_entry("Refinement", "started", "Refining plan")
             refine_cfg = {
                 "model_id": ui_settings.get(
-                    "refinement_model", ui_settings.get("selected_model", "claude-3-haiku-20240307")
+                    "refinement_model", ui_settings.get("selected_model", DEFAULT_PLANNING_MODEL)
                 ),
-                "max_tokens": ui_settings.get("refinement_max_tokens", 1000),
+                "max_tokens": ui_settings.get("refinement_max_tokens", 8000),
                 "temperature": ui_settings.get("refinement_temperature", 0.3),
                 "openai_api_key": ui_settings.get("openai_api_key"),
                 "critique_prompt_path": ui_settings.get("critique_prompt_path"),
