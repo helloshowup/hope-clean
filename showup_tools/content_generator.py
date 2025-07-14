@@ -169,6 +169,7 @@ async def generate_content(variables: Dict[str, str], template: str, settings: O
             )
 
         logger.info(f"Successfully generated content ({len(content)} characters)")
+        verify_educational_content_tags(content)
         return content
 
     except Exception as e:
@@ -186,6 +187,7 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
         ui_settings = {}
 
     use_dynamic = ui_settings.get("use_dynamic_blocks", True)
+    system_prompt = load_prompt("system/ai_editor_system_message")
 
     prompt_template = load_prompt("generation/generation_prompt")
     if not prompt_template:
@@ -221,8 +223,10 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
                     model=model,
                     frequency_penalty=freq_pen,
                     presence_penalty=pres_pen,
+                    system_prompt=system_prompt,
                     task_type="content_generation",
                 )
+                verify_educational_content_tags(result)
                 parts.append(result.strip())
             return "\n\n".join(parts)
     else:
@@ -237,13 +241,18 @@ async def generate_three_versions_from_plan(final_plan: Dict[str, Any], ui_setti
                 model=model,
                 frequency_penalty=freq_pen,
                 presence_penalty=pres_pen,
+                system_prompt=system_prompt,
                 task_type="content_generation",
             )
+            verify_educational_content_tags(result)
             return result.strip()
 
     temperatures = [0.3, 0.5, 1.0]
     tasks = [asyncio.create_task(generate_version(t)) for t in temperatures]
     versions = await asyncio.gather(*tasks)
+
+    for v in versions:
+        verify_educational_content_tags(v)
 
     logger.info("Completed generation of all three versions from plan")
     return list(versions)
@@ -276,6 +285,15 @@ def extract_educational_content(content: str) -> str:
         # If tags not found, return the original content
         logger.warning("Educational content tags not found, returning original content")
         return content
+
+def verify_educational_content_tags(content: str) -> bool:
+    """Check that the generated content includes <educational_content> tags."""
+    start_tag = "<educational_content>"
+    end_tag = "</educational_content>"
+    if start_tag in content and end_tag in content:
+        return True
+    logger.warning("<educational_content> tags missing from generated output")
+    return False
 
 from pathlib import Path
 
