@@ -1,4 +1,4 @@
-You are generating lesson content. The assembled lesson should be roughly {{word_count}} words in total.
+You are generating lesson content. The assembled lesson should be roughly {{word_count}} words in total and must be suitable for this target learner: {{learner_profile}}
 Use Markdown formatting when appropriate.
 
 If generating a single block, you will receive the block JSON in {{block}} and a short {{instruction}} describing how to expand it.
