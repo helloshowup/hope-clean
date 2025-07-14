@@ -11,8 +11,8 @@ from showup_core.utils import load_prompt
 from .block_library import (
     get_block_type_definitions,
     validate_plan,
-    PlanModel,
 )
+from .models import PlanModel
 from .openai_dynamic_generation import get_instructor_client
 
 
